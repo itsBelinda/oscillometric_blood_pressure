@@ -1,0 +1,40 @@
+psth-vep
+-----------
+
+This program performs averaging over repetitive stimuli. It can
+work on discrete events such as spikes or on continous data
+such as visually evoked potentials.
+
+It was initially developed to read and display data from Tobi
+Delbrücks neuromorphic analog VLSI retina/simple cell chip
+(http://http://www.ini.uzh.ch/~tobi/friend/). This compilation proved to be a
+nice setup for classroom demonstrations.
+
+For data acquisition, the comedi library (http://www.comedi.org/) is used, so
+any comedi device may be used to fetch the data. It has been tested with the
+USB-DUX (http://www.linux-usb-daq.co.uk/).
+
+License
+-------
+
+This piece of software is released under the GNU General Public License.
+
+http://www.gnu.org/licenses/licenses.html#GPL
+
+So please go ahead and modify/extend it.
+
+
+Installation
+------------
+
+You need the following libraries to compile and run the program:
+
+Comedi: http://www.comedi.org/download.php
+Qt4: http://qt.nokia.com/downloads/downloads#qt-lib
+Qwt: http://qwt.sourceforge.net/
+
+Once all libraries are up and running, have a look at "physio_psth.pro" and
+modify it.
+
+Then run "qmake", which should generate a Makefile and "make" to compile
+everything.
