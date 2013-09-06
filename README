@@ -29,9 +29,11 @@ Installation
 
 You need the following libraries to compile and run the program:
 
-Comedi: http://www.comedi.org/download.php
-Qt4: http://qt.nokia.com/downloads/downloads#qt-lib
-Qwt: http://qwt.sourceforge.net/
+Comedi: http://www.comedi.org
+Qt4: http://qt.nokia.com
+Qwt6: http://qwt.sourceforge.net
+
+These are all part of, for example, UBUNTU Linux.
 
 Once all libraries are up and running, have a look at "physio_psth.pro" and
 modify it.
