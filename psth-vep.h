@@ -32,6 +32,8 @@
 
 #define SAMPLING_RATE 1000 // 1kHz
 
+#define PREAMP_GAIN 500
+
 #define NOTCH_F 50 // filter out 50Hz noise
 #define IIRORDER 6
 

@@ -21,7 +21,7 @@ DataPlot::DataPlot(double *xData, double *yData, int length,
 {
   setTitle("Raw Data");
   setAxisTitle(QwtPlot::xBottom, "Time/ms");
-  setAxisTitle(QwtPlot::yLeft, "ADC value / V");
+  setAxisTitle(QwtPlot::yLeft, "differential voltage / V");
 
   // setAxisAutoScale(QwtPlot::yLeft,true);
 
@@ -56,7 +56,7 @@ void DataPlot::setNewData(double yNew) {
     updateCtr--;
     if (updateCtr==0) {
 	    double d = max - min;
-	    setAxisScale(QwtPlot::yLeft,min-d/10,max+d/10);
+	    setAxisScale(QwtPlot::yLeft,min-d/5.0,max+d/5.0);
 	    updateCtr = SCALE_UPDATE_PERIOD;
     }
 }

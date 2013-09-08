@@ -161,6 +161,9 @@ MainWindow::MainWindow( QWidget *parent ) :
   plotLayout->addStrut(400);
   mainLayout->addLayout(plotLayout);
 
+  mainLayout->setStretchFactor(controlLayout,1);
+  mainLayout->setStretchFactor(plotLayout,4);
+
   // two plots
   RawDataPlot = new DataPlot(xData, yData, psthLength, 
 			     crange->max, crange->min, this);
@@ -442,7 +445,7 @@ void MainWindow::timerEvent(QTimerEvent *)
 
     double yNew = comedi_to_phys(v,
 				 crange,
-				 maxdata);
+				 maxdata) / ((double)PREAMP_GAIN);
 
     if (filter50HzCheckBox->checkState()==Qt::Checked) {
 	    yNew=iirnotch->filter(yNew);
