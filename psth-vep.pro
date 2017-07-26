@@ -4,7 +4,7 @@ OBJECTS_DIR = obj
 
 LIBS += \
     -L/usr/local/lib \
-    -lqwt \
+    -lqwt-qt5 \
     -lcomedi \
     -liir
 
@@ -20,3 +20,8 @@ HEADERS = \
     psth-vep.h \
     psthplot.h \
     dataplot.h
+
+CONFIG		+= qt release c++11
+
+QT             	+= widgets
+QT += printsupport

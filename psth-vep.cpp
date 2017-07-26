@@ -1,8 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2003 by Matthias H. Hennig                              *
  *   hennig@cn.stir.ac.uk                                                  *
- *   Copyright (C) 2005 by Bernd Porr                                      *
- *   BerndPorr@f2s.com                                                     *
+ *   Copyright (C) 2005-2017 by Bernd Porr                                 *
+ *   mail@berndporr.me.uk                                                  *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
@@ -20,6 +20,8 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QComboBox>
+
+#include <unistd.h>
 
 MainWindow::MainWindow( QWidget *parent ) :
     QWidget(parent),
@@ -188,7 +190,7 @@ MainWindow::MainWindow( QWidget *parent ) :
   controlLayout->addWidget( ADcounterGroup );
 
   QwtCounter *cntChannel = new QwtCounter(ADcounterGroup);
-  cntChannel->setRange(0, numChannels-1, 1);
+  cntChannel->setRange(0, numChannels-1);
   cntChannel->setValue(adChannel);
   ADcounterLayout->addWidget(cntChannel);
   connect(cntChannel, SIGNAL(valueChanged(double)), SLOT(slotSetChannel(double)));
@@ -245,7 +247,7 @@ MainWindow::MainWindow( QWidget *parent ) :
   cntSLength->setNumButtons(2);
   cntSLength->setIncSteps(QwtCounter::Button1, 10);
   cntSLength->setIncSteps(QwtCounter::Button2, 100);
-  cntSLength->setRange(1, MAX_PSTH_LENGTH, 1);
+  cntSLength->setRange(1, MAX_PSTH_LENGTH);
   cntSLength->setValue(psthLength);
   PSTHcounterLayout->addWidget(cntSLength);
   connect(cntSLength, 
@@ -259,7 +261,7 @@ MainWindow::MainWindow( QWidget *parent ) :
   cntBinw->setNumButtons(2);
   cntBinw->setIncSteps(QwtCounter::Button1, 1);
   cntBinw->setIncSteps(QwtCounter::Button2, 10);
-  cntBinw->setRange(1, 100, 1);
+  cntBinw->setRange(1, 100);
   cntBinw->setValue(psthBinw);
   PSTHcounterLayout->addWidget(cntBinw);
   connect(cntBinw, SIGNAL(valueChanged(double)), SLOT(slotSetPsthBinw(double)));
