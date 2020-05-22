@@ -1,12 +1,10 @@
-psth-vep
+obp (oscillometric blood pressure)
 -----------
 
-This program performs averaging over repetitive stimuli. It can
-work on discrete events such as spikes or on continous data
-such as visually evoked potentials.
+This program currently only reads data and displays it. 
 
-It was initially developed to read and display data from Tobi
-Delbrücks neuromorphic analog VLSI retina/simple cell chip
+It is based on a project that was initially developed to read and display data from Tobi
+DelbrÃ¼cks neuromorphic analog VLSI retina/simple cell chip
 (http://http://www.ini.uzh.ch/~tobi/friend/). This compilation proved to be a
 nice setup for classroom demonstrations.
 
