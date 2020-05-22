@@ -9,7 +9,7 @@
  *   (at your option) any later version.                                   *
  ***************************************************************************/
 
-#include "psth-vep.h"
+#include "obp.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -26,11 +26,11 @@
 MainWindow::MainWindow( QWidget *parent ) :
     QWidget(parent),
     adChannel(0),
-    psthLength(1000),
-    psthBinw(20),
-    spikeThres(1),
-    psthOn(0),
-    spikeDetected(false),
+    dataLength(1000),
+    //psthBinw(20),
+    //spikeThres(1),
+    //psthOn(0),
+    //spikeDetected(false),
     time(0),
     linearAverage(0)
 {
@@ -147,13 +147,13 @@ MainWindow::MainWindow( QWidget *parent ) :
   {
     xData[i] = i;     // time axis
     yData[i] = 0;
-    timeData[i] = double(i)*psthBinw; // psth time axis
+    //timeData[i] = double(i)*psthBinw; // psth time axis
     spikeCountData[i] = 0;
     psthData[i] = 0;
   }
 
   // the gui, straight forward QT/Qwt
-  resize(640,420);
+  resize(640,800); //TODO: currently has no effect?
   QHBoxLayout *mainLayout = new QHBoxLayout( this );
 
   QVBoxLayout *controlLayout = new QVBoxLayout;
@@ -166,17 +166,13 @@ MainWindow::MainWindow( QWidget *parent ) :
   mainLayout->setStretchFactor(controlLayout,1);
   mainLayout->setStretchFactor(plotLayout,4);
 
-  // two plots
-  RawDataPlot = new DataPlot(xData, yData, psthLength, 
+  // just one plot
+  RawDataPlot = new DataPlot(xData, yData, dataLength,
 			     crange->max, crange->min, this);
   plotLayout->addWidget(RawDataPlot);
   RawDataPlot->show();
 
   plotLayout->addSpacing(20);
-
-  MyPsthPlot = new PsthPlot(timeData, psthData, psthLength/psthBinw, this);
-  plotLayout->addWidget(MyPsthPlot);
-  MyPsthPlot->show();
 
   /*---- Buttons ----*/
 
@@ -200,84 +196,23 @@ MainWindow::MainWindow( QWidget *parent ) :
   ADcounterLayout->addWidget(filter50HzCheckBox);
 
   // psth functions
-  QGroupBox   *PSTHfunGroup  = new QGroupBox( "Actions", this );
-  QVBoxLayout *PSTHfunLayout = new QVBoxLayout;
+  QGroupBox   *AcitonsGroup  = new QGroupBox( "Actions", this );
+  QVBoxLayout *ActionsLayout = new QVBoxLayout;
 
-  PSTHfunGroup->setLayout(PSTHfunLayout);
-  PSTHfunGroup->setAlignment(Qt::AlignJustify);
-  PSTHfunGroup->setSizePolicy( QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
-  controlLayout->addWidget( PSTHfunGroup );
+  AcitonsGroup->setLayout(ActionsLayout);
+  AcitonsGroup->setAlignment(Qt::AlignJustify);
+  AcitonsGroup->setSizePolicy( QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
+  controlLayout->addWidget( AcitonsGroup );
 
-  averagePsth = new QComboBox(PSTHfunGroup);
-  averagePsth->addItem(tr("PSTH"));
-  averagePsth->addItem(tr("VEP"));
-  PSTHfunLayout->addWidget(averagePsth);
-  connect( averagePsth, SIGNAL(currentIndexChanged(int)), SLOT(slotAveragePsth(int)) );
+  QPushButton *clearData = new QPushButton(AcitonsGroup);
+  clearData->setText("clear data");
+  ActionsLayout->addWidget(clearData);
+  connect(clearData, SIGNAL(clicked()), SLOT(slotClearPsth()));
 
-  triggerPsth = new QPushButton(PSTHfunGroup);
-  triggerPsth->setText("PSTH on");
-  triggerPsth->setCheckable(true);
-  PSTHfunLayout->addWidget(triggerPsth);
-  connect(triggerPsth, SIGNAL(clicked()), SLOT(slotTriggerPsth()));
-
-  QPushButton *clearPsth = new QPushButton(PSTHfunGroup);
-  clearPsth->setText("clear data");
-  PSTHfunLayout->addWidget(clearPsth);
-  connect(clearPsth, SIGNAL(clicked()), SLOT(slotClearPsth()));
-
-  QPushButton *savePsth = new QPushButton(PSTHfunGroup);
-  savePsth->setText("save data");
-  PSTHfunLayout->addWidget(savePsth);
-  connect(savePsth, SIGNAL(clicked()), SLOT(slotSavePsth()));
-
-  // psth params
-  QGroupBox   *PSTHcounterGroup = new QGroupBox( "Parameters", this );
-  QVBoxLayout *PSTHcounterLayout = new QVBoxLayout;
-
-  PSTHcounterGroup->setLayout(PSTHcounterLayout);
-  PSTHcounterGroup->setAlignment(Qt::AlignJustify);
-  PSTHcounterGroup->setSizePolicy( QSizePolicy(QSizePolicy::Fixed,
-					       QSizePolicy::Fixed) );
-  controlLayout->addWidget( PSTHcounterGroup );
-
-  QLabel *psthLengthLabel = new QLabel("Sweep length", PSTHcounterGroup);
-  PSTHcounterLayout->addWidget(psthLengthLabel);
-
-  QwtCounter *cntSLength = new QwtCounter(PSTHcounterGroup);
-  cntSLength->setNumButtons(2);
-  cntSLength->setIncSteps(QwtCounter::Button1, 10);
-  cntSLength->setIncSteps(QwtCounter::Button2, 100);
-  cntSLength->setRange(1, MAX_PSTH_LENGTH);
-  cntSLength->setValue(psthLength);
-  PSTHcounterLayout->addWidget(cntSLength);
-  connect(cntSLength, 
-	  SIGNAL(valueChanged(double)), 
-	  SLOT(slotSetPsthLength(double)));
-
-  QLabel *binwidthLabel = new QLabel("Binwidth", PSTHcounterGroup);
-  PSTHcounterLayout->addWidget(binwidthLabel);
-
-  cntBinw = new QwtCounter(PSTHcounterGroup);
-  cntBinw->setNumButtons(2);
-  cntBinw->setIncSteps(QwtCounter::Button1, 1);
-  cntBinw->setIncSteps(QwtCounter::Button2, 10);
-  cntBinw->setRange(1, 100);
-  cntBinw->setValue(psthBinw);
-  PSTHcounterLayout->addWidget(cntBinw);
-  connect(cntBinw, SIGNAL(valueChanged(double)), SLOT(slotSetPsthBinw(double)));
-
-  QLabel *thresholdLabel = new QLabel("Spike Threshold", PSTHcounterGroup);
-  PSTHcounterLayout->addWidget(thresholdLabel);
-
-  editSpikeT = new QTextEdit("0");
-  QFont editFont("Courier",14);
-  QFontMetrics editMetrics(editFont);
-  editSpikeT->setMaximumHeight ( editMetrics.height()*1.2 );
-  editSpikeT->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  editSpikeT->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  editSpikeT->setFont(editFont);
-  PSTHcounterLayout->addWidget(editSpikeT);
-  connect(editSpikeT, SIGNAL(textChanged()), SLOT(slotSetSpikeThres()));
+  QPushButton *saveData = new QPushButton(AcitonsGroup);
+  saveData->setText("save data");
+  ActionsLayout->addWidget(saveData);
+  connect(saveData, SIGNAL(clicked()), SLOT(slotSavePsth()));
 
   thresholdMarker = new QwtPlotMarker();
   thresholdMarker->setValue(0,0);
@@ -294,7 +229,7 @@ MainWindow::~MainWindow()
   delete[] chanlist;
 }
 
-void MainWindow::slotSavePsth()
+void MainWindow::slotSaveData()
 {
   QString fileName = QFileDialog::getSaveFileName();
 
@@ -306,8 +241,8 @@ void MainWindow::slotSavePsth()
     {
       QTextStream out(&file);
 
-      for(int i=0; i<psthLength/psthBinw; i++)
-        out << timeData[i] << "\t" << psthData[i] << "\n";
+//      for(int i=0; i<dataLength/psthBinw; i++)
+//        out << timeData[i] << "\t" << psthData[i] << "\n";
 
       file.close();
     }
@@ -318,112 +253,15 @@ void MainWindow::slotSavePsth()
   }
 }
 
-void MainWindow::slotClearPsth()
+void MainWindow::slotClearData()
 {
   time = 0;
-  for(int i=0; i<psthLength/psthBinw; i++) {
-    psthData[i] = 0;
-    spikeCountData[i] = 0;
-  }
-  spikeDetected = false;
-  psthActTrial = 0;
-  MyPsthPlot->replot();
-}
-
-void MainWindow::slotTriggerPsth()
-{
-	if(psthOn == 0)
-	{
-		for(int i=0; i<psthLength/psthBinw; i++) {
-			psthData[i] = 0;
-			spikeCountData[i] = 0;
-		}
-		psthActTrial = 0;
-		psthOn = 1;
-		time = 0;
-		MyPsthPlot->startDisplay();
-		psthOn = 1;
-		psthActTrial = 0;
-		time = 0;
-	}
-	else
-	{
-		MyPsthPlot->stopDisplay();
-		psthOn = 0;
-		psthActTrial = 0;
-		spikeDetected = false;
-	}
+  // TODO kept from template.
 }
 
 void MainWindow::slotSetChannel(double c)
 {
   adChannel = (int)c;
-  spikeDetected = false;
-}
-
-void MainWindow::slotSetPsthLength(double l)
-{
-  psthLength = (int)l;
-
-  for(int i=0; i<psthLength/psthBinw; i++) {
-    psthData[i] = 0;
-    spikeCountData[i] = 0;
-    timeData[i] = double(i)*psthBinw;
-  }
-  spikeDetected = false;
-  psthActTrial = 0;
-  time = 0;
-
-  RawDataPlot->setPsthLength((int) l);
-  MyPsthPlot->setPsthLength(psthLength/psthBinw);
-}
-
-void MainWindow::slotSetPsthBinw(double b)
-{
-  psthBinw = (int)b;
-  for(int i=0; i<psthLength/psthBinw; i++) {
-    psthData[i] = 0;
-    spikeCountData[i] = 0;
-    timeData[i] = double(i)*psthBinw;
-  }
-  spikeDetected = false;
-  psthActTrial = 0;
-  time = 0;
-  MyPsthPlot->setPsthLength(psthLength/psthBinw);
-}
-
-void MainWindow::slotSetSpikeThres()
-{
-	QString t = editSpikeT->toPlainText();
-	spikeThres = t.toFloat();
-	thresholdMarker->setValue(0,spikeThres);
-	printf("%lf\n",spikeThres);
-	spikeDetected = false;
-}
-
-void MainWindow::slotAveragePsth(int idx)
-{
-	linearAverage = (idx>0);
-	if ( linearAverage )
-	{
-		cntBinw->setEnabled(false);
-		editSpikeT->setEnabled(false);
-		MyPsthPlot->setYaxisLabel("Averaged Data");
-		MyPsthPlot->setAxisTitle(QwtPlot::yLeft, "average/V");
-		MyPsthPlot->setTitle("VEP");
-		triggerPsth->setText("Averaging on");
-		psthBinw = 1;
-		cntBinw->setValue(psthBinw);
-	}
-	else
-	{
-		cntBinw->setEnabled(true);
-		editSpikeT->setEnabled(true);
-		MyPsthPlot->setYaxisLabel("Spikes/s");
-		MyPsthPlot->setAxisTitle(QwtPlot::yLeft, "Spikes/s");
-		MyPsthPlot->setTitle("PSTH");
-		triggerPsth->setText("PSTH on");
-	}
 }
 
 void MainWindow::timerEvent(QTimerEvent *)
@@ -455,36 +293,6 @@ void MainWindow::timerEvent(QTimerEvent *)
 
     RawDataPlot->setNewData(yNew);
 
-    int trialIndex = time % psthLength;
-
-    if( linearAverage && psthOn )
-    {
-      spikeCountData[trialIndex] += yNew;
-
-      psthData[trialIndex] = spikeCountData[trialIndex] / (time/psthLength + 1);
-    }
-    else if( !spikeDetected && yNew>spikeThres )
-    {
-      if(psthOn)
-      {
-        int psthIndex = trialIndex / psthBinw;
-
-        spikeCountData[psthIndex] += 1;
-
-        psthData[psthIndex] = ( spikeCountData[psthIndex]*1000 ) / 
-		( psthBinw * (time/psthLength + 1) );
-
-        spikeDetected = true;
-      }
-    }
-    else if( yNew < spikeThres )
-    {
-      spikeDetected = false;
-    }
-    
-    if( trialIndex == 0 )
-      psthActTrial += 1;
-    
     ++time;
   }
   RawDataPlot->replot();

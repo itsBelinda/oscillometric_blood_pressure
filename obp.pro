@@ -11,14 +11,12 @@ LIBS += \
 TMAKE_CXXFLAGS += -fno-exceptions
 
 SOURCES = \
-    psthplot.cpp \
+    obp.cpp \
     dataplot.cpp \
     main.cpp \
-    psth-vep.cpp
 
 HEADERS = \
-    psth-vep.h \
-    psthplot.h \
+    obp.h \
     dataplot.h
 
 CONFIG		+= qt release c++11

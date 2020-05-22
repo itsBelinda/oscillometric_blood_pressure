@@ -23,7 +23,6 @@
 #include <qwt/qwt_counter.h>
 #include <qwt/qwt_plot_marker.h>
 
-#include "psthplot.h"
 #include "dataplot.h"
 #include <Iir.h>
 
@@ -47,27 +46,11 @@ class MainWindow : public QWidget
     
   // show the raw serai data here
   DataPlot *RawDataPlot;
-  // here the PSTH will be shown
-  PsthPlot *MyPsthPlot;
   
   // channel number for the seari device
   int adChannel;
-  // length of the PSTH, this is the length on one trial
-  int psthLength;
-  // bin width for the PSTH
-  int psthBinw;
-  // treshold for a spike
-  double spikeThres;
-
-  // boo, activate/deactivate the psth plot
-  int psthOn;
-
-  // count trials while recording
-  int psthActTrial;
-  
-  // bool, set when a spike is detected and the activity has not
-  // gone back to resting potential
-  bool spikeDetected;
+  // length of the data
+  int dataLength;
   
   // data
   double xData[MAX_PSTH_LENGTH], yData[MAX_PSTH_LENGTH];
@@ -109,14 +92,9 @@ class MainWindow : public QWidget
 private slots:
 
   // actions:
-  void slotClearPsth();
-  void slotTriggerPsth();
+  void slotClearData();
   void slotSetChannel(double c);
-  void slotSetPsthLength(double l);
-  void slotSetPsthBinw(double b);
-  void slotSetSpikeThres();
-  void slotSavePsth();
-  void slotAveragePsth(int idx);
+  void slotSaveData();
 
 protected:
 
