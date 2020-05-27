@@ -44,10 +44,10 @@ class MainWindow : public QWidget
 {
   Q_OBJECT
     
-  // show the raw serai data here
+  // show the raw serial data here
   DataPlot *RawDataPlot;
   
-  // channel number for the seari device
+  // channel number for the serial device
   int adChannel;
   // length of the data
   int dataLength;

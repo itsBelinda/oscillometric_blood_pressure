@@ -25,14 +25,14 @@ public:
 	DataPlot(double *xData, double *yData, int length, 
 		 double max, double min, 
 		 QWidget *parent = 0);
-  void setPsthLength(int length);
+  void setDataLength(int length);
   void setNewData(double yNew);
 
 private:
   double *xData, *yData;
 
   // number of data points
-  int psthLength;
+  int dataLength;
   // curve object
   QwtPlotCurve *dataCurve;
 

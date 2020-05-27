@@ -26,7 +26,7 @@
 MainWindow::MainWindow( QWidget *parent ) :
     QWidget(parent),
     adChannel(0),
-    dataLength(1000),
+    dataLength(5000),
     //psthBinw(20),
     //spikeThres(1),
     //psthOn(0),
@@ -50,6 +50,11 @@ MainWindow::MainWindow( QWidget *parent ) :
   maxdata = comedi_get_maxdata(dev, COMEDI_SUB_DEVICE, 0);
   crange = comedi_get_range(dev,COMEDI_SUB_DEVICE,0,0);
   numChannels = comedi_get_n_channels(dev, COMEDI_SUB_DEVICE);
+
+    printf("maxdata: %d \n", maxdata);
+    printf("crange min: %f, max: %f \n", crange->min, crange->max);
+    printf("num channels: %d \n", numChannels);
+    printf("dataLength: %d \n", dataLength);
 
   chanlist = new unsigned[numChannels];
 
@@ -169,6 +174,7 @@ MainWindow::MainWindow( QWidget *parent ) :
   // just one plot
   RawDataPlot = new DataPlot(xData, yData, dataLength,
 			     crange->max, crange->min, this);
+
   plotLayout->addWidget(RawDataPlot);
   RawDataPlot->show();
 
@@ -278,14 +284,19 @@ void MainWindow::timerEvent(QTimerEvent *)
 
     int v;
 
-    if( sigmaBoard )
-	    v = ((lsampl_t *)buffer)[adChannel];
-    else
-	    v = ((sampl_t *)buffer)[adChannel];
+    if( sigmaBoard ) {
+        v = ((lsampl_t *)buffer)[adChannel];
+        printf("Sigma\n");
+
+    }
+    else {
+        v = ((sampl_t *)buffer)[adChannel];
+    }
 
     double yNew = comedi_to_phys(v,
 				 crange,
-				 maxdata) / ((double)PREAMP_GAIN);
+				 maxdata);/// ((double)PREAMP_GAIN);
+    //printf("y: %f\n", yNew);
 
     if (filter50HzCheckBox->checkState()==Qt::Checked) {
 	    yNew=iirnotch->filter(yNew);
