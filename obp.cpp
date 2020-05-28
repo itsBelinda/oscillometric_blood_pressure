@@ -3,6 +3,9 @@
  *   hennig@cn.stir.ac.uk                                                  *
  *   Copyright (C) 2005-2017 by Bernd Porr                                 *
  *   mail@berndporr.me.uk                                                  *
+ *   Copyright (C) 2020 by Belinda Kneubühler                              *
+ *   belinda.kneubuehler@outlook.com                                       *
+ *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
  *   the Free Software Foundation; either version 2 of the License, or     *
@@ -27,10 +30,6 @@ MainWindow::MainWindow( QWidget *parent ) :
     QWidget(parent),
     adChannel(0),
     dataLength(5000),
-    //psthBinw(20),
-    //spikeThres(1),
-    //psthOn(0),
-    //spikeDetected(false),
     time(0),
     linearAverage(0)
 {
@@ -47,8 +46,8 @@ MainWindow::MainWindow( QWidget *parent ) :
   // do not produce NAN for out of range behaviour
   comedi_set_global_oor_behavior(COMEDI_OOR_NUMBER); 
 
-  maxdata = comedi_get_maxdata(dev, COMEDI_SUB_DEVICE, 0);
-  crange = comedi_get_range(dev,COMEDI_SUB_DEVICE,0,0);
+  maxdata = comedi_get_maxdata(dev, COMEDI_SUB_DEVICE, COMEDI_SUB_DEVICE);
+  crange = comedi_get_range(dev,COMEDI_SUB_DEVICE,COMEDI_SUB_DEVICE,COMEDI_RANGE_ID);
   numChannels = comedi_get_n_channels(dev, COMEDI_SUB_DEVICE);
 
     printf("maxdata: %d \n", maxdata);
@@ -148,17 +147,13 @@ MainWindow::MainWindow( QWidget *parent ) :
     readSize = sizeof(sampl_t) * numChannels;
 
   //  Initialize data for plots
-  for(int i=0; i<MAX_PSTH_LENGTH; i++)
+  for(int i=0; i<MAX_DATA_LENGTH; i++)
   {
     xData[i] = i;     // time axis
     yData[i] = 0;
-    //timeData[i] = double(i)*psthBinw; // psth time axis
-    spikeCountData[i] = 0;
-    psthData[i] = 0;
   }
 
   // the gui, straight forward QT/Qwt
-  resize(640,800); //TODO: currently has no effect?
   QHBoxLayout *mainLayout = new QHBoxLayout( this );
 
   QVBoxLayout *controlLayout = new QVBoxLayout;
@@ -182,8 +177,8 @@ MainWindow::MainWindow( QWidget *parent ) :
 
   /*---- Buttons ----*/
 
-  // AD group
-  QGroupBox   *ADcounterGroup = new QGroupBox( "A/D Channel", this );
+  // Filter group
+  QGroupBox   *ADcounterGroup = new QGroupBox( "Filter", this );
   QVBoxLayout *ADcounterLayout = new QVBoxLayout;
 
   ADcounterGroup->setLayout(ADcounterLayout);
@@ -191,17 +186,11 @@ MainWindow::MainWindow( QWidget *parent ) :
   ADcounterGroup->setSizePolicy( QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
   controlLayout->addWidget( ADcounterGroup );
 
-  QwtCounter *cntChannel = new QwtCounter(ADcounterGroup);
-  cntChannel->setRange(0, numChannels-1);
-  cntChannel->setValue(adChannel);
-  ADcounterLayout->addWidget(cntChannel);
-  connect(cntChannel, SIGNAL(valueChanged(double)), SLOT(slotSetChannel(double)));
-
   filter50HzCheckBox = new QCheckBox( "50Hz filter" );
   filter50HzCheckBox->setEnabled( true );
   ADcounterLayout->addWidget(filter50HzCheckBox);
 
-  // psth functions
+  // Actions
   QGroupBox   *AcitonsGroup  = new QGroupBox( "Actions", this );
   QVBoxLayout *ActionsLayout = new QVBoxLayout;
 
@@ -213,17 +202,12 @@ MainWindow::MainWindow( QWidget *parent ) :
   QPushButton *clearData = new QPushButton(AcitonsGroup);
   clearData->setText("clear data");
   ActionsLayout->addWidget(clearData);
-  connect(clearData, SIGNAL(clicked()), SLOT(slotClearPsth()));
+  connect(clearData, SIGNAL(clicked()), SLOT(slotClearData()));
 
   QPushButton *saveData = new QPushButton(AcitonsGroup);
   saveData->setText("save data");
   ActionsLayout->addWidget(saveData);
-  connect(saveData, SIGNAL(clicked()), SLOT(slotSavePsth()));
-
-  thresholdMarker = new QwtPlotMarker();
-  thresholdMarker->setValue(0,0);
-  thresholdMarker->attach(RawDataPlot);
-  thresholdMarker->setLineStyle(QwtPlotMarker::HLine);
+  connect(saveData, SIGNAL(clicked()), SLOT(slotSaveData()));
 
   // Generate timer event every 50ms
   (void)startTimer(50);
@@ -247,8 +231,8 @@ void MainWindow::slotSaveData()
     {
       QTextStream out(&file);
 
-//      for(int i=0; i<dataLength/psthBinw; i++)
-//        out << timeData[i] << "\t" << psthData[i] << "\n";
+//      for(int i=0; i<dataLength/Binw; i++)
+//        out << timeData[i] << "\t" << Data[i] << "\n";
 
       file.close();
     }
@@ -278,7 +262,7 @@ void MainWindow::timerEvent(QTimerEvent *)
   {
     if( read(comedi_fileno(dev), buffer, readSize) == 0 )
     {
-      printf("Error: end of Aquisition\n");
+      printf("Error: end of Acquisition\n");
       exit(1);
     }
 
@@ -295,8 +279,7 @@ void MainWindow::timerEvent(QTimerEvent *)
 
     double yNew = comedi_to_phys(v,
 				 crange,
-				 maxdata);/// ((double)PREAMP_GAIN);
-    //printf("y: %f\n", yNew);
+				 maxdata);
 
     if (filter50HzCheckBox->checkState()==Qt::Checked) {
 	    yNew=iirnotch->filter(yNew);

@@ -3,6 +3,8 @@
  *   hennig@cn.stir.ac.uk                                                  *
  *   Copyright (C) 2005 by Bernd Porr                                      *
  *   mail@berndporr.me.uk                                                  *
+ *   Copyright (C) 2020 by Belinda Kneubühler                              *
+ *   belinda.kneubuehler@outlook.com                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -10,8 +12,8 @@
  *   (at your option) any later version.                                   *
  ***************************************************************************/
 
-#ifndef PHYSIO_PSTH_H
-#define PHYSIO_PSTH_H
+#ifndef OBP_H
+#define OBP_H
 
 #include <QWidget>
 #include <QPushButton>
@@ -26,18 +28,16 @@
 #include "dataplot.h"
 #include <Iir.h>
 
-// maximal length of the PSTH (for memory alloctaion)
-#define MAX_PSTH_LENGTH 5000
+// maximal length of the data (for memory alloctaion)
+#define MAX_DATA_LENGTH 5000
 
 #define SAMPLING_RATE 1000 // 1kHz
-
-#define PREAMP_GAIN 500
 
 #define NOTCH_F 50 // filter out 50Hz noise
 #define IIRORDER 6
 
 #define COMEDI_SUB_DEVICE  0
-#define COMEDI_RANGE_ID    0    /* +/- 4V */
+#define COMEDI_RANGE_ID    2    /* +/- 4V */
 
 
 class MainWindow : public QWidget
@@ -53,11 +53,11 @@ class MainWindow : public QWidget
   int dataLength;
   
   // data
-  double xData[MAX_PSTH_LENGTH], yData[MAX_PSTH_LENGTH];
-  // PSTH, t is time, p is spike count, psth is spikes/sec
-  double timeData[MAX_PSTH_LENGTH], spikeCountData[MAX_PSTH_LENGTH], psthData[MAX_PSTH_LENGTH];
+  double xData[MAX_DATA_LENGTH], yData[MAX_DATA_LENGTH];
+  // t is time, p is spike count, psth is spikes/sec
+  double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
   
-  // serai file desc
+  // serial file desc
   int usbFd;
   
   // time counter
@@ -82,13 +82,7 @@ class MainWindow : public QWidget
 
   Iir::Butterworth::BandStop<IIRORDER>* iirnotch;
 
-  QComboBox *averagePsth;
-  QwtCounter *cntBinw;
-  QTextEdit *editSpikeT;
-  QPushButton *triggerPsth;
   QCheckBox* filter50HzCheckBox;
-  QwtPlotMarker *thresholdMarker;
-
 private slots:
 
   // actions:
