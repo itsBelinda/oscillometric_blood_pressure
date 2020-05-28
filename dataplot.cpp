@@ -40,6 +40,7 @@ void DataPlot::setDataLength(int length) {
 }
 
 void DataPlot::setNewData(double yNew) {
+    static int cnt = 0;
     memmove(yData, yData + 1, (dataLength - 1) * sizeof(yData[0]));
     yData[dataLength - 1] = yNew;
 }

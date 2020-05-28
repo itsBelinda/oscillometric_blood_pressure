@@ -40,65 +40,72 @@
 #define COMEDI_RANGE_ID    2    /* +/- 4V */
 
 
-class MainWindow : public QWidget
-{
-  Q_OBJECT
-    
-  // show the raw serial data here
-  DataPlot *RawDataPlot;
-  
-  // channel number for the serial device
-  int adChannel;
-  // length of the data
-  int dataLength;
-  
-  // data
-  double xData[MAX_DATA_LENGTH], yData[MAX_DATA_LENGTH];
-  // t is time, p is spike count, psth is spikes/sec
-  double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
-  
-  // serial file desc
-  int usbFd;
-  
-  // time counter
-  long int time;
-  
-  comedi_cmd comediCommand;
-  
-  /**
-   * file descriptor for /dev/comedi0
-   **/
-  comedi_t *dev;
-  size_t   readSize;
-  bool     sigmaBoard;
-  lsampl_t maxdata;
-  comedi_range* crange;
-  double sampling_rate;
+class MainWindow : public QWidget {
+Q_OBJECT
 
-  int numChannels;
-  unsigned *chanlist;
+    // show the raw serial data here
+    DataPlot *RawDataPlot;
+    DataPlot *LPPlot;
+    DataPlot *HPPlot;
 
-  int linearAverage;
+    // channel number for the serial device
+    int adChannel;
+    // length of the data
+    int dataLength;
 
-  Iir::Butterworth::BandStop<IIRORDER>* iirnotch;
+    // data
+    double xData[MAX_DATA_LENGTH], yData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
+    // t is time, p is spike count, psth is spikes/sec
+    double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
 
-  QCheckBox* filter50HzCheckBox;
+    // serial file desc
+    int usbFd;
+
+    // time counter
+    long int time;
+
+    comedi_cmd comediCommand;
+
+    /**
+     * file descriptor for /dev/comedi0
+     **/
+    comedi_t *dev;
+    size_t readSize;
+    bool sigmaBoard;
+    lsampl_t maxdata;
+    comedi_range *crange;
+    double sampling_rate;
+
+    int numChannels;
+    unsigned *chanlist;
+
+    int linearAverage;
+
+    // Filters
+    Iir::Butterworth::BandStop<IIRORDER> *iirnotch;
+    Iir::Butterworth::LowPass<IIRORDER> *iirLP;
+    Iir::Butterworth::HighPass<IIRORDER> *iirHP;
+
+    QCheckBox *filter50HzCheckBox;
 private slots:
 
-  // actions:
-  void slotClearData();
-  void slotSetChannel(double c);
-  void slotSaveData();
+    // actions:
+    void slotClearData();
+
+    void slotSetChannel(double c);
+
+    void slotSaveData();
 
 protected:
 
-  /// timer to read out the data
-  virtual void timerEvent(QTimerEvent *e);
+    /// timer to read out the data
+    virtual void timerEvent(QTimerEvent *e);
 
 public:
 
-  MainWindow( QWidget *parent=0 );
-  ~MainWindow();
+    MainWindow(QWidget *parent = 0);
+
+    ~MainWindow();
 
 };
 
