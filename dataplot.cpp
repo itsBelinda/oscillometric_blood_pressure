@@ -12,6 +12,9 @@
 
 #include "dataplot.h"
 
+//static:
+int DataPlot::penColour = (int) Qt::darkRed;
+
 DataPlot::DataPlot(double *xData, double *yData, int length,
                    double maxY, double minY, QWidget *parent) :
         QwtPlot(parent),
@@ -20,17 +23,26 @@ DataPlot::DataPlot(double *xData, double *yData, int length,
         max(maxY),
         min(minY),
         updateCtr(1) {
-    setTitle("Raw Data");
-    setAxisTitle(QwtPlot::xBottom, "Time/ms");
-    setAxisTitle(QwtPlot::yLeft, "voltage / V");
+    QwtPlot::setTitle("Raw Data");
+    QwtPlot::setAxisTitle(QwtPlot::xBottom, "Time/ms");
+    QwtPlot::setAxisTitle(QwtPlot::yLeft, "voltage / V");
 
     setAxisScale(QwtPlot::yLeft, min, max);
     // Insert new curve for raw data
     dataCurve = new QwtPlotCurve("Raw Data");
-    dataCurve->setPen(QPen(Qt::blue, 3));
+    dataCurve->setPen(QPen((Qt::GlobalColor)penColour++, 3));
     dataCurve->setRawSamples(xData, yData, length);
     dataLength = length;
     dataCurve->attach(this);
+}
+
+void DataPlot::setPlotTitle(const QString title){
+    QwtPlot::setTitle(title);
+}
+
+void DataPlot::setAxisTitles(const QString bottomTitle, const QString leftTitle) {
+    QwtPlot::setAxisTitle(QwtPlot::xBottom, bottomTitle);
+    QwtPlot::setAxisTitle(QwtPlot::yLeft, leftTitle);
 }
 
 void DataPlot::setDataLength(int length) {
@@ -44,3 +56,4 @@ void DataPlot::setNewData(double yNew) {
     memmove(yData, yData + 1, (dataLength - 1) * sizeof(yData[0]));
     yData[dataLength - 1] = yNew;
 }
+

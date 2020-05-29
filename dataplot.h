@@ -20,26 +20,30 @@
 #define SCALE_UPDATE_PERIOD 1000
 
 /// this plot shows the raw input data (spikes or membrane potential)
-class DataPlot : public QwtPlot
-{
+class DataPlot : public QwtPlot {
 public:
+    static int penColour;
 
-	DataPlot(double *xData, double *yData, int length, 
-		 double max, double min, 
-		 QWidget *parent = 0);
-  void setDataLength(int length);
-  void setNewData(double yNew);
+    DataPlot(double *xData, double *yData, int length,
+             double max, double min,
+             QWidget *parent = 0);
+
+    void setPlotTitle(const QString title);
+    void setAxisTitles(const QString bottomTitle, const QString leftTitle);
+    void setDataLength(int length);
+    void setNewData(double yNew);
 
 private:
-  double *xData, *yData;
+    double *xData, *yData;
 
-  // number of data points
-  int dataLength;
-  // curve object
-  QwtPlotCurve *dataCurve;
+    // number of data points
+    int dataLength;
+    // curve object
+    QwtPlotCurve *dataCurve;
 
-  double max,min;
-  int updateCtr;
+    double max, min;
+    int updateCtr;
 };
+
 
 #endif

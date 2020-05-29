@@ -153,7 +153,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //  Initialize data for plots
     for (int i = 0; i < MAX_DATA_LENGTH; i++) {
-        xData[i] = i;     // time axis
+        xData[i] = (double)i/(double)SAMPLING_RATE;     // time axis in seconds
         yData[i] = 0;
         yLPData[i] = 0;
         yHPData[i] = i;
@@ -185,6 +185,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                2.6, 1.8, this);
 
     plotLayout->addWidget(LPPlot);
+    LPPlot->setPlotTitle("5 Hz LP filtered");
     LPPlot->show();
     plotLayout->addSpacing(20);
 
@@ -193,6 +194,7 @@ MainWindow::MainWindow(QWidget *parent) :
                           0.5, -0.5, this);
 
     plotLayout->addWidget(HPPlot);
+    HPPlot->setPlotTitle("0.5 Hz HP filtered");
     HPPlot->show();
     plotLayout->addSpacing(20);
 
