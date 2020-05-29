@@ -29,9 +29,9 @@
 #include <Iir.h>
 
 // maximal length of the data (for memory alloctaion)
-#define MAX_DATA_LENGTH 5000
+#define MAX_DATA_LENGTH 8000*5
 
-#define SAMPLING_RATE 1000 // 1kHz
+#define SAMPLING_RATE 8000 // 8kHz
 
 #define NOTCH_F 50 // filter out 50Hz noise
 #define IIRORDER 6

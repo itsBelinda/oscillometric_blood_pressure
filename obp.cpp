@@ -29,7 +29,7 @@
 MainWindow::MainWindow(QWidget *parent) :
         QWidget(parent),
         adChannel(0),
-        dataLength(1000),
+        dataLength(MAX_DATA_LENGTH),
         time(0),
         linearAverage(0) {
     // initialize comedi
@@ -47,7 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
     maxdata = comedi_get_maxdata(dev, COMEDI_SUB_DEVICE, COMEDI_SUB_DEVICE);
     crange = comedi_get_range(dev, COMEDI_SUB_DEVICE, COMEDI_SUB_DEVICE, COMEDI_RANGE_ID);
     numChannels = comedi_get_n_channels(dev, COMEDI_SUB_DEVICE);
-
     printf("maxdata: %d \n", maxdata);
     printf("crange min: %f, max: %f \n", crange->min, crange->max);
     printf("num channels: %d \n", numChannels);
@@ -121,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
         sampling_rate = (double) 1E9 / comediCommand.scan_begin_arg;
     }
     printf("sampling rate: %f \n", sampling_rate);
+    sampling_rate = SAMPLING_RATE; //TODO: calculation seems to be wrong, setting manually for now
 
     // 50Hz or 60Hz mains notch filter
     iirnotch = new Iir::Butterworth::BandStop<IIRORDER>;
@@ -156,7 +156,7 @@ MainWindow::MainWindow(QWidget *parent) :
         xData[i] = i;     // time axis
         yData[i] = 0;
         yLPData[i] = 0;
-        yHPData[i] = 0;
+        yHPData[i] = i;
     }
 
     // the gui, straight forward QT/Qwt
@@ -190,7 +190,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // HP data plot
     HPPlot = new DataPlot(xData, yHPData, dataLength,
-                          1, -0.5, this);
+                          0.5, -0.5, this);
 
     plotLayout->addWidget(HPPlot);
     HPPlot->show();
@@ -277,6 +277,7 @@ void MainWindow::slotSetChannel(double c) {
  * @param QTimerEvent
  */
 void MainWindow::timerEvent(QTimerEvent *) {
+    static int count = 0;
     unsigned char buffer[readSize];
 
     while (comedi_get_buffer_contents(dev, COMEDI_SUB_DEVICE) > 0) {
@@ -304,11 +305,10 @@ void MainWindow::timerEvent(QTimerEvent *) {
         }
 
         double yLP = iirLP->filter(yNew);
-        double yHP = iirHP->filter(yLP*5);
-
+        double yHP = iirHP->filter(yLP);
         RawDataPlot->setNewData(yNew);
         LPPlot->setNewData(yLP);
-        HPPlot->setNewData(yHP);
+        HPPlot->setNewData(yHP*5);
         ++time;
     }
     RawDataPlot->replot();
