@@ -1,0 +1,174 @@
+# -*- coding: utf-8 -*-
+"""
+obp_tests.py
+"""
+#%% Imports
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal
+import iir_filter
+
+plt.rcParams['axes.grid'] = True
+
+
+#%% Get the data
+
+data = np.loadtxt('../data/sample_02_05.dat')
+fs= 1000 # Hz
+gain = 50
+resolution = 12 # bits
+N = len(data)
+T = 1/fs
+bin_size = fs/N 
+y1 = data[:,1]
+y2 = data[:,2]
+y3 = data[:,3]
+t = data[:,0] 
+faxis = np.linspace(0,fs-bin_size,len(y2))
+
+# Choose data set to work with:
+y = y1
+
+#%% Convert voltage to mmHg
+
+minV = np.min(y)
+ykPa = (y - minV) / 0.02 # 20mV per 1kPa
+ymmHg = ykPa * 7.5006157584566
+
+#%% Filter design
+#
+## 50 Hz notch filter
+#f0 = 48.0
+#f1 = 52.0
+#sos50 = signal.butter(6, [f0/fs*2,f1/fs*2], 'bandstop', output='sos')
+#filt50 = iir_filter.IIR_filter(sos50)
+
+# 5 Hz LP filter
+f5 = 5
+sos5 = signal.butter(6, f5/fs*2, 'lowpass', output='sos')
+filt5 = iir_filter.IIR_filter(sos5)
+
+# 0.5 Hz HP filter
+f05 = 0.5
+sos5 = signal.butter(6, f05/fs*2, 'highpass', output='sos')
+filt05 = iir_filter.IIR_filter(sos5)
+
+#%% Filter display
+## repeat filters, but withoug sos output
+#
+## Plot filter
+#
+#fig_filters, (h_freq) = plt.subplots(1, 1, num='Filter')
+##fig_filters.subplots_adjust(hspace=.5)
+##fig_filters.suptitle('Averaging and Noise Filter', fontsize=16)
+#
+#h_freq.set_title('Magnitude Spectrum: ')
+#h_freq.set_ylabel('Magnitude (dB)')
+#h_freq.set_xlabel('Frequency (Hz)')
+#h_freq.set_ylim(-50, 1)
+#
+#
+##b, a = signal.butter(6, [f0/fs*2,f1/fs*2], 'bandstop')
+##wf, hf = signal.freqz(b, a)
+##h_freq.plot(wf / np.pi / 2 * fs, 20 * np.log10(np.abs(hf)), 'b', label='50 Hz')
+#
+#b, a = signal.butter(6, f5/fs*2, 'lowpass')
+#wf, hf = signal.freqz(b, a)
+#h_freq.plot(wf / np.pi / 2 * fs, 20 * np.log10(np.abs(hf)), 'r', label='5 Hz')
+#
+#b, a = signal.butter(6, f05/fs*2, 'highpass')
+#wf, hf = signal.freqz(b, a)
+#h_freq.plot(wf / np.pi / 2 * fs, 20 * np.log10(np.abs(hf)), 'g', label='0.5 Hz')
+#h_freq.legend()
+#plt.show()
+#%% Filter the signal
+
+#yf = np.zeros(len(y))
+#for i in range(len(y)):
+#    yf[i] = filt50.filter(ymmHg[i])
+#    
+yf = ymmHg;  
+yfLP = np.zeros(len(y))
+for i in range(len(y)):
+    yfLP[i] = filt5.filter(yf[i])
+    
+yfHP = np.zeros(len(y))
+for i in range(len(y)):
+    yfHP[i] = filt05.filter(yfLP[i])
+    
+#%% Plot full signals
+time = np.linspace(0, len(yf)/fs, len(yf))
+fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
+                sharex=True,sharey=False,num='mmHg Signal')
+fig_timeSignal.subplots_adjust(hspace=0)
+
+time_filt.plot(time,yf, 'b', label='filtered')
+time_LP.plot(time,yfLP, 'r', label='LP')
+time_HP.plot(time,yfHP, 'g', label='HP')
+
+time_filt.legend()
+time_LP.legend()
+time_HP.legend()
+
+fig_timeSignal.suptitle('Blood Pressure', fontsize=20) 
+time_filt.set_ylabel('mmHg', fontsize=16)
+time_LP.set_ylabel('mmHg', fontsize=16)
+time_HP.set_ylabel('detlat/mmHg', fontsize=16)
+time_HP.set_xlabel('Time (s)', fontsize=16)
+time_LP.set_xlim(0, max(time))
+plt.get_current_fig_manager().window.showMaximized()
+ 
+
+
+#%% Plot frequency spectrum
+
+y_F = np.fft.fft(yf)
+y_F_show = 20 * np.log10(abs(y_F))
+yLP_F = np.fft.fft(yfLP)
+yLP_F_show = 20 * np.log10(abs(yLP_F))
+yHP_F = np.fft.fft(yfHP)
+yHP_F_show = 20 * np.log10(abs(yHP_F))
+
+fig_specSignal, (spec_orig,
+                 spec_LP,
+                 spec_HP) = plt.subplots(3,
+                                           1,
+                                           sharex=True,
+                                           sharey=True,
+                                           num='Frequency Spectrum')
+fig_specSignal.subplots_adjust(hspace=0)
+fig_specSignal.suptitle(
+    'Single-sided Magnitude Spectrum '
+    'Frequency Domain (fs=1 kHz)',
+    fontsize=16)
+plt.get_current_fig_manager().window.showMaximized()
+
+spec_orig.plot(faxis[0:(int(len(y_F) / 2)) + 1],
+               y_F_show[0:(int(len(y_F) / 2)) + 1],
+               'b',
+               label='original')
+
+spec_LP.plot(faxis[0:(int(len(y_F) / 2)) + 1],
+               yLP_F_show[0:(int(len(y_F) / 2)) + 1],
+               'r',
+               label='LP filtered')
+spec_HP.plot(faxis[0:(int(len(y_F) / 2)) + 1],
+               yLP_F_show[0:(int(len(y_F) / 2)) + 1],
+               'g',
+               label='HP filtered')
+
+spec_orig.legend()
+spec_LP.legend()
+spec_HP.legend()
+
+spec_orig.set_ylabel('Magnitude (dB)', fontsize=16)
+spec_LP.set_ylabel('Magnitude (dB)', fontsize=16)
+spec_HP.set_ylabel('Magnitude (dB)', fontsize=16)
+spec_HP.set_xlabel('Frequency [Hz]', fontsize=16)
+spec_orig.set_xlim(-1, 50)
+
+
+#%% Print out data
+
+plt.show()
