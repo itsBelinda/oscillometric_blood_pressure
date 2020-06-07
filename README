@@ -22,7 +22,7 @@ http://www.gnu.org/licenses/licenses.html#GPL
 So please go ahead and modify/extend it.
 
 
-Installation
+Installation (C++)
 ------------
 
 You need the following libraries to compile and run the program:
@@ -33,3 +33,6 @@ These are all part of, for example, UBUNTU Linux.
 
 Run "qmake", which should generate a Makefile and "make" to compile
 everything.
+
+Alternatively, the project is now also set-up as a cmake project. 
+Run "cmake ." to generate the Makefile and make to compile. 
