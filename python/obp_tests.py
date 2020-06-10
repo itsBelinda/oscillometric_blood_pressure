@@ -97,10 +97,10 @@ fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
                 sharex=True,sharey=False,num='mmHg Signal')
 fig_timeSignal.subplots_adjust(hspace=0)
 
-time_filt.plot(time,ymmHg, 'b', label='v')
+time_filt.plot(t,ymmHg, 'b', label='v')
 #time_filt.plot(t2/1000,y2P, 'r', label='raw')
-time_LP.plot(time,yfLP, 'r', label='LP')
-time_HP.plot(time,yfHP, 'g', label='HP')
+time_LP.plot(t,yfLP, 'r', label='LP')
+time_HP.plot(t,yfHP, 'g', label='HP')
 
 time_filt.legend()
 time_LP.legend()
@@ -111,7 +111,7 @@ time_filt.set_ylabel('mmHg', fontsize=16)
 time_LP.set_ylabel('mmHg', fontsize=16)
 time_HP.set_ylabel('detlat/mmHg', fontsize=16)
 time_HP.set_xlabel('Time (s)', fontsize=16)
-time_LP.set_xlim(0, max(time))
+time_LP.set_xlim(0, max(t))
 time_HP.set_ylim(-3, 3)
 plt.get_current_fig_manager().window.showMaximized()
  
