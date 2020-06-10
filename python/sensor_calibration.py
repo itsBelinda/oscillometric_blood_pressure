@@ -19,7 +19,7 @@ plt.rcParams['axes.grid'] = True
 
 #%% Get the data
 
-data = np.loadtxt('../data/calibrate_sigma.dat')
+data = np.loadtxt('../data/sample_07_01.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
@@ -36,7 +36,12 @@ vmax = +1.325
 xmax = (2**24 -1)
 
 # Choose data set to work with and convert to voltage
-y = ((y1 * (vmax-vmin) / xmax ) + vmin) 
+if np.max(y1) > vmax:
+    #for raw data: 
+    y = ((y1 * (vmax-vmin) / xmax ) + vmin) 
+    t = t/1000
+else:
+    y = y1 #for raw data: ((y1 * (vmax-vmin) / xmax ) + vmin) 
 
 
 #%% Filter 
@@ -53,16 +58,16 @@ y150Hg = np.mean(yfLP[-10*fs:])
 
 factor = 150 / ((y150Hg - y0Hg) * 50 * 7.5006157584566)
 print("voltage at ambient pressure: ", np.around(y0Hg, decimals=5) )
-print("correction factor for voltage divider: ", np.around(factor, decimals=2) )
+print("correction factor for voltage divider: ", np.around(factor, decimals=5) )
 
 #%% Plot to check
-time = t/1000
+
 fig_timeSignal, (time_filt) = plt.subplots(1,1,
                 sharex=True,sharey=False,num='')
 fig_timeSignal.subplots_adjust(hspace=0)
 
-time_filt.plot(time,y, 'b', label='raw')
-time_filt.plot(time,yfLP, 'r', label='filtered')
+time_filt.plot(t,y, 'b', label='raw')
+time_filt.plot(t,yfLP, 'r', label='filtered')
 
 time_filt.legend()
 
@@ -70,7 +75,7 @@ fig_timeSignal.suptitle('Blood Pressure', fontsize=20)
 time_filt.set_ylabel('mmHg', fontsize=16)
 time_filt.set_ylabel('mmHg', fontsize=16)
 time_filt.set_xlabel('Time (s)', fontsize=16)
-time_filt.set_xlim(0, max(t/1000))
+time_filt.set_xlim(0, max(t))
 plt.get_current_fig_manager().window.showMaximized()
 
 ##%% Plot frequency spectrum

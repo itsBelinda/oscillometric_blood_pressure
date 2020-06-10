@@ -12,15 +12,13 @@ plt.rcParams['axes.grid'] = True
 
 #%% Get the data
 
-data = np.loadtxt('../data/sample_07_05.dat')
+data = np.loadtxt('../data/sample_07_10.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
 T = 1/fs
 bin_size = fs/N 
 y1 = data[:,1]
-y2 = data[:,2]
-#y3 = data[:,3]
 t = data[:,0] 
 
 # convert data
@@ -28,22 +26,26 @@ vmin = -1.325
 vmax = +1.325
 xmax = (2**24 -1)
 
-# Choose data set to work with and
-# calculate sensor voltage output (voltage divider):
-y = ((y1 * (vmax-vmin) / xmax ) + vmin) 
-y=y1
+# Choose data set to work with and convert to voltage
+if np.max(y1) > vmax:
+    #for raw data: 
+    y = ((y1 * (vmax-vmin) / xmax ) + vmin) 
+    t = t/1000
+else:
+    y = y1 #for raw data: ((y1 * (vmax-vmin) / xmax ) + vmin) 
+
+
 
 #%% Convert voltage to mmHg
 
 #
-ambientV = 0.67#0.675 # from calibration
+ambientV = 0.710#0.675 # from calibration
 mmHg_per_kPa = 7.5006157584566 # from literature
 kPa_per_V = 50 # 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
-corrFact = 2.61 # from calibration
+corrFact = 2.50 # from calibration
 
 ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact 
-#
-#y2P = (y2V - minV) * 7.5006157584566 / 0.02
+
 
 #%% Filter design
 #
@@ -91,7 +93,6 @@ plt.show()
 
     
 #%% Plot full signals
-time = t#/1000
 fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
                 sharex=True,sharey=False,num='mmHg Signal')
 fig_timeSignal.subplots_adjust(hspace=0)
