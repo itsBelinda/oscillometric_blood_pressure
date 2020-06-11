@@ -12,7 +12,7 @@ plt.rcParams['axes.grid'] = True
 
 #%% Get the data
 
-data = np.loadtxt('../data/sample_07_10.dat')
+data = np.loadtxt('../data/sample_07_05.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
