@@ -137,6 +137,8 @@ yMaximasP = yMaximas[oscStartInd:oscEndInd+1]
 minStart = np.argmax(tMinima>tMaximas[oscStartInd])-1
 minEnd = np.argmax(tMinima>tMaximas[oscEndInd])
 tMinP = tMinima[minStart:minEnd+1]
+yMinimasP = yMinima[minStart:minEnd+1]
+
 oscMinP = oscMin[minStart:minEnd+1]
 
 dMaxMin = oscMaxP - oscMinP[1:len(tMaxP)+1]
@@ -172,20 +174,20 @@ print("    DBP: ", np.around(pDBP, decimals=2) )
 
 
 #interpolation
-intMax = interp1d(tMaxP, oscMaxP, kind='linear')
-intMin = interp1d(tMinP, oscMinP, kind='linear')
+intMax = interp1d(yMaximasP, oscMaxP, kind='linear')
+intMin = interp1d(yMinimasP, oscMinP, kind='linear')
 
-omweInter = intMax(tP) - intMin(tP)
-dIPres = np.diff(omweInter)
-dIPres.append(0)
-pMAPinter = ylpP[np.argmax(omweInter)]
-print("interpolation: ", np.around(pMAPinter, decimals=2) )
+# omweInter = intMax(ylpP-yhpP) #- intMin(ylpP)
+# dIPres = np.diff(omweInter)
+# dIPres = np.append(0,dIPres)
+# pMAPinter = ylpP[np.argmax(omweInter)]
+# print("interpolation: ", np.around(pMAPinter, decimals=2) )
 
-maxArg = np.argmax(omweInter)
-pSBPInt = ylpP[np.argmax(omweInter > np.max(omweInter)*0.55)]
-pDBPInt = ylpP[maxArg + np.argmax(omweInter[maxArg:] < np.max(omweInter)*0.70)]
-print("    SBP: ", np.around(pSBPInt, decimals=2) )
-print("    DBP: ", np.around(pDBPInt, decimals=2) )
+# maxArg = np.argmax(omweInter)
+# pSBPInt = ylpP[np.argmax(omweInter > np.max(omweInter)*0.55)]
+# pDBPInt = ylpP[maxArg + np.argmax(omweInter[maxArg:] < np.max(omweInter)*0.70)]
+# print("    SBP: ", np.around(pSBPInt, decimals=2) )
+# print("    DBP: ", np.around(pDBPInt, decimals=2) )
 
 
 
@@ -200,10 +202,11 @@ proc_Pressure.plot(tP,ylpP-yhpP, 'b', label='deflation')
 
 #proc_delta.plot(yfLP, intMax(tP)-intMin(tP), 'g', label='OMVE interp.')
 proc_env.plot(yMaximasP, dMaxMin,  label='OMVE max-min')
+# proc_env.plot(ylpP,omweInter)
 proc_delta.plot(yMaximasP[::-1], dPres,  label='dOMVE')
 proc_delta.plot(yMaximasP[::-1], dPresN,  label='dOMVE n in time')
 proc_delta.plot(yMaximasP[::-1], dPresN,  label='dOMVE n in pressure')
-proc_delta.plot(ylpP[::-1], dIPres,  label='dInterOMVE')
+# proc_delta.plot(ylpP[::-1], dIPres*1e4,  label='dInterOMVE')
 
 proc_Pressure.legend()
 proc_delta.legend()
