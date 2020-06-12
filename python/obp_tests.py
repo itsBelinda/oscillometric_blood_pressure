@@ -12,7 +12,7 @@ plt.rcParams['axes.grid'] = True
 
 #%% Get the data
 
-data = np.loadtxt('../data/sample_07_05.dat')
+data = np.loadtxt('../data/sample_07_04.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
@@ -56,7 +56,7 @@ ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
 #filt50 = iir_filter.IIR_filter(sos50)
 
 # 5 Hz LP filter
-f5 = 5
+f5 = 20
 bLP, aLP = signal.butter(6, f5/fs*2, 'lowpass')
 yfLP = signal.lfilter(bLP, aLP, ymmHg)
 

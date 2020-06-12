@@ -20,7 +20,7 @@ from scipy.interpolate import interp1d
 
 #%% Get the data
 
-data = np.loadtxt('../data/sample_07_04.dat')
+data = np.loadtxt('../data/sample_07_10.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
@@ -107,10 +107,10 @@ oscStartInd = 0
 oscEndInd = 0
 
 
-#deltaT = np.diff(tMaximas)
+deltaTtest = np.diff(tMaximas)
 #delta2T = np.diff(deltaT)
 for i in range(1,len(tMaximas)-1):
-    deltaT[i] = tMaximas[i]-tMaximas[i-1]
+    deltaT[i] = tMaximas[i]-tMaximas[i-1] #TODO: normalisation in time necessary?
     delta2T[i] = deltaT[i]-deltaT[i-1]
     
     if oscStartInd == 0 :
@@ -139,6 +139,7 @@ iEnd = int(tEnd*1000)
 tMaxP = tMaximas[oscStartInd:oscEndInd+1]
 oscMaxP = oscMax[oscStartInd:oscEndInd+1]
 deltaP = deltaT[oscStartInd:oscEndInd+1]
+deltaPtest = deltaTtest[oscStartInd:oscEndInd+1]
 tP = t[iStart:iEnd+1]
 yhpP = yfHP[iStart:iEnd+1]
 ylpP = yfLP[iStart:iEnd+1]
@@ -244,6 +245,7 @@ fig_processSignal.subplots_adjust(hspace=0)
 proc_Pressure.plot(tP,ylpP, 'r', label='pressure')
 proc_Pressure.plot(tP,ylpP-yhpP, 'b', label='deflation')
 proc_delta.plot(tMaxP, deltaP, 'c', label='time since last maxima')
+proc_delta.plot(tMaxP, deltaPtest, 'c', label='time since last maxima')
 proc_delta.plot(tP, yhpP, 'g', label='oscillogram')
 proc_delta.plot(tMaxP, oscMaxP, 'm', label='envelope')
 proc_delta.plot(tMinP, oscMinP, 'm')
