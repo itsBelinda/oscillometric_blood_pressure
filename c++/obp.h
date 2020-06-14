@@ -28,16 +28,17 @@
 #include "dataplot.h"
 #include <Iir.h>
 
-// maximal length of the data (for memory alloctaion)
-#define MAX_DATA_LENGTH 8000*5
+// maximal length of the data (for memory allocation)
+#define MAX_DATA_LENGTH 8000
 
-#define SAMPLING_RATE 8000 // 8kHz
+#define SAMPLING_RATE 1000 // 1kHz
 
 #define NOTCH_F 50 // filter out 50Hz noise
 #define IIRORDER 6
+#define IIRORDER_HIGH 10
 
 #define COMEDI_SUB_DEVICE  0
-#define COMEDI_RANGE_ID    2    /* +/- 4V */
+#define COMEDI_RANGE_ID    0   /* +/- 1.325V  for sigma device*/
 
 
 class MainWindow : public QWidget {
@@ -83,7 +84,7 @@ Q_OBJECT
 
     // Filters
     Iir::Butterworth::BandStop<IIRORDER> *iirnotch;
-    Iir::Butterworth::LowPass<IIRORDER> *iirLP;
+    Iir::Butterworth::LowPass<IIRORDER_HIGH> *iirLP;
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     QCheckBox *filter50HzCheckBox;
