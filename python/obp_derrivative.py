@@ -62,7 +62,7 @@ f05 = 0.5 # TODO: might be better to set lower ~0.3
 bHP, aHP = signal.butter(2, f05/fs*2, 'highpass')
 yfHP = signal.lfilter(bHP, aHP, yfLP)
 
-
+yfBP = yfLP-yfHP
 
 #%% Find peaks in derrivative (HP filtered)
 
@@ -70,7 +70,7 @@ localMax, _ = signal.find_peaks(yfHP, prominence = 0.3 )#distance = 500)
 
 
 # get values of local maximas in pressure and time
-yMaximas = yfLP[localMax]
+yMaximas = yfBP[localMax]
 tMaximas = t[localMax]
 # the local max values of the oscillation
 oscMax = yfHP[localMax]
@@ -83,7 +83,7 @@ tPumpedUP = tMaximas[xPumpedUp]
 
 localMin, _ = signal.find_peaks(-yfHP, prominence = 0.3 )
 # get values of local maximas in pressure and time
-yMinima = yfLP[localMin]
+yMinima = yfBP[localMin]
 tMinima = t[localMin]
 # the local max values of the oscillation
 oscMin = yfHP[localMin]
@@ -115,23 +115,25 @@ for i in range(1,len(tMaximas)-1):
         # if np.abs(delta2T[i]) > 0.2:
         #     oscEndInd = i-3 #omitt the last one: -2 not -1       
         if (oscMax[oscStartInd]*1.2) > oscMax[i]: # more info on left side
-            oscEndInd = i
+            oscEndInd = i-3
+            
 
 if oscEndInd == 0:
-    oscEndInd = len(tMaximas)-3
+    oscEndInd = len(tMaximas)-4
 
 # data for processing:
-tStart = tMaximas[oscStartInd]
-tEnd = tMaximas[oscEndInd]
-iStart = int(tStart*1000)
-iEnd = int(tEnd*1000)
+yMaximasP = yMaximas[oscStartInd:oscEndInd+1]
+tStart_a = np.where(yfBP == yMaximasP[0])
+iStart = int(tStart_a[0]+100)
+tEnd_a = np.where(yfBP == yMaximasP[-1])
+iEnd = int(tEnd_a[0]-100)
 tMaxP = tMaximas[oscStartInd:oscEndInd+1]
 oscMaxP = oscMax[oscStartInd:oscEndInd+1]
 deltaP = deltaT[oscStartInd:oscEndInd+1]
 tP = t[iStart:iEnd+1]
 yhpP = yfHP[iStart:iEnd+1]
 ylpP = yfLP[iStart:iEnd+1]
-yMaximasP = yMaximas[oscStartInd:oscEndInd+1]
+ybpP = yfBP[iStart:iEnd+1]
 
 # make sure minimas are (at least) defined for every maxima
 minStart = np.argmax(tMinima>tMaximas[oscStartInd])-1
@@ -158,7 +160,7 @@ dPresNP = np.zeros(len(dMaxMin))
 for i in range(0,len(dMaxMin)-1):
     dPres[i] = (dMaxMin[i+1]-dMaxMin[i])
     dPresN[i] = (dMaxMin[i+1]-dMaxMin[i])/(tMaxP[i+1]-tMaxP[i])
-    dPresNP[i] = (dMaxMin[i]-dMaxMin[i+1])/(yMaximasP[i]-yMaximasP[i+1])
+    dPresNP[i] = (dMaxMin[i]-dMaxMin[i+1])/(yMaximasP[i+1]-yMaximasP[i])
     
 maxVal = np.argmax(dMaxMin)    
 pMAP = yMaximasP[maxVal]
@@ -178,18 +180,19 @@ print("    DBP: ", np.around(pDBP, decimals=2) )
 
 
 #interpolation
-intMax = interp1d(yMaximasP, oscMaxP, kind='linear')
-intMin = interp1d(yMinimasP, oscMinP, kind='linear')
+intMax = interp1d(yMaximasP, oscMaxP, kind='quadratic')
+intMin = interp1d(yMinimasP, oscMinP, kind='quadratic')
 
-# omweInter = intMax(ylpP-yhpP) #- intMin(ylpP)
-# dIPres = np.diff(omweInter)
-# dIPres = np.append(0,dIPres)
-# pMAPinter = ylpP[np.argmax(omweInter)]
-# print("interpolation: ", np.around(pMAPinter, decimals=2) )
+omweInter = intMax(ybpP)-intMin(ybpP)
+dIPres = np.diff(omweInter)
+dIPres = np.append(0,dIPres)
 
-# maxArg = np.argmax(omweInter)
-# pSBPInt = ylpP[np.argmax(omweInter > np.max(omweInter)*0.55)]
-# pDBPInt = ylpP[maxArg + np.argmax(omweInter[maxArg:] < np.max(omweInter)*0.70)]
+argMaxInter = np.argmax(omweInter)
+pMAPinter = ybpP[argMaxInter]
+print("interpolation: " )
+
+maxArg = np.argmax(omweInter)
+print("    MAP: ", np.around(pMAPinter, decimals=2) )
 # print("    SBP: ", np.around(pSBPInt, decimals=2) )
 # print("    DBP: ", np.around(pDBPInt, decimals=2) )
 
@@ -206,11 +209,17 @@ proc_Pressure.plot(tP,ylpP-yhpP, 'b', label='deflation')
 
 #proc_delta.plot(yfLP, intMax(tP)-intMin(tP), 'g', label='OMVE interp.')
 proc_env.plot(yMaximasP, dMaxMin,  label='OMVE max-min')
-# proc_env.plot(ylpP,omweInter)
-proc_delta.plot(yMaximasP[::-1], dPres,  label='dOMVE')
-proc_delta.plot(yMaximasP[::-1], dPresN,  label='dOMVE n in time')
-proc_delta.plot(yMaximasP[::-1], dPresN,  label='dOMVE n in pressure')
-# proc_delta.plot(ylpP[::-1], dIPres*1e4,  label='dInterOMVE')
+proc_env.plot(yMaximasP, oscMaxP, 'r',marker='x', label='OMVE max')
+proc_env.plot(yMinimasP, oscMinP,'b', marker='x', label='OMVE min')
+proc_env.plot(ybpP, intMin(ybpP), 'g', label='OMVE min')
+proc_env.plot(ybpP, intMax(ybpP), 'm', label='OMVE max')
+proc_env.plot(ybpP, omweInter, 'c', label='OMVE interp')
+
+proc_delta.plot(yMaximasP, dPres,  label='dOMVE')
+proc_delta.plot(yMaximasP, dPresN,  label='dOMVE n in time')
+proc_delta.plot(yMaximasP, dPresNP,  label='dOMVE n in pressure')
+proc_delta.plot(ybpP, dIPres,  label='dOMVE interpolation')
+
 
 proc_Pressure.legend()
 proc_delta.legend()
@@ -222,42 +231,42 @@ proc_Pressure.set_xlim(min(tP), max(tP))
 
 proc_env.set_ylabel('detlat/mmHg', fontsize=16)
 proc_env.set_xlabel('mmHg', fontsize=16)
-proc_env.set_xlim(max(yMaximasP), min(yMaximasP))
+proc_env.set_xlim(max(yMaximasP)+10, min(yMaximasP)-10)
 proc_delta.set_ylabel('detlat/mmHg', fontsize=16)
 proc_delta.set_xlabel('mmHg', fontsize=16)
-proc_delta.set_xlim(max(yMaximasP), min(yMaximasP))
+proc_delta.set_xlim(max(yMaximasP)+10, min(yMaximasP)-10)
 #proc_delta.set_ylim(-3, 3)
 plt.get_current_fig_manager().window.showMaximized()
 
 
 #%% Plot full signals
 #(dMaxMin[i]-dMaxMin[i-1])/tMaxP[i]
-# fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
-#                 sharex=True,sharey=False,num='mmHg Signal')
-# fig_timeSignal.subplots_adjust(hspace=0)
+fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
+                sharex=True,sharey=False,num='mmHg Signal')
+fig_timeSignal.subplots_adjust(hspace=0)
 
-# time_filt.plot(t,ymmHg, 'b', label='raw')
-# time_LP.plot(t, yfLP, 'r', label='LP')
-# time_HP.plot(t,yfHP, 'g', label='HP')
-# time_HP.plot(tMaximas, oscMax, 'm', label='local maximas')
-# time_HP.plot(tMinima, oscMin, 'm', label='local minimas')
-# time_HP.plot(tMaximas, deltaT, 'c', label='time since last maxima')
-# time_HP.plot(tMaximas, delta2T, 'k', label='2nd derrivative in time')
-# time_HP.axvline(x = tStart)
-# time_HP.axvline(x = tEnd)
+time_filt.plot(t,ymmHg, 'b', label='raw')
+time_LP.plot(t, yfLP, 'r', label='LP')
+time_HP.plot(t,yfHP, 'g', label='HP')
+time_HP.plot(tMaximas, oscMax, 'm', label='local maximas')
+time_HP.plot(tMinima, oscMin, 'm', label='local minimas')
+time_HP.plot(tMaximas, deltaT, 'c', label='time since last maxima')
+time_HP.plot(tMaximas, delta2T, 'k', label='2nd derrivative in time')
+time_HP.axvline(x = (iStart/1000))
+time_HP.axvline(x = (iEnd/1000))
 
-# time_filt.legend()
-# time_LP.legend()
-# time_HP.legend()
+time_filt.legend()
+time_LP.legend()
+time_HP.legend()
 
-# fig_timeSignal.suptitle('Blood Pressure', fontsize=20) 
-# time_filt.set_ylabel('mmHg', fontsize=16)
-# time_LP.set_ylabel('mmHg', fontsize=16)
-# time_HP.set_ylabel('detlat/mmHg', fontsize=16)
-# time_HP.set_xlabel('Time (s)', fontsize=16)
-# time_LP.set_xlim(0, max(t))
-# time_HP.set_ylim(-3, 3)
-# plt.get_current_fig_manager().window.showMaximized()
+fig_timeSignal.suptitle('Blood Pressure', fontsize=20) 
+time_filt.set_ylabel('mmHg', fontsize=16)
+time_LP.set_ylabel('mmHg', fontsize=16)
+time_HP.set_ylabel('detlat/mmHg', fontsize=16)
+time_HP.set_xlabel('Time (s)', fontsize=16)
+time_LP.set_xlim(0, max(t))
+time_HP.set_ylim(-3, 3)
+plt.get_current_fig_manager().window.showMaximized()
  
 
 
