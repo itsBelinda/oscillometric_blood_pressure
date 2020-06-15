@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     crange = comedi_get_range(dev, COMEDI_SUB_DEVICE, COMEDI_SUB_DEVICE, COMEDI_RANGE_ID);
     numChannels = comedi_get_n_channels(dev, COMEDI_SUB_DEVICE);
     printf("maxdata: %d \n", maxdata);
-    printf("crange min: %f, max: %f \n", crange->min, crange->max);
+    //printf("crange min: %f, max: %f \n", crange->min, crange->max);
     printf("num channels: %d \n", numChannels);
     printf("dataLength: %d \n", dataLength);
 
@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
      * if you can't get a valid command in two tests, the original
      * command wasn't specified very well. */
     ret = comedi_command_test(dev, &comediCommand);
-
+    fprintf(stderr, "first test returned %d\n", ret);
     if (ret < 0) {
         comedi_perror("comedi_command_test");
         exit(-1);
@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
         sampling_rate = (double) 1E9 / comediCommand.scan_begin_arg;
     }
     printf("sampling rate: %f \n", sampling_rate);
-    sampling_rate = SAMPLING_RATE; //TODO: calculation seems to be wrong, setting manually for now
+    //sampling_rate = SAMPLING_RATE; //TODO: calculation seems to be wrong, setting manually for now
 
     // 50Hz or 60Hz mains notch filter
     iirnotch = new Iir::Butterworth::BandStop<IIRORDER>;
@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     iirnotch->setup(IIRORDER, sampling_rate, NOTCH_F, NOTCH_F / 10.0);
 
     // 5Hz mains LP filter
-    iirLP = new Iir::Butterworth::LowPass<IIRORDER>;
+    iirLP = new Iir::Butterworth::LowPass<IIRORDER_HIGH>;
     assert(iirLP != NULL);
     iirLP->setup(sampling_rate, 5.0);
 
@@ -174,7 +174,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Raw data plot (50Hz notch filter option)
     RawDataPlot = new DataPlot(xData, yData, dataLength,
-                               crange->max, crange->min, this);
+                               200,0,this);//crange->max, crange->min, this);
+    RawDataPlot->setAxisTitles("Time/ms", "Pressure/mmHg");
 
     plotLayout->addWidget(RawDataPlot);
     RawDataPlot->show();
@@ -182,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // LP data plot
     LPPlot = new DataPlot(xData, yLPData, dataLength,
-                               2.6, 1.8, this);
+                               1, 0.6, this);
 
     plotLayout->addWidget(LPPlot);
     LPPlot->setPlotTitle("5 Hz LP filtered");
@@ -194,7 +195,7 @@ MainWindow::MainWindow(QWidget *parent) :
                           0.5, -0.5, this);
 
     plotLayout->addWidget(HPPlot);
-    HPPlot->setPlotTitle("0.5 Hz HP filtered");
+    HPPlot->setPlotTitle("0.5 Hz HP filtered (x5)");
     HPPlot->show();
     plotLayout->addSpacing(20);
 
@@ -292,8 +293,6 @@ void MainWindow::timerEvent(QTimerEvent *) {
 
         if (sigmaBoard) {
             v = ((lsampl_t *) buffer)[adChannel];
-            printf("Sigma\n");
-
         } else {
             v = ((sampl_t *) buffer)[adChannel];
         }
@@ -308,7 +307,14 @@ void MainWindow::timerEvent(QTimerEvent *) {
 
         double yLP = iirLP->filter(yNew);
         double yHP = iirHP->filter(yLP);
-        RawDataPlot->setNewData(yNew);
+
+//        ambientV = 0.710#0.675 # from calibration
+//        mmHg_per_kPa = 7.5006157584566 # from literature
+//        kPa_per_V = 50 # 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
+//        corrFact = 2.50 # from calibration
+//
+//        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
+        RawDataPlot->setNewData((yNew-.71)* 7.5006157584566*50*2.5);
         LPPlot->setNewData(yLP);
         HPPlot->setNewData(yHP*5);
         ++time;
