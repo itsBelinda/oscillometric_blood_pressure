@@ -141,7 +141,7 @@ yMinimasP = yMinima[minStart:minEnd+1]
 
 oscMinP = oscMin[minStart:minEnd+1]
 
-dMaxMin = oscMaxP - oscMinP[1:len(tMaxP)+1]
+dMaxMin = oscMaxP - oscMinP[0:len(tMaxP)]
 
 avPulse = np.average(deltaP)
 pulse=60/avPulse
@@ -160,13 +160,17 @@ for i in range(0,len(dMaxMin)-1):
     dPresN[i] = (dMaxMin[i+1]-dMaxMin[i])/(tMaxP[i+1]-tMaxP[i])
     dPresNP[i] = (dMaxMin[i]-dMaxMin[i+1])/(yMaximasP[i]-yMaximasP[i+1])
     
-maxChange = np.argmax(dPresNP[0:(int(len(dPresNP)/2))])
-minChange = np.argmin(dPresNP[(int(len(dPresNP)/2)):])+int(len(dPresNP)/2)
+maxVal = np.argmax(dMaxMin)    
+pMAP = yMaximasP[maxVal]
+
+maxChange = np.argmax(dPresNP[0:maxVal])
+minChange = np.argmin(dPresNP[maxVal:])+maxVal
 
 pSBP = yMaximasP[maxChange]
 pDBP = yMaximasP[minChange]
 
 print("using only min/max values of oscillogram")
+print("    MAP: ", np.around(pMAP, decimals=2) )
 print("    SBP: ", np.around(pSBP, decimals=2) )
 print("    DBP: ", np.around(pDBP, decimals=2) )
 
@@ -228,32 +232,32 @@ plt.get_current_fig_manager().window.showMaximized()
 
 #%% Plot full signals
 #(dMaxMin[i]-dMaxMin[i-1])/tMaxP[i]
-#fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
-#                sharex=True,sharey=False,num='mmHg Signal')
-#fig_timeSignal.subplots_adjust(hspace=0)
-#
-#time_filt.plot(t,ymmHg, 'b', label='raw')
-#time_LP.plot(t, yfLP, 'r', label='LP')
-#time_HP.plot(t,yfHP, 'g', label='HP')
-#time_HP.plot(tMaximas, oscMax, 'm', label='local maximas')
-#time_HP.plot(tMinima, oscMin, 'm', label='local minimas')
-#time_HP.plot(tMaximas, deltaT, 'c', label='time since last maxima')
-#time_HP.plot(tMaximas, delta2T, 'k', label='2nd derrivative in time')
-#time_HP.axvline(x = tStart)
-#time_HP.axvline(x = tEnd)0
-#
-#time_filt.legend()
-#time_LP.legend()
-#time_HP.legend()
-#
-#fig_timeSignal.suptitle('Blood Pressure', fontsize=20) 
-#time_filt.set_ylabel('mmHg', fontsize=16)
-#time_LP.set_ylabel('mmHg', fontsize=16)
-#time_HP.set_ylabel('detlat/mmHg', fontsize=16)
-#time_HP.set_xlabel('Time (s)', fontsize=16)
-#time_LP.set_xlim(0, max(t))
-#time_HP.set_ylim(-3, 3)
-#plt.get_current_fig_manager().window.showMaximized()
+# fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
+#                 sharex=True,sharey=False,num='mmHg Signal')
+# fig_timeSignal.subplots_adjust(hspace=0)
+
+# time_filt.plot(t,ymmHg, 'b', label='raw')
+# time_LP.plot(t, yfLP, 'r', label='LP')
+# time_HP.plot(t,yfHP, 'g', label='HP')
+# time_HP.plot(tMaximas, oscMax, 'm', label='local maximas')
+# time_HP.plot(tMinima, oscMin, 'm', label='local minimas')
+# time_HP.plot(tMaximas, deltaT, 'c', label='time since last maxima')
+# time_HP.plot(tMaximas, delta2T, 'k', label='2nd derrivative in time')
+# time_HP.axvline(x = tStart)
+# time_HP.axvline(x = tEnd)
+
+# time_filt.legend()
+# time_LP.legend()
+# time_HP.legend()
+
+# fig_timeSignal.suptitle('Blood Pressure', fontsize=20) 
+# time_filt.set_ylabel('mmHg', fontsize=16)
+# time_LP.set_ylabel('mmHg', fontsize=16)
+# time_HP.set_ylabel('detlat/mmHg', fontsize=16)
+# time_HP.set_xlabel('Time (s)', fontsize=16)
+# time_LP.set_xlim(0, max(t))
+# time_HP.set_ylim(-3, 3)
+# plt.get_current_fig_manager().window.showMaximized()
  
 
 

@@ -150,7 +150,7 @@ minEnd = np.argmax(tMinima>tMaximas[oscEndInd])
 tMinP = tMinima[minStart:minEnd+1]
 oscMinP = oscMin[minStart:minEnd+1]
 
-dMaxMin = oscMaxP - oscMinP[1:len(tMaxP)+1]
+dMaxMin = oscMaxP - oscMinP[0:len(tMaxP)]
 
 avPulse = np.average(deltaP)
 pulse=60/avPulse
