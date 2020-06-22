@@ -71,7 +71,13 @@ ratio for systolic pressure also calculated for a reference database},
   title   = {Improved measurement of blood pressure by extraction of characteristic features from the cuff oscillometric waveform},
   issue   = {6},
   volume  = {15},
-  comment = {proposes new and seemingly relatively simple algorithms. has to be looked at in more detail},
+  comment = {proposes new and seemingly relatively simple algorithms. has to be looked at in more detail:
+only 25 subjects tested, not really a new algorithm, because in the end, it still uses the fixed-ratio method, but adds artifact removal and compares it to some model based algorithms. 
+results were evaluated by comparing them to the accusatory method (BHS standard, but old)
+
+interesting part: 
+We further demonstrated from our analysis results (Tables 5 and 6) that the usage of variable characteristic ratio derived based on several features extracted from the OWE improved the blood pressure estimation accuracy over the conventional MAA method using fixed characteristic ratios
+- based on Lee 2013},
   journal = {Sensors (Switzerland)},
   year    = {2015},
 }
@@ -81,7 +87,7 @@ ratio for systolic pressure also calculated for a reference database},
   title   = {Smartphone-based blood pressure monitoring via the oscillometric finger-pressing method},
   issue   = {431},
   volume  = {10},
-  comment = {very interesting. no detailed explanation about algorithm. I have used this device, the results were comaired with a commercially available automated device (wrist measurement)},
+  comment = {very interesting at first, in the end, it is just another implementation of the fixed-ratio algorithm optimised/adjusted for finger measurements},
   journal = {Science Translational Medicine},
   year    = {2018},
 }
@@ -90,7 +96,7 @@ ratio for systolic pressure also calculated for a reference database},
   author       = {Jazbinsek, Vojko},
   title        = {New algorithm for automatic determination of systolic and diastolic blood pressures in oscillometric measurements},
   organization = {2016 39th International Convention on Information and Communication Technology, Electronics and Microelectronics, MIPRO 2016 - Proceedings},
-  comment      = {unfortunately, I coud not cet access to this paper. It sounds very promissing.},
+  comment      = {unfortunately, I coud not cet access to this paper. It sounds very promissing. problably just another fitting problem},
   year         = {2016},
 }
 
@@ -111,6 +117,51 @@ ratio for systolic pressure also calculated for a reference database},
   comment = {referenced basically everywhere!},
   journal = {Annals of Biomedical Engineering},
   year    = {1982},
+}
+
+@Article{Bos2007,
+  author  = {Bos, Willem J. W. and Verrij, Elisabeth and Vincent, Hieronymus H. and Westerhof, Berend E. and Parati, Gianfranco and Montfrans, Gert A. Van},
+  title   = {How to assess mean blood pressure properly at the brachial artery level},
+  issue   = {4},
+  volume  = {25},
+  comment = {how to calclulate MAP},
+  journal = {Journal of Hypertension},
+  year    = {2007},
+}
+
+@Article{Ursino1996,
+  author   = {Ursino,M. and Cristalli,C.},
+  title    = {A mathematical study of some biomechanical factors affecting the oscillometric blood pressure measurement},
+  language = {English},
+  number   = {8},
+  pages    = {761-778},
+  volume   = {43},
+  abstract = {A mathematical lumped parameter model of the oscillometric technique for indirect blood pressure measurement is presented. The model includes cuff compliance, pressure transmission from the cuff to the brachial artery through the soft tissue of the arm, and the biomechanics of the brachial artery both at positive and negative transmural pressure values. The main aspects of oscillometry are simulated i.e., the increase in cuff pressure pulsatility during cuff deflation maneuvers, the existence of a point of maximum pulsations (about 1.5 mmHg) at a cuff pressure close to mean arterial pressure, and the characteristic ratios for cuff pressure pulsatility at systole and diastole (0.52 and 0.70, respectively, with this model, using basal parameters and an individual set of data for the arterial pressure waveform). Subsequently, the model is used to examine how alterations in some biomechanical factors may prejudice the accuracy of pressure measurement. Numerical simulations indicate that alterations in wall viscoelastic properties and in arterial pressure pulse amplitude may significantly affect the accuracy of pressure estimates, leading to errors as great as 15-20% in the computation of diastolic and systolic arterial pressure. By contrast, changes in arterial pressure mean value and cuff compliance do not seem to have significant influence on the measurement. Evaluation of mean arterial pressure through a characteristic ratio is not robust and may lead to misleading results. Mean arterial pressure may be better evaluated as the lowest pressure at which cuff pulse amplitude reaches a plateau. The obtained results may help to explain the nature of errors which usually limit the reliability of arterial pressure measurement (for instance in the elderly).;A mathematical lumped parameter model of the oscillometric technique for indirect blood pressure measurement is presented. The model includes cuff compliance, pressure transmission from the cuff to the brachial artery through the soft tissue of the arm, and the biomechanics of the brachial artery both at positive and negative transmural pressure values. The main aspects of oscillometry are simulated i.e., the increase in cuff pressure pulsatility during cuff deflation manoeuvres, the existence of a point of maximum pulsations (about 1.5 mmHg) at a cuff pressure close to mean arterial pressure, and the characteristic ratios for cuff pressure pulsatility at systole and diastole (0.52 and 0.70, respectively, with this model, using basal parameters and an individual set of data for the arterial pressure waveform). Subsequently, the model is used to examine how alterations in some biomechanical factors may prejudice the accuracy of pressure measurement. Numerical simulations indicate that alterations in wall viscoelastic properties and in arterial pressure pulse amplitude may significantly affect the accuracy of pressure estimates, leading to errors as great as 15-20% in the computation of diastolic and systolic arterial pressure. By contrast, changes in arterial pressure mean value and cuff compliance do not seem to have significant influence on the measurement. Evaluation of mean arterial pressure through a characteristic ratio is not robust and may lead to misleading results. Mean arterial pressure may be better evaluated as the lowest pressure at which cuff pulse amplitude reaches a plateau. The obtained results may help to explain the nature of errors which usually limit the reliability of arterial pressure measurement (for instance in the elderly).;},
+  comment  = {attempt to mathematically prove oscillometric method. compares obtained values to Geddes. 
+conclusion: Geddes values can possibly be made more accurate, because systolic pressure was obtained by him through the accusatory method and that ofent overestimates it. for high arterial pressures, the ratios should be lowered and vice versa. 
+MAP should be estimated as the lowest cuff pressure where oscillations have a plateau.
+in the end: accusatory method should be used for sys/dia measurement and oscillometric method for esitmation of MAP},
+  isbn     = {0018-9294},
+  journal  = {IEEE Transactions on Biomedical Engineering},
+  keywords = {Biomechanics; Viscosity; Biological tissues; Elasticity; Numerical simulation; Blood pressure; Brachytherapy; Pressure measurement; Mathematical model; Arteries; Models, Cardiovascular; Humans; Stress, Mechanical; Linear Models; Diastole - physiology; Equipment Design; Pulse - physiology; Blood Pressure Determination - methods; Biomechanical Phenomena; Pulsatile Flow - physiology; Sensitivity and Specificity; Systole - physiology; Signal Processing, Computer-Assisted; Aged; Hemodynamics; Brachial Artery - physiology; Measurement; Models; Blood circulation},
+  year     = {1996},
+}
+
+@Article{Lee2013,
+  author   = {Lee,Soojeong and Chang,Joon-Hyuk and Nam,Sang W. and Lim,Chungsoo and Rajan,Sreeraman and Dajani,Hilmi R. and Groza,Voicu Z.},
+  title    = {Oscillometric Blood Pressure Estimation Based on Maximum Amplitude Algorithm Employing Gaussian Mixture Regression},
+  language = {English},
+  number   = {12},
+  pages    = {3387-3389},
+  volume   = {62},
+  abstract = {This paper introduces a novel approach to estimate the systolic and diastolic blood pressure ratios (SBPR and DBPR) based on the maximum amplitude algorithm (MAA) using a Gaussian mixture regression (GMR). The relevant features, which clearly discriminate the SBPR and DBPR according to the targeted groups, are selected in a feature vector. The selected feature vector is then represented by the Gaussian mixture model. The SBPR and DBPR are subsequently obtained with the help of the GMR and then mapped back to SBP and DBP values that are more accurate than those obtained with the conventional MAA method.},
+  comment  = {85 healthy subjects
+using Gaussian Mixture Regression (iterative learning)
+only included for completeness},
+  isbn     = {0018-9456},
+  journal  = {IEEE Transactions on Instrumentation and Measurement},
+  keywords = {Accuracy; Estimation; maximum amplitude algorithm (MAA); Blood pressure; Gaussian mixture regression (GMR); Biomedical monitoring; Standards; Gaussian mixture model; oscillometric blood pressure estimation; Signal processing; Research; Regression analysis; Analysis; Estimation theory; Gaussian processes},
+  year     = {2013},
 }
 
 @Comment{jabref-meta: databaseType:biblatex;}
