@@ -189,12 +189,18 @@ dIPres = np.append(0,dIPres)
 
 argMaxInter = np.argmax(omweInter)
 pMAPinter = ybpP[argMaxInter]
-print("interpolation: " )
 
+maxChangeI = np.argmax(dIPres[0:argMaxInter])
+minChangeI = np.argmin(dIPres[argMaxInter:])+argMaxInter
+
+pSBPInt = ybpP[maxChangeI]
+pDBPInt = ybpP[minChangeI]
+
+print("interpolation: " )
 maxArg = np.argmax(omweInter)
 print("    MAP: ", np.around(pMAPinter, decimals=2) )
-# print("    SBP: ", np.around(pSBPInt, decimals=2) )
-# print("    DBP: ", np.around(pDBPInt, decimals=2) )
+print("    SBP: ", np.around(pSBPInt, decimals=2) )
+print("    DBP: ", np.around(pDBPInt, decimals=2) )
 
 
 
