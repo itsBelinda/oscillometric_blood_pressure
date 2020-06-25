@@ -9,6 +9,7 @@
  *   (at your option) any later version.                                   *
  ***************************************************************************/
 #include "obp.h"
+#include "uitest.h"
 
 #include <QApplication>
 
@@ -19,5 +20,9 @@ int main(int argc, char **argv)
 
   mainWindow.show();
   mainWindow.resize(1400,400);
+
+  TestWindow testWindow;
+  testWindow.show();
+
   return app.exec();
 }

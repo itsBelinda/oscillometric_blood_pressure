@@ -92,9 +92,7 @@ private slots:
 
     // actions:
     void slotClearData();
-
     void slotSetChannel(double c);
-
     void slotSaveData();
 
 protected:
