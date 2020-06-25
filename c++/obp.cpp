@@ -233,6 +233,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ActionsLayout->addWidget(saveData);
     connect(saveData, SIGNAL(clicked()), SLOT(slotSaveData()));
 
+
+    // Second window for UI-testing:
+
+    TestWindow *testWindow = new TestWindow(this);
+    testWindow->show();
+
+
     // Generate timer event every 50ms
     (void) startTimer(50);
 
@@ -282,7 +289,7 @@ void MainWindow::slotSetChannel(double c) {
 void MainWindow::timerEvent(QTimerEvent *) {
     static int count = 0;
     unsigned char buffer[readSize];
-
+    double pressure = 0.0;
     while (comedi_get_buffer_contents(dev, COMEDI_SUB_DEVICE) > 0) {
         if (read(comedi_fileno(dev), buffer, readSize) == 0) {
             printf("Error: end of Acquisition\n");
@@ -314,7 +321,9 @@ void MainWindow::timerEvent(QTimerEvent *) {
 //        corrFact = 2.50 # from calibration
 //
 //        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
-        RawDataPlot->setNewData((yNew-.71)* 7.5006157584566*50*2.5);
+        pressure = (yNew-.71)* 7.5006157584566*50*2.5;
+        RawDataPlot->setNewData(pressure);
+        //testWindow->setPressure(pressure); //TODO: breaks
         LPPlot->setNewData(yLP);
         HPPlot->setNewData(yHP*5);
         ++time;

@@ -16,139 +16,135 @@ TestWindow::~TestWindow()
 
 }
 
-void TestWindow::setupUi(QMainWindow *MainWindow)
+void TestWindow::setupUi(QMainWindow *window)
 {
-    if (MainWindow->objectName().isEmpty())
-        MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-    MainWindow->resize(2081, 1006);
-    MainWindow->setAcceptDrops(true);
+    if (window->objectName().isEmpty())
+        window->setObjectName(QString::fromUtf8("TestWindow"));
+
     QIcon icon(QIcon::fromTheme(QString::fromUtf8("Main")));
-    MainWindow->setWindowIcon(icon);
-    MainWindow->setTabShape(QTabWidget::Triangular);
-    centralwidget = new QWidget(MainWindow);
+    window->resize(2081, 1006);
+    window->setAcceptDrops(true);
+    window->setWindowIcon(icon);
+    window->setTabShape(QTabWidget::Triangular);
+    centralwidget = new QWidget(window);
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-    horizontalLayout_3 = new QHBoxLayout(centralwidget);
-    horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
-    verticalLayout_7 = new QVBoxLayout();
-    verticalLayout_7->setObjectName(QString::fromUtf8("verticalLayout_7"));
-    textBrowser = new QTextBrowser(centralwidget);
-    textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-    textBrowser->setFrameShape(QFrame::HLine);
-    textBrowser->setFrameShadow(QFrame::Plain);
 
-    verticalLayout_7->addWidget(textBrowser);
+    // Layouts
+    hl = new QHBoxLayout(centralwidget);
+    hl->setObjectName(QString::fromUtf8("hl"));
+    vlLeft = new QVBoxLayout();
+    vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
+    vlRight = new QVBoxLayout();
+    vlRight->setObjectName(QString::fromUtf8("vlRight"));
 
-    verticalSpacer_4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    verticalLayout_7->addItem(verticalSpacer_4);
+    line1 = new QFrame(centralwidget);
+    line1->setObjectName(QString::fromUtf8("line1"));
+    line1->setFrameShape(QFrame::VLine);
+    line1->setFrameShadow(QFrame::Sunken);
 
-    label = new QLabel(centralwidget);
-    label->setObjectName(QString::fromUtf8("label"));
-    label->setWordWrap(true);
+    infoBox = new QTextBrowser(centralwidget);
+    infoBox->setObjectName(QString::fromUtf8("infoBox"));
+    infoBox->setFrameShape(QFrame::HLine);
+    infoBox->setFrameShadow(QFrame::Plain);
+    infoLabel = new QLabel(centralwidget);
+    infoLabel->setObjectName(QString::fromUtf8("infoLabel"));
+    infoLabel->setWordWrap(true);
 
-    verticalLayout_7->addWidget(label);
+    // TODO: needs a separate class to support setting needle directly.
+    meter = new QwtDial(centralwidget);
+    meter->setObjectName(QString::fromUtf8("meter"));
+    meter->setUpperBound(260.000000000000000);
+    meter->setScaleStepSize(20.000000000000000);
+    meter->setWrapping(false);
+    meter->setInvertedControls(false);
+    meter->setLineWidth(4);
+    meter->setMode(QwtDial::RotateNeedle);
+    meter->setMinScaleArc(20.000000000000000);
+    meter->setMaxScaleArc(340.000000000000000);
+    QwtDialSimpleNeedle *needle = new QwtDialSimpleNeedle(
+            QwtDialSimpleNeedle::Arrow, true, Qt::black,
+            QColor( Qt::gray ).lighter( 130 ) );
 
-    verticalSpacer_3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    meter->setNeedle(needle);
 
-    verticalLayout_7->addItem(verticalSpacer_3);
+    btnStart = new QPushButton(centralwidget);
+    btnStart->setObjectName(QString::fromUtf8("btnStart"));
 
-    Dial = new QwtDial(centralwidget);
-    Dial->setObjectName(QString::fromUtf8("Dial"));
-    Dial->setUpperBound(260.000000000000000);
-    Dial->setScaleStepSize(20.000000000000000);
-    Dial->setWrapping(false);
-    Dial->setInvertedControls(false);
-    Dial->setLineWidth(4);
-    Dial->setMode(QwtDial::RotateNeedle);
-    Dial->setMinScaleArc(20.000000000000000);
-    Dial->setMaxScaleArc(340.000000000000000);
+    // build left side of window
+    vlLeft->addWidget(infoBox);
+    vlLeft->addItem(vSpace1);
+    vlLeft->addWidget(infoLabel);
+    vlLeft->addItem(vSpace2);
+    vlLeft->addWidget(meter);
+    vlLeft->addItem(vSpace3);
+    vlLeft->addWidget(btnStart);
+    vlLeft->addItem(vSpace4);
 
-    verticalLayout_7->addWidget(Dial);
+    lTitlePlotRaw = new QLabel(centralwidget);
+    lTitlePlotRaw->setObjectName(QString::fromUtf8("lTitlePlotRaw"));
+    lTitlePlotOsc = new QLabel(centralwidget);
+    lTitlePlotOsc->setObjectName(QString::fromUtf8("lTitlePlotOsc"));
 
-    verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    line2 = new QFrame(centralwidget);
+    line2->setObjectName(QString::fromUtf8("line2"));
+    line2->setFrameShape(QFrame::HLine);
+    line2->setFrameShadow(QFrame::Sunken);
 
-    verticalLayout_7->addItem(verticalSpacer);
+    pltRaw = new QwtPlot(centralwidget);
+    pltRaw->setObjectName(QString::fromUtf8("pltRaw"));
+    pltOsc = new QwtPlot(centralwidget);
+    pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
 
-    pushButton_2 = new QPushButton(centralwidget);
-    pushButton_2->setObjectName(QString::fromUtf8("pushButton_2"));
+    // build right side of window
+    vlRight->addWidget(lTitlePlotRaw);
+    vlRight->addWidget(pltRaw);
+    vlRight->addWidget(line2);
+    vlRight->addItem(vSpace5);
+    vlRight->addWidget(lTitlePlotOsc);
+    vlRight->addWidget(pltOsc);
 
-    verticalLayout_7->addWidget(pushButton_2);
+    // build both sides together
+    hl->addLayout(vlLeft);
+    hl->addWidget(line1);
+    hl->addLayout(vlRight);
 
-    verticalSpacer_2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-    verticalLayout_7->addItem(verticalSpacer_2);
-
-
-    horizontalLayout_3->addLayout(verticalLayout_7);
-
-    line_2 = new QFrame(centralwidget);
-    line_2->setObjectName(QString::fromUtf8("line_2"));
-    line_2->setFrameShape(QFrame::VLine);
-    line_2->setFrameShadow(QFrame::Sunken);
-
-    horizontalLayout_3->addWidget(line_2);
-
-    verticalLayout_9 = new QVBoxLayout();
-    verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
-    label_2 = new QLabel(centralwidget);
-    label_2->setObjectName(QString::fromUtf8("label_2"));
-
-    verticalLayout_9->addWidget(label_2);
-
-    qwtPlot_2 = new QwtPlot(centralwidget);
-    qwtPlot_2->setObjectName(QString::fromUtf8("qwtPlot_2"));
-
-    verticalLayout_9->addWidget(qwtPlot_2);
-
-    verticalSpacer_5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-    verticalLayout_9->addItem(verticalSpacer_5);
-
-    line = new QFrame(centralwidget);
-    line->setObjectName(QString::fromUtf8("line"));
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
-
-    verticalLayout_9->addWidget(line);
-
-    label_3 = new QLabel(centralwidget);
-    label_3->setObjectName(QString::fromUtf8("label_3"));
-
-    verticalLayout_9->addWidget(label_3);
-
-    qwtPlot = new QwtPlot(centralwidget);
-    qwtPlot->setObjectName(QString::fromUtf8("qwtPlot"));
-
-    verticalLayout_9->addWidget(qwtPlot);
-
-
-    horizontalLayout_3->addLayout(verticalLayout_9);
-
-    MainWindow->setCentralWidget(centralwidget);
-    menubar = new QMenuBar(MainWindow);
+    // TODO: menubar working? just missing content?
+    window->setCentralWidget(centralwidget);
+    menubar = new QMenuBar(window);
     menubar->setObjectName(QString::fromUtf8("menubar"));
     menubar->setGeometry(QRect(0, 0, 2081, 39));
-    MainWindow->setMenuBar(menubar);
-    statusbar = new QStatusBar(MainWindow);
+    window->setMenuBar(menubar);
+    statusbar = new QStatusBar(window);
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
-    MainWindow->setStatusBar(statusbar);
+    window->setStatusBar(statusbar);
 
-    retranslateUi(MainWindow);
+    retranslateUi(window);
 
-    QMetaObject::connectSlotsByName(MainWindow);
+    QMetaObject::connectSlotsByName(window);
 } // setupUi
 
-void TestWindow::retranslateUi(QMainWindow *MainWindow)
+void TestWindow::retranslateUi(QMainWindow *window)
 {
-    MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", nullptr));
-    textBrowser->setHtml(QApplication::translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+    window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
+    infoBox->setHtml(QApplication::translate("TestWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                                                "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                                                "p, li { white-space: pre-wrap; }\n"
                                                                "</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
                                                                "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Instructions about what to do come here. Explaining what to do.</p></body></html>", nullptr));
-    label->setText(QApplication::translate("MainWindow", "Alternatively, instructions in a label. Explaining what to do. However, are these wrapping? \n"
+    infoLabel->setText(QApplication::translate("TestWindow", "Alternatively, instructions in a infoLabel. Explaining what to do. However, are these wrapping? \n"
                                                          "Below is some sort of visual feedback (depending on the state of the application).", nullptr));
-    pushButton_2->setText(QApplication::translate("MainWindow", "Start ", nullptr));
-    label_2->setText(QApplication::translate("MainWindow", "Title of Plot 1: RawData", nullptr));
-    label_3->setText(QApplication::translate("MainWindow", "Title of Plot 2: Oscillogram", nullptr));
+    btnStart->setText(QApplication::translate("MainWindow", "Start ", nullptr));
+    lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: RawData", nullptr));
+    lTitlePlotOsc->setText(QApplication::translate("TestWindow", "Title of Plot 2: Oscillogram", nullptr));
 } // retranslateUi
+
+void TestWindow::setPressure(double pressure)
+{
+    meter->setValue(pressure);
+}

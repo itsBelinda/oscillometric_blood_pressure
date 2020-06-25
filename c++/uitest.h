@@ -22,6 +22,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <qwt/qwt_dial.h>
+#include <qwt/qwt_dial_needle.h>
 #include <qwt/qwt_plot.h>
 
 
@@ -34,31 +35,32 @@ Q_OBJECT
 public:
     TestWindow(QWidget *parent = nullptr);
     ~TestWindow();
+    void setPressure(double pressure);
 
-public:
+private:
     QWidget *centralwidget;
-    QHBoxLayout *horizontalLayout_3;
-    QVBoxLayout *verticalLayout_7;
-    QTextBrowser *textBrowser;
-    QSpacerItem *verticalSpacer_4;
-    QLabel *label;
-    QSpacerItem *verticalSpacer_3;
-    QwtDial *Dial;
-    QSpacerItem *verticalSpacer;
-    QPushButton *pushButton_2;
-    QSpacerItem *verticalSpacer_2;
-    QFrame *line_2;
-    QVBoxLayout *verticalLayout_9;
-    QLabel *label_2;
-    QwtPlot *qwtPlot_2;
-    QSpacerItem *verticalSpacer_5;
-    QFrame *line;
-    QLabel *label_3;
-    QwtPlot *qwtPlot;
+    QHBoxLayout *hl;
+    QVBoxLayout *vlLeft;
+    QVBoxLayout *vlRight;
+    QSpacerItem *vSpace1;
+    QSpacerItem *vSpace2;
+    QSpacerItem *vSpace3;
+    QSpacerItem *vSpace4;
+    QSpacerItem *vSpace5;
+    QTextBrowser *infoBox;
+    QLabel *infoLabel;
+    QwtDial *meter;
+    QPushButton *btnStart;
+    QLabel *lTitlePlotRaw;
+    QLabel *lTitlePlotOsc;
+    QwtPlot *pltRaw;
+    QwtPlot *pltOsc;
+    QFrame *line1;
+    QFrame *line2;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
-    void setupUi(QMainWindow *MainWindow);
+    void setupUi(QMainWindow *window);
     void retranslateUi(QMainWindow *MainWindow);
 
 };

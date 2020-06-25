@@ -34,6 +34,7 @@ DataPlot::DataPlot(double *xData, double *yData, int length,
     dataCurve->setRawSamples(xData, yData, length);
     dataLength = length;
     dataCurve->attach(this);
+
 }
 
 void DataPlot::setPlotTitle(const QString title){

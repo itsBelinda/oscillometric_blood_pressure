@@ -25,6 +25,7 @@
 #include <qwt/qwt_counter.h>
 #include <qwt/qwt_plot_marker.h>
 
+#include "uitest.h"
 #include "dataplot.h"
 #include <Iir.h>
 
@@ -88,6 +89,8 @@ Q_OBJECT
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     QCheckBox *filter50HzCheckBox;
+    TestWindow *testWindow;
+
 private slots:
 
     // actions:
