@@ -1,12 +1,8 @@
-//
-// Created by belinda on 25/06/2020.
-//
 #include <QtWidgets>
 #include "uitest.h"
 
 TestWindow::TestWindow(QWidget *parent)
           : QMainWindow(parent)
-//        , ui(new Ui::MainWindow)
 {
     setupUi(this);
 }

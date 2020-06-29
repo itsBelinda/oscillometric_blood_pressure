@@ -1,12 +1,7 @@
-//
-// Created by belinda on 25/06/2020.
-//
-
 #ifndef OBP_UITEST_H
 #define OBP_UITEST_H
 
 #include <QMainWindow>
-
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
@@ -62,6 +57,7 @@ private:
 
     void setupUi(QMainWindow *window);
     void retranslateUi(QMainWindow *MainWindow);
+
 
 };
 

@@ -9,17 +9,19 @@
  *   (at your option) any later version.                                   *
  ***************************************************************************/
 #include "obp.h"
-
+#include "stackedWidgets.h"
 #include <QApplication>
 
-int main(int argc, char **argv)
-{
-  QApplication app(argc, argv);
-  MainWindow   mainWindow;
+int main(int argc, char **argv) {
+    QApplication app(argc, argv);
+    MainWindow mainWindow;
 
-  mainWindow.show();
-  mainWindow.resize(1400,400);
+    mainWindow.show();
+    mainWindow.resize(1400, 400);
 
+    StackedWidgetWindow secondWindow(&mainWindow);
 
-  return app.exec();
+    secondWindow.show();
+
+    return app.exec();
 }
