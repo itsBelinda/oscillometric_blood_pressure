@@ -22,7 +22,7 @@ add_executable(obp
         main.cpp
         obp.cpp
         dataplot.cpp
-        )
+        datarecord.cpp datarecord.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5)
 

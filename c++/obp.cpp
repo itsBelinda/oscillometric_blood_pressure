@@ -233,6 +233,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ActionsLayout->addWidget(saveData);
     connect(saveData, SIGNAL(clicked()), SLOT(slotSaveData()));
 
+    record = new Datarecord("default.dat", 1000.0);
+
     // Generate timer event every 50ms
     (void) startTimer(50);
 
@@ -317,6 +319,7 @@ void MainWindow::timerEvent(QTimerEvent *) {
         RawDataPlot->setNewData((yNew-.71)* 7.5006157584566*50*2.5);
         LPPlot->setNewData(yLP);
         HPPlot->setNewData(yHP*5);
+        record->addSample(yNew);
         ++time;
     }
     RawDataPlot->replot();
