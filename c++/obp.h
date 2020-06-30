@@ -93,11 +93,9 @@ Q_OBJECT
 private slots:
 
     // actions:
-    void slotsStopRecord();
-
+    void slotStartRecord();
+    void slotStopRecord();
     void slotSetChannel(double c);
-
-    void slotSaveData();
 
 protected:
 

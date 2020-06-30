@@ -226,12 +226,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QPushButton *startRecord = new QPushButton(AcitonsGroup);
     startRecord->setText("start recording data");
     ActionsLayout->addWidget(startRecord);
-    connect(startRecord, SIGNAL(clicked()), SLOT(slotSaveData()));
+    connect(startRecord, SIGNAL(clicked()), SLOT(slotStartRecord()));
 
     QPushButton *stopRecord = new QPushButton(AcitonsGroup);
     stopRecord->setText("stop recording data");
     ActionsLayout->addWidget(stopRecord);
-    connect(stopRecord, SIGNAL(clicked()), SLOT(slotsStopRecord()));
+    connect(stopRecord, SIGNAL(clicked()), SLOT(slotStopRecord()));
 
     record = new Datarecord(1000.0);
 
@@ -244,11 +244,11 @@ MainWindow::~MainWindow() {
     delete[] chanlist;
 }
 
-void MainWindow::slotSaveData() {
+void MainWindow::slotStartRecord() {
     record->startRecording();
 }
 
-void MainWindow::slotsStopRecord() {
+void MainWindow::slotStopRecord() {
     record->stopRecording();
     time = 0;
     // TODO kept from template.
