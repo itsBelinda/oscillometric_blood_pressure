@@ -8,15 +8,19 @@
 class Datarecord {
 
 public:
+    Datarecord(double samplingRate);
     Datarecord(QString filename, double samplingRate);
     ~Datarecord();
 
     void addSample(double sample);
+    void startRecording();
+    void stopRecording();
 private:
 
     QString rec_filename;
     QFile*  rec_file;
     QTextStream* outStream;
+    bool boRecord;
     long int nsample;
     double samplingRate;
 };

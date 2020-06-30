@@ -223,17 +223,17 @@ MainWindow::MainWindow(QWidget *parent) :
     AcitonsGroup->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     controlLayout->addWidget(AcitonsGroup);
 
-    QPushButton *clearData = new QPushButton(AcitonsGroup);
-    clearData->setText("clear data");
-    ActionsLayout->addWidget(clearData);
-    connect(clearData, SIGNAL(clicked()), SLOT(slotClearData()));
+    QPushButton *startRecord = new QPushButton(AcitonsGroup);
+    startRecord->setText("start recording data");
+    ActionsLayout->addWidget(startRecord);
+    connect(startRecord, SIGNAL(clicked()), SLOT(slotSaveData()));
 
-    QPushButton *saveData = new QPushButton(AcitonsGroup);
-    saveData->setText("save data");
-    ActionsLayout->addWidget(saveData);
-    connect(saveData, SIGNAL(clicked()), SLOT(slotSaveData()));
+    QPushButton *stopRecord = new QPushButton(AcitonsGroup);
+    stopRecord->setText("stop recording data");
+    ActionsLayout->addWidget(stopRecord);
+    connect(stopRecord, SIGNAL(clicked()), SLOT(slotsStopRecord()));
 
-    record = new Datarecord("default.dat", 1000.0);
+    record = new Datarecord(1000.0);
 
     // Generate timer event every 50ms
     (void) startTimer(50);
@@ -245,25 +245,11 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::slotSaveData() {
-    QString fileName = QFileDialog::getSaveFileName();
-
-    if (!fileName.isNull()) {
-        QFile file(fileName);
-
-        if (file.open(QIODevice::WriteOnly | QFile::Truncate)) {
-            QTextStream out(&file);
-
-//      for(int i=0; i<dataLength/Binw; i++)
-//        out << timeData[i] << "\t" << Data[i] << "\n";
-
-            file.close();
-        } else {
-            // TODO: warning box
-        }
-    }
+    record->startRecording();
 }
 
-void MainWindow::slotClearData() {
+void MainWindow::slotsStopRecord() {
+    record->stopRecording();
     time = 0;
     // TODO kept from template.
 }

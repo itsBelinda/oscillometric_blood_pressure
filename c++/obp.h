@@ -93,7 +93,7 @@ Q_OBJECT
 private slots:
 
     // actions:
-    void slotClearData();
+    void slotsStopRecord();
 
     void slotSetChannel(double c);
 
