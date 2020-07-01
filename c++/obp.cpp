@@ -302,9 +302,12 @@ void MainWindow::timerEvent(QTimerEvent *) {
 //        corrFact = 2.50 # from calibration
 //
 //        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
+        // Set data in plots
         RawDataPlot->setNewData((yNew-.71)* 7.5006157584566*50*2.5);
         LPPlot->setNewData(yLP);
         HPPlot->setNewData(yHP*5);
+
+        // Store data in file
         record->addSample(yNew);
         ++time;
     }

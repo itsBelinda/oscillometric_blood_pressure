@@ -49,6 +49,7 @@ void Datarecord::startRecording(){
 }
 
 void Datarecord::stopRecording(){
+    nsample = 0;
     boRecord = false;
     if (rec_file) {
         rec_file->close();
@@ -66,5 +67,5 @@ void Datarecord::addSample(double sample)
     nsample++;
     // TODO: local outstream?
     // TODO: custom separator?
-    *outStream << nsample << "\t" << sample << "\n";
+    *outStream << (float)nsample/samplingRate << "\t" << sample << "\n";
 }
