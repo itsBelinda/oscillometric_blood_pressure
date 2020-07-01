@@ -4,6 +4,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QFile>
+#include <QtCore/QTextStream>
 
 class Datarecord {
 

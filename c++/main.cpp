@@ -9,15 +9,28 @@
  *   (at your option) any later version.                                   *
  ***************************************************************************/
 #include "obp.h"
-
+#include <iostream>
 #include <QApplication>
+
+#include "Processing.h"
 
 int main(int argc, char **argv)
 {
-  QApplication app(argc, argv);
-  MainWindow   mainWindow;
+//  QApplication app(argc, argv);
+//  MainWindow   mainWindow;
+//
+//  mainWindow.show();
+//  mainWindow.resize(1400,400);
+//  return app.exec();
 
-  mainWindow.show();
-  mainWindow.resize(1400,400);
-  return app.exec();
+    Processing *procThread = new Processing();
+
+    std::cout << "create thread" << std::endl;
+    procThread->start();
+    std::cout << "process started" << std::endl;
+
+    //DemoThread demoThread1(0);
+    //demoThread1.start();
+    procThread->join();
+
 }

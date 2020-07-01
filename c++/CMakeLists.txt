@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0)
+set (CMAKE_CXX_STANDARD 11)
 
 project(obp)
 
@@ -12,6 +13,7 @@ endif()
 
 # required packages
 find_package(Qt5 COMPONENTS Widgets PrintSupport REQUIRED)
+find_package (Threads)
 
 # required libraries
 find_library(comedi REQUIRED)
@@ -22,8 +24,9 @@ add_executable(obp
         main.cpp
         obp.cpp
         dataplot.cpp
-        datarecord.cpp datarecord.h Processing.cpp Processing.h)
+        datarecord.cpp
+        Processing.cpp)
 
-target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5)
+target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
 
 
