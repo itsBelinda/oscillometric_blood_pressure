@@ -29,15 +29,14 @@ Datarecord::Datarecord(QString filename, double samplingRate) // = "default.dat"
     boRecord = true;
 }
 
-Datarecord::~Datarecord(){
+Datarecord::~Datarecord() {
     if (rec_file) {
         rec_file->close();
     }
 };
 
 
-
-void Datarecord::startRecording(){
+void Datarecord::startRecording() {
     rec_filename = QFileDialog::getSaveFileName();
     if (!rec_filename.isNull()) {
         rec_file = new QFile(rec_filename);
@@ -49,7 +48,7 @@ void Datarecord::startRecording(){
     }
 }
 
-void Datarecord::startRecording(QString filename){
+void Datarecord::startRecording(QString filename) {
     rec_filename = filename; //TODO: filename does not have to be saved?
     if (!rec_filename.isNull()) {
         rec_file = new QFile(rec_filename);
@@ -61,7 +60,7 @@ void Datarecord::startRecording(QString filename){
     }
 }
 
-void Datarecord::stopRecording(){
+void Datarecord::stopRecording() {
     nsample = 0;
     boRecord = false;
     if (rec_file) {
@@ -71,24 +70,19 @@ void Datarecord::stopRecording(){
 
 //TODO: single samples for now, maybe a whole buffer would be better? Thread?
 //
-void Datarecord::addSample(double sample)
-{
-    if(!boRecord || !rec_file)
-    {
+void Datarecord::addSample(double sample) {
+    if (!boRecord || !rec_file) {
         return;
     }
     nsample++;
     // TODO: local outstream?
     // TODO: custom separator?
-    *outStream << (float)nsample/samplingRate << "\t" << sample << "\n";
+    *outStream << (float) nsample / samplingRate << "\t" << sample << "\n";
 }
 
-void Datarecord::saveAll(std::vector<double> samples)
-{
-    //std::for_each(begin(samples), end(samples), this->*addSample(sample));
-
-    for (auto sample : samples)
-    {
+void Datarecord::saveAll(QString fileName, std::vector<double> samples) {
+    startRecording(fileName);
+    for (auto sample : samples) {
         addSample(sample);
     }
     stopRecording();

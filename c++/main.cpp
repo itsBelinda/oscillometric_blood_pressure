@@ -14,23 +14,27 @@
 
 #include "Processing.h"
 
-int main(int argc, char **argv)
-{
-//  QApplication app(argc, argv);
-//  MainWindow   mainWindow;
+int main(int argc, char **argv) {
+//    QApplication app(argc, argv);
+//    MainWindow mainWindow;
 //
-//  mainWindow.show();
-//  mainWindow.resize(1400,400);
-//  return app.exec();
-
+//    mainWindow.show();
+//    mainWindow.resize(1400, 400);
+//    return app.exec();
     Processing *procThread = new Processing();
 
     std::cout << "create thread" << std::endl;
     procThread->start();
     std::cout << "process started" << std::endl;
+    procThread->startMeasurement();
 
-    //DemoThread demoThread1(0);
-    //demoThread1.start();
+    std::cout << "user input stops program (press ENTER)..." << std::endl;
+    std::cin.get();
+    procThread->stopMeasurement();
+    procThread->stopThread();
     procThread->join();
+    return 0;
 
 }
+
+

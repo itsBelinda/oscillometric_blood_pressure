@@ -8,8 +8,9 @@
 #include "CppThread.h"
 #include "datarecord.h"
 
-#define SAMPLING_RATE 1000 // 1kHz
 
+//#define SAMPLING_RATE 1000.0 // 1kHz
+#include "obp.h"
 #define IIRORDER 6
 
 #define COMEDI_SUB_DEVICE  0
@@ -26,6 +27,10 @@ public:
     bool bSaveToFile();
     void stopThread();
 
+    //TODO:should ultimately be handled by the algorithm:
+    void startMeasurement();
+    void stopMeasurement();
+
 private:
     void run() override;
     std::vector<double> pData;// = std::vector<double>(122880);
@@ -35,7 +40,8 @@ private:
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     Datarecord *record;
-    bool brunning;
+    bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
+    bool bMeasuring;
 
 //TODO: move to comedi class?
 
@@ -55,6 +61,8 @@ private:
     unsigned *chanlist;
 
     void addSample(double sample);
+
+    static QString getFilename();
 };
 
 

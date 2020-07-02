@@ -245,11 +245,11 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::slotStartRecord() {
-    record->startRecording();
+    //record->startRecording();
 }
 
 void MainWindow::slotStopRecord() {
-    record->stopRecording();
+    //record->stopRecording();
     time = 0;
     // TODO kept from template.
 }

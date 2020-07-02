@@ -1,19 +1,22 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <iomanip>
+
+#include <QtCore/QDateTime>
 
 #include "Processing.h"
 
 #define DEFAULT_MINUTES 2
 #define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
 
-
 Processing::Processing() :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
         adChannel(0) {
     // initialize comedi
-    brunning = false;
+    bRunning = false;
+    bMeasuring = false;
 
     std::cout << "processing constructor" << std::endl;
     const char *filename = "/dev/comedi0";
@@ -129,7 +132,8 @@ Processing::Processing() :
     else
         readSize = sizeof(sampl_t) * numChannels;
 
-    //record = new Datarecord("justTesting.dat", 1000.0);
+    pData.clear();
+    record = new Datarecord(SAMPLING_RATE);
 }
 
 Processing::~Processing() {
@@ -147,9 +151,9 @@ void Processing::run() {
     //TODO: implement data aquisition here
     unsigned char buffer[readSize];
 
-    brunning = true;
+    bRunning = true;
 
-    while( brunning ) {
+    while (bRunning) {
         if (comedi_get_buffer_contents(dev, COMEDI_SUB_DEVICE) > 0) {
             //TODO: does read sleep while waiting?
             if (read(comedi_fileno(dev), buffer, readSize) == 0) {
@@ -166,7 +170,12 @@ void Processing::run() {
                 v = ((sampl_t *) buffer)[adChannel];
             }
             double y = comedi_to_phys(v, crange, maxdata);
-            std::cout << y << std::endl;
+            //std::cout << y << std::endl; // TODO: debug only
+            if (bMeasuring) {
+                addSample(y);
+                //TODO: do not just save data, but "process" it
+            }
+
         } else {
             // If there was no data in the buffer, sleep for 10ms.
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -174,10 +183,35 @@ void Processing::run() {
     }
 }
 
-void Processing::addSample(double sample) {
-    pData.push_back(sample); //TODO: check if fast enough
-}
 
 void Processing::stopThread() {
-    brunning = false;
+    // TODO: safely abort measurement
+    bRunning = false;
+}
+
+void Processing::addSample(double sample) {
+
+    double yLP = iirLP->filter(sample);
+    double yHP = iirHP->filter(yLP);
+    pData.push_back(yLP);
+    oData.push_back(yHP);
+
+}
+
+void Processing::startMeasurement() {
+    pData.clear();
+    oData.clear();
+    bMeasuring = true;
+}
+
+void Processing::stopMeasurement() {
+    bMeasuring = false;
+    record->saveAll(Processing::getFilename(),pData);
+}
+
+QString Processing::getFilename() {
+    QDateTime dateTime = dateTime.currentDateTime();
+    QString dateTimeString = dateTime.toString("yyyy-MM-dd_hh:mm:ss");
+    dateTimeString.append(".dat");
+    return dateTimeString;
 }

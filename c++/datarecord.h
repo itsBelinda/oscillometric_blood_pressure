@@ -14,7 +14,7 @@ public:
     ~Datarecord();
 
     void addSample(double sample);
-    void saveAll(std::vector<double> samples);
+    void saveAll(QString fileName, std::vector<double> samples);
     void startRecording(QString filename);
     void startRecording();
     void stopRecording();
