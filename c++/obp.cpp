@@ -223,22 +223,17 @@ MainWindow::MainWindow(QWidget *parent) :
     AcitonsGroup->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     controlLayout->addWidget(AcitonsGroup);
 
-    QPushButton *clearData = new QPushButton(AcitonsGroup);
-    clearData->setText("clear data");
-    ActionsLayout->addWidget(clearData);
-    connect(clearData, SIGNAL(clicked()), SLOT(slotClearData()));
+    QPushButton *startRecord = new QPushButton(AcitonsGroup);
+    startRecord->setText("start recording data");
+    ActionsLayout->addWidget(startRecord);
+    connect(startRecord, SIGNAL(clicked()), SLOT(slotStartRecord()));
 
-    QPushButton *saveData = new QPushButton(AcitonsGroup);
-    saveData->setText("save data");
-    ActionsLayout->addWidget(saveData);
-    connect(saveData, SIGNAL(clicked()), SLOT(slotSaveData()));
+    QPushButton *stopRecord = new QPushButton(AcitonsGroup);
+    stopRecord->setText("stop recording data");
+    ActionsLayout->addWidget(stopRecord);
+    connect(stopRecord, SIGNAL(clicked()), SLOT(slotStopRecord()));
 
-
-    // Second window for UI-testing:
-
-    TestWindow *testWindow = new TestWindow(this);
-    testWindow->show();
-
+    record = new Datarecord(1000.0);
 
     // Generate timer event every 50ms
     (void) startTimer(50);
@@ -249,26 +244,12 @@ MainWindow::~MainWindow() {
     delete[] chanlist;
 }
 
-void MainWindow::slotSaveData() {
-    QString fileName = QFileDialog::getSaveFileName();
-
-    if (!fileName.isNull()) {
-        QFile file(fileName);
-
-        if (file.open(QIODevice::WriteOnly | QFile::Truncate)) {
-            QTextStream out(&file);
-
-//      for(int i=0; i<dataLength/Binw; i++)
-//        out << timeData[i] << "\t" << Data[i] << "\n";
-
-            file.close();
-        } else {
-            // TODO: warning box
-        }
-    }
+void MainWindow::slotStartRecord() {
+    //record->startRecording();
 }
 
-void MainWindow::slotClearData() {
+void MainWindow::slotStopRecord() {
+    //record->stopRecording();
     time = 0;
     // TODO kept from template.
 }
@@ -289,7 +270,7 @@ void MainWindow::slotSetChannel(double c) {
 void MainWindow::timerEvent(QTimerEvent *) {
     static int count = 0;
     unsigned char buffer[readSize];
-    double pressure = 0.0;
+
     while (comedi_get_buffer_contents(dev, COMEDI_SUB_DEVICE) > 0) {
         if (read(comedi_fileno(dev), buffer, readSize) == 0) {
             printf("Error: end of Acquisition\n");
@@ -321,11 +302,13 @@ void MainWindow::timerEvent(QTimerEvent *) {
 //        corrFact = 2.50 # from calibration
 //
 //        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
-        pressure = (yNew-.71)* 7.5006157584566*50*2.5;
-        RawDataPlot->setNewData(pressure);
-        //testWindow->setPressure(pressure); //TODO: breaks
+        // Set data in plots
+        RawDataPlot->setNewData((yNew-.71)* 7.5006157584566*50*2.5);
         LPPlot->setNewData(yLP);
         HPPlot->setNewData(yHP*5);
+
+        // Store data in file
+        record->addSample(yNew);
         ++time;
     }
     RawDataPlot->replot();

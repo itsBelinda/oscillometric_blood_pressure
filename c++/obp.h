@@ -25,9 +25,9 @@
 #include <qwt/qwt_counter.h>
 #include <qwt/qwt_plot_marker.h>
 
-#include "uitest.h"
-#include "dataplot.h"
 #include <Iir.h>
+#include "dataplot.h"
+#include "datarecord.h"
 
 // maximal length of the data (for memory allocation)
 #define MAX_DATA_LENGTH 8000
@@ -49,6 +49,7 @@ Q_OBJECT
     DataPlot *RawDataPlot;
     DataPlot *LPPlot;
     DataPlot *HPPlot;
+    Datarecord *record;
 
     // channel number for the serial device
     int adChannel;
@@ -89,14 +90,12 @@ Q_OBJECT
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     QCheckBox *filter50HzCheckBox;
-    TestWindow *testWindow;
-
 private slots:
 
     // actions:
-    void slotClearData();
+    void slotStartRecord();
+    void slotStopRecord();
     void slotSetChannel(double c);
-    void slotSaveData();
 
 protected:
 
