@@ -14,6 +14,8 @@ public:
     ~Datarecord();
 
     void addSample(double sample);
+    void saveAll(std::vector<double> samples);
+    void startRecording(QString filename);
     void startRecording();
     void stopRecording();
 private:
@@ -24,6 +26,7 @@ private:
     bool boRecord;
     long int nsample;
     double samplingRate;
+
 };
 
 

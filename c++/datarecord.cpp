@@ -36,8 +36,21 @@ Datarecord::~Datarecord(){
 };
 
 
+
 void Datarecord::startRecording(){
     rec_filename = QFileDialog::getSaveFileName();
+    if (!rec_filename.isNull()) {
+        rec_file = new QFile(rec_filename);
+        if (rec_file->open(QIODevice::WriteOnly)) {
+            outStream = new QTextStream(rec_file);
+            nsample = 0;
+            boRecord = true;
+        }
+    }
+}
+
+void Datarecord::startRecording(QString filename){
+    rec_filename = filename; //TODO: filename does not have to be saved?
     if (!rec_filename.isNull()) {
         rec_file = new QFile(rec_filename);
         if (rec_file->open(QIODevice::WriteOnly)) {
@@ -68,4 +81,15 @@ void Datarecord::addSample(double sample)
     // TODO: local outstream?
     // TODO: custom separator?
     *outStream << (float)nsample/samplingRate << "\t" << sample << "\n";
+}
+
+void Datarecord::saveAll(std::vector<double> samples)
+{
+    //std::for_each(begin(samples), end(samples), this->*addSample(sample));
+
+    for (auto sample : samples)
+    {
+        addSample(sample);
+    }
+    stopRecording();
 }
