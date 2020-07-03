@@ -56,5 +56,13 @@ void DataPlot::setNewData(double yNew) {
     static int cnt = 0;
     memmove(yData, yData + 1, (dataLength - 1) * sizeof(yData[0]));
     yData[dataLength - 1] = yNew;
+    // TODO: lots of copying. Seems to be the only way
+    // TODO: find out how to change RawSamples without causing segmentation fault.
+    // on the other hand, if this means it can happen in a separate
+    // thread (GUI & processing) this might be the lesser evil
 }
-
+//
+//void DataPlot::setNewData(double *yData, int length){
+//    //dataCurve->setSamples(this->xData, yData, length); // copies all data...
+//    dataCurve->setRawSamples(xData, yData, length); // segmentation fault
+//}

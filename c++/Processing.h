@@ -31,6 +31,12 @@ public:
     void startMeasurement();
     void stopMeasurement();
 
+    //callback registrations (event handlers?):
+    //void regDataCallback();
+
+    // to get it working now:
+    void setView(MainWindow* view);
+
 private:
     void run() override;
     std::vector<double> pData;// = std::vector<double>(122880);
@@ -43,6 +49,7 @@ private:
     bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
     bool bMeasuring;
 
+    MainWindow* view;
 //TODO: move to comedi class?
 
     int adChannel;

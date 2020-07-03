@@ -17,6 +17,7 @@ Processing::Processing() :
     // initialize comedi
     bRunning = false;
     bMeasuring = false;
+    this->view = NULL; //TODO: remove!!!
 
     std::cout << "processing constructor" << std::endl;
     const char *filename = "/dev/comedi0";
@@ -106,7 +107,7 @@ Processing::Processing() :
         sampling_rate = (double) 1E9 / comediCommand.scan_begin_arg;
     }
     printf("sampling rate: %f \n", sampling_rate);
-    //sampling_rate = SAMPLING_RATE; //TODO: calculation seems to be wrong, setting manually for now
+    sampling_rate = SAMPLING_RATE; //TODO: calculation seems to be wrong, setting manually for now
 
     // 5Hz mains LP filter
     iirLP = new Iir::Butterworth::LowPass<IIRORDER>;
@@ -133,11 +134,13 @@ Processing::Processing() :
         readSize = sizeof(sampl_t) * numChannels;
 
     pData.clear();
+    oData.clear();
     record = new Datarecord(SAMPLING_RATE);
 }
 
 Processing::~Processing() {
-
+    stopMeasurement();
+    stopThread();
 }
 
 bool Processing::bSaveToFile() {
@@ -148,11 +151,11 @@ bool Processing::bSaveToFile() {
 void Processing::run() {
 
     std::cout << "run ..." << std::endl;
-    //TODO: implement data aquisition here
     unsigned char buffer[readSize];
 
     bRunning = true;
 
+    double i = 0.6;
     while (bRunning) {
         if (comedi_get_buffer_contents(dev, COMEDI_SUB_DEVICE) > 0) {
             //TODO: does read sleep while waiting?
@@ -166,19 +169,19 @@ void Processing::run() {
 
             if (sigmaBoard) {
                 v = ((lsampl_t *) buffer)[adChannel];
+                std::cout << "raw:" << v << std::endl;
             } else {
                 v = ((sampl_t *) buffer)[adChannel];
             }
             double y = comedi_to_phys(v, crange, maxdata);
-            //std::cout << y << std::endl; // TODO: debug only
+            std::cout << "vol:" << y << std::endl; // TODO: debug only
             if (bMeasuring) {
                 addSample(y);
                 //TODO: do not just save data, but "process" it
             }
-
         } else {
-            // If there was no data in the buffer, sleep for 10ms.
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            // If there was no data in the buffer, sleep for 1ms.
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 }
@@ -190,12 +193,31 @@ void Processing::stopThread() {
 }
 
 void Processing::addSample(double sample) {
+//        ambientV = 0.710#0.675 # from calibration
+//        mmHg_per_kPa = 7.5006157584566 # from literature
+//        kPa_per_V = 50 # 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
+//        corrFact = 2.50 # from calibration
+//
+//        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
 
+    view->updateRAWPlot(sample);
     double yLP = iirLP->filter(sample);
     double yHP = iirHP->filter(yLP);
     pData.push_back(yLP);
     oData.push_back(yHP);
 
+    //TODO: remove!!!!
+    if(view!=NULL) {
+        //view->updatePressurePlot(&pData[0],8000);
+        view->updatePressurePlot(yLP);
+        view->updateOscillationPlot(yHP);
+    }
+
+
+}
+
+void Processing::setView(MainWindow* view){
+    this->view = view;
 }
 
 void Processing::startMeasurement() {

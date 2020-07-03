@@ -49,7 +49,6 @@ Q_OBJECT
     DataPlot *RawDataPlot;
     DataPlot *LPPlot;
     DataPlot *HPPlot;
-    Datarecord *record;
 
     // channel number for the serial device
     int adChannel;
@@ -61,40 +60,11 @@ Q_OBJECT
     // t is time, p is spike count, psth is spikes/sec
     double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
 
-    // serial file desc
-    int usbFd;
-
-    // time counter
-    long int time;
-
-    comedi_cmd comediCommand;
-
-    /**
-     * file descriptor for /dev/comedi0
-     **/
-    comedi_t *dev;
-    size_t readSize;
-    bool sigmaBoard;
-    lsampl_t maxdata;
-    comedi_range *crange;
-    double sampling_rate;
-
-    int numChannels;
-    unsigned *chanlist;
-
-    int linearAverage;
-
-    // Filters
-    Iir::Butterworth::BandStop<IIRORDER> *iirnotch;
-    Iir::Butterworth::LowPass<IIRORDER_HIGH> *iirLP;
-    Iir::Butterworth::HighPass<IIRORDER> *iirHP;
-
     QCheckBox *filter50HzCheckBox;
 private slots:
 
     // actions:
-    void slotStartRecord();
-    void slotStopRecord();
+
     void slotSetChannel(double c);
 
 protected:
@@ -108,6 +78,18 @@ public:
 
     ~MainWindow();
 
+    // update functions, to be used as callbacks,
+    // TODO: change implementation to events?
+    // potentially model based, view has access to data,
+    // just needs input on when to access it
+
+    //TODO: update: memory location for data for plot
+    // cannot change!
+    void updateRAWPlot(double yNew);
+    void updatePressurePlot(double yNew);
+    void updateOscillationPlot(double yNew);
+
+    void updatePressurePlot(double *pData, int length);
 };
 
 #endif
