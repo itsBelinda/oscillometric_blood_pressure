@@ -61,8 +61,8 @@ void DataPlot::setNewData(double yNew) {
     // on the other hand, if this means it can happen in a separate
     // thread (GUI & processing) this might be the lesser evil
 }
-//
-//void DataPlot::setNewData(double *yData, int length){
-//    //dataCurve->setSamples(this->xData, yData, length); // copies all data...
-//    dataCurve->setRawSamples(xData, yData, length); // segmentation fault
-//}
+
+void DataPlot::setNewData(double *yData, int length){
+    //dataCurve->setSamples(this->xData, yData, length); // copies all data...
+    dataCurve->setRawSamples(xData, yData, length); // segmentation fault
+}

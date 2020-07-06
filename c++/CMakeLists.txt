@@ -25,7 +25,9 @@ add_executable(obp
         obp.cpp
         dataplot.cpp
         datarecord.cpp
-        Processing.cpp)
+        Processing.cpp
+        stackedWidgets.cpp
+        uitest.cpp)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
 

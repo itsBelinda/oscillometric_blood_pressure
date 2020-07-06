@@ -32,7 +32,7 @@ public:
     void setAxisTitles(const QString bottomTitle, const QString leftTitle);
     void setDataLength(int length);
     void setNewData(double yNew);
-//    void setNewData(double *yData, int length);
+    void setNewData(double *yData, int length);
 
 private:
     double *xData, *yData;

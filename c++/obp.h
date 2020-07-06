@@ -28,21 +28,13 @@
 #include <Iir.h>
 #include "dataplot.h"
 #include "datarecord.h"
+#include "Processing.h"
 
 // maximal length of the data (for memory allocation)
 #define MAX_DATA_LENGTH 8000
 
-#define SAMPLING_RATE 1000 // 1kHz
 
-#define NOTCH_F 50 // filter out 50Hz noise
-#define IIRORDER 6
-#define IIRORDER_HIGH 10
-
-#define COMEDI_SUB_DEVICE  0
-#define COMEDI_RANGE_ID    0   /* +/- 1.325V  for sigma device*/
-#define COMEDI_NUM_CHANNEL 1
-
-class MainWindow : public QWidget {
+class MainWindow : public QWidget, public IEventListener {
 Q_OBJECT
 
     // show the raw serial data here
@@ -50,8 +42,6 @@ Q_OBJECT
     DataPlot *LPPlot;
     DataPlot *HPPlot;
 
-    // channel number for the serial device
-    int adChannel;
     // length of the data
     int dataLength;
 
@@ -61,11 +51,10 @@ Q_OBJECT
     double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
 
     QCheckBox *filter50HzCheckBox;
+private:
+
 private slots:
-
     // actions:
-
-    void slotSetChannel(double c);
 
 protected:
 
@@ -75,9 +64,10 @@ protected:
 public:
 
     MainWindow(QWidget *parent = 0);
-
     ~MainWindow();
 
+    void eNewData(double pData, double oData);
+    virtual void eSwitchScreen() {}; //TBD
     // update functions, to be used as callbacks,
     // TODO: change implementation to events?
     // potentially model based, view has access to data,

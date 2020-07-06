@@ -10,6 +10,11 @@
 #define DEFAULT_MINUTES 2
 #define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
 
+
+
+
+
+
 Processing::Processing() :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
@@ -17,7 +22,6 @@ Processing::Processing() :
     // initialize comedi
     bRunning = false;
     bMeasuring = false;
-    this->view = NULL; //TODO: remove!!!
 
     std::cout << "processing constructor" << std::endl;
     const char *filename = "/dev/comedi0";
@@ -178,12 +182,12 @@ void Processing::run() {
 
             if (sigmaBoard) {
                 v = ((lsampl_t *) buffer)[adChannel];
-                std::cout << "raw:" << v << std::endl;
+                //std::cout << "raw:" << v << std::endl;
             } else {
                 v = ((sampl_t *) buffer)[adChannel];
             }
             double y = comedi_to_phys(v, crange, maxdata);
-            std::cout << "vol:" << y << std::endl; // TODO: debug only
+            //std::cout << "vol:" << y << std::endl; // TODO: debug only
             if (bMeasuring) {
                 addSample(y);
                 //TODO: do not just save data, but "process" it
@@ -208,25 +212,20 @@ void Processing::addSample(double sample) {
 //        corrFact = 2.50 # from calibration
 //
 //        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
-
-    view->updateRAWPlot(sample);
     double yLP = iirLP->filter(sample);
     double yHP = iirHP->filter(yLP);
     pData.push_back(yLP);
     oData.push_back(yHP);
 
     //TODO: remove!!!!
-    if(view!=NULL) {
-        //view->updatePressurePlot(&pData[0],8000);
-        view->updatePressurePlot(yLP);
-        view->updateOscillationPlot(yHP);
+    if(cb) {
+        cb->eNewData(yLP, yHP);
+//        view->updateRAWPlot(sample);
+//        view->updatePressurePlot(yLP);
+//        view->updateOscillationPlot(yHP);
     }
 
 
-}
-
-void Processing::setView(MainWindow* view){
-    this->view = view;
 }
 
 void Processing::startMeasurement() {

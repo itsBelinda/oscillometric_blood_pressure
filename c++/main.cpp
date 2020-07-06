@@ -14,7 +14,9 @@
 
 #include "Processing.h"
 
+
 int main(int argc, char **argv) {
+
     QApplication app(argc, argv);
 
     Processing procThread;
@@ -23,7 +25,8 @@ int main(int argc, char **argv) {
     w.show();
     w.resize(1400, 400);
 
-    procThread.setView(&w); // TODO: remove circular dependency with callbacks
+    //procThread.setView(&w); // TODO: remove circular dependency with callbacks
+    procThread.registerListener(&w);
     std::cout << "create thread" << std::endl;
     procThread.start();
     std::cout << "process started" << std::endl;
@@ -31,12 +34,12 @@ int main(int argc, char **argv) {
 
 //    std::cout << "user input stops program (press ENTER)..." << std::endl;
 //    std::cin.get();
-    app.exec();
+    int appReturn = app.exec();
     // TODO: stop properly.
     procThread.stopMeasurement();
     procThread.stopThread();
     procThread.join();
-    return 0;
+    return appReturn;
 
 }
 

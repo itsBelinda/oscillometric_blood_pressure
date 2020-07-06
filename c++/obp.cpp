@@ -13,6 +13,8 @@
  ***************************************************************************/
 
 #include "obp.h"
+#include "uitest.h"
+#include "stackedWidgets.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -26,9 +28,8 @@
 
 #include <unistd.h>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent):
         QWidget(parent),
-        adChannel(0),
         dataLength(MAX_DATA_LENGTH){
 
     //  Initialize data for plots
@@ -113,8 +114,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ActionsLayout->addWidget(stopRecord);
     //connect(stopRecord, SIGNAL(clicked()), SLOT(slotStopRecord()));
 
+
+
     // Generate timer event every 50ms
     (void) startTimer(50);
+
+
 
 }
 
@@ -122,10 +127,6 @@ MainWindow::~MainWindow() {
 
 }
 
-
-void MainWindow::slotSetChannel(double c) {
-    adChannel = (int) c;
-}
 
 /**
  * timerEvent
@@ -145,9 +146,9 @@ void MainWindow::timerEvent(QTimerEvent *) {
 //
 // TODO: changing where the memory address points is not allowed with qwt!
 // copying seems to be the only possibility for now.
-//void MainWindow::updatePressurePlot(double *pData, int length){
-//    LPPlot->setNewData(pData, length);
-//}
+void MainWindow::updatePressurePlot(double *pData, int length){
+    LPPlot->setNewData(pData, length);
+}
 
 //void MainWindow::updateOscillationPlot(double *pData, int length){
 //    HPPlot->setNewData(pData, length);
@@ -163,3 +164,7 @@ void MainWindow::updateOscillationPlot(double yNew){
     HPPlot->setNewData(yNew);
 }
 
+void MainWindow::eNewData(double pData, double oData) {
+    LPPlot->setNewData(pData);
+    HPPlot->setNewData(oData);
+}
