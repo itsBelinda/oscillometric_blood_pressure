@@ -39,6 +39,15 @@ Processing::Processing() :
     //printf("crange min: %f, max: %f \n", crange->min, crange->max);
     printf("num channels: %d \n", numChannels);
 
+    if( numChannels < COMEDI_NUM_CHANNEL )
+    {
+        exit(1);
+    }
+    else
+    {
+        numChannels = COMEDI_NUM_CHANNEL;
+    }
+
     chanlist = new unsigned[numChannels];
 
     /* Set up channel list */

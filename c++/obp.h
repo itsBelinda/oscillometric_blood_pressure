@@ -40,7 +40,7 @@
 
 #define COMEDI_SUB_DEVICE  0
 #define COMEDI_RANGE_ID    0   /* +/- 1.325V  for sigma device*/
-
+#define COMEDI_NUM_CHANNEL 1
 
 class MainWindow : public QWidget {
 Q_OBJECT
