@@ -14,26 +14,33 @@
 
 #include "Processing.h"
 
+
 int main(int argc, char **argv) {
-//    QApplication app(argc, argv);
-//    MainWindow mainWindow;
-//
-//    mainWindow.show();
-//    mainWindow.resize(1400, 400);
-//    return app.exec();
-    Processing *procThread = new Processing();
 
+    QApplication app(argc, argv);
+
+    Processing procThread;
+
+    MainWindow w;
+    w.show();
+    w.resize(1400, 400);
+
+    //Todo: maybe have procthread in window (model in view?)
+    procThread.attach(&w);
     std::cout << "create thread" << std::endl;
-    procThread->start();
+    procThread.start();
     std::cout << "process started" << std::endl;
-    procThread->startMeasurement();
+    //todo: should be done by algorithm
+    procThread.startMeasurement();
 
-    std::cout << "user input stops program (press ENTER)..." << std::endl;
-    std::cin.get();
-    procThread->stopMeasurement();
-    procThread->stopThread();
-    procThread->join();
-    return 0;
+//    std::cout << "user input stops program (press ENTER)..." << std::endl;
+//    std::cin.get();
+    int appReturn = app.exec();
+    // TODO: stop properly from program/algo
+    procThread.stopMeasurement();
+    procThread.stopThread();
+    procThread.join();
+    return appReturn;
 
 }
 

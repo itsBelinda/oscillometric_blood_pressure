@@ -28,31 +28,20 @@
 #include <Iir.h>
 #include "dataplot.h"
 #include "datarecord.h"
+#include "Processing.h"
 
 // maximal length of the data (for memory allocation)
 #define MAX_DATA_LENGTH 8000
 
-#define SAMPLING_RATE 1000 // 1kHz
 
-#define NOTCH_F 50 // filter out 50Hz noise
-#define IIRORDER 6
-#define IIRORDER_HIGH 10
-
-#define COMEDI_SUB_DEVICE  0
-#define COMEDI_RANGE_ID    0   /* +/- 1.325V  for sigma device*/
-
-
-class MainWindow : public QWidget {
+class MainWindow : public QWidget, public IEventListener, public IObserver{
 Q_OBJECT
 
     // show the raw serial data here
     DataPlot *RawDataPlot;
     DataPlot *LPPlot;
     DataPlot *HPPlot;
-    Datarecord *record;
 
-    // channel number for the serial device
-    int adChannel;
     // length of the data
     int dataLength;
 
@@ -61,41 +50,11 @@ Q_OBJECT
     // t is time, p is spike count, psth is spikes/sec
     double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
 
-    // serial file desc
-    int usbFd;
-
-    // time counter
-    long int time;
-
-    comedi_cmd comediCommand;
-
-    /**
-     * file descriptor for /dev/comedi0
-     **/
-    comedi_t *dev;
-    size_t readSize;
-    bool sigmaBoard;
-    lsampl_t maxdata;
-    comedi_range *crange;
-    double sampling_rate;
-
-    int numChannels;
-    unsigned *chanlist;
-
-    int linearAverage;
-
-    // Filters
-    Iir::Butterworth::BandStop<IIRORDER> *iirnotch;
-    Iir::Butterworth::LowPass<IIRORDER_HIGH> *iirLP;
-    Iir::Butterworth::HighPass<IIRORDER> *iirHP;
-
     QCheckBox *filter50HzCheckBox;
-private slots:
+private:
 
+private slots:
     // actions:
-    void slotStartRecord();
-    void slotStopRecord();
-    void slotSetChannel(double c);
 
 protected:
 
@@ -105,9 +64,19 @@ protected:
 public:
 
     MainWindow(QWidget *parent = 0);
-
     ~MainWindow();
 
+    void eNewData(double pData, double oData);
+    // potentially model based, view has access to data,
+    // just needs input on when to access it
+
+    //TODO: update: memory location for data for plot
+    // cannot change!
+    void updateRAWPlot(double yNew);
+    void updatePressurePlot(double yNew);
+    void updateOscillationPlot(double yNew);
+
+    void updatePressurePlot(double *pData, int length);
 };
 
 #endif
