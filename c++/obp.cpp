@@ -28,6 +28,8 @@
 
 #include <unistd.h>
 
+
+
 MainWindow::MainWindow(QWidget *parent):
         QWidget(parent),
         dataLength(MAX_DATA_LENGTH){
@@ -113,7 +115,6 @@ MainWindow::MainWindow(QWidget *parent):
     stopRecord->setText("stop recording data");
     ActionsLayout->addWidget(stopRecord);
     //connect(stopRecord, SIGNAL(clicked()), SLOT(slotStopRecord()));
-
 
 
     // Generate timer event every 50ms

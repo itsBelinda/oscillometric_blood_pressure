@@ -34,7 +34,7 @@
 #define MAX_DATA_LENGTH 8000
 
 
-class MainWindow : public QWidget, public IEventListener {
+class MainWindow : public QWidget, public IEventListener, public IObserver{
 Q_OBJECT
 
     // show the raw serial data here
@@ -67,9 +67,6 @@ public:
     ~MainWindow();
 
     void eNewData(double pData, double oData);
-    virtual void eSwitchScreen() {}; //TBD
-    // update functions, to be used as callbacks,
-    // TODO: change implementation to events?
     // potentially model based, view has access to data,
     // just needs input on when to access it
 

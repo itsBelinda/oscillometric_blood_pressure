@@ -25,17 +25,18 @@ int main(int argc, char **argv) {
     w.show();
     w.resize(1400, 400);
 
-    //procThread.setView(&w); // TODO: remove circular dependency with callbacks
-    procThread.registerListener(&w);
+    //Todo: maybe have procthread in window (model in view?)
+    procThread.attach(&w);
     std::cout << "create thread" << std::endl;
     procThread.start();
     std::cout << "process started" << std::endl;
+    //todo: should be done by algorithm
     procThread.startMeasurement();
 
 //    std::cout << "user input stops program (press ENTER)..." << std::endl;
 //    std::cin.get();
     int appReturn = app.exec();
-    // TODO: stop properly.
+    // TODO: stop properly from program/algo
     procThread.stopMeasurement();
     procThread.stopThread();
     procThread.join();

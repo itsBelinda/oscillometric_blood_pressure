@@ -217,13 +217,7 @@ void Processing::addSample(double sample) {
     pData.push_back(yLP);
     oData.push_back(yHP);
 
-    //TODO: remove!!!!
-    if(cb) {
-        cb->eNewData(yLP, yHP);
-//        view->updateRAWPlot(sample);
-//        view->updatePressurePlot(yLP);
-//        view->updateOscillationPlot(yHP);
-    }
+    notifyNewData(yLP,yHP);
 
 
 }
@@ -241,7 +235,7 @@ void Processing::stopMeasurement() {
 
 QString Processing::getFilename() {
     QDateTime dateTime = dateTime.currentDateTime();
-    QString dateTimeString = dateTime.toString("yyyy-MM-dd_hh:mm:ss");
+    QString dateTimeString = dateTime.toString("testdata_yyyy-MM-dd_hh:mm:ss");
     dateTimeString.append(".dat");
     return dateTimeString;
 }
