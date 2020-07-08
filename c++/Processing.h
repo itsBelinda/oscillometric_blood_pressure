@@ -10,11 +10,9 @@
 #include "CppThread.h"
 #include "datarecord.h"
 #include "ISubject.h"
-
+#include "ComediHandler.h"
 
 #define IIRORDER 6
-
-
 
 class Processing : public CppThread, public ISubject{
 
@@ -37,13 +35,13 @@ private:
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     Datarecord *record;
+    ComediHandler *comedi;
     bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
     bool bMeasuring;
 
 
 //TODO: move to comedi class?
 
-    int adChannel;
     /**
    * file descriptor for /dev/comedi0
    **/
