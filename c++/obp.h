@@ -34,7 +34,7 @@
 #define MAX_DATA_LENGTH 8000
 
 
-class MainWindow : public QWidget, public IEventListener, public IObserver{
+class MainWindow : public QWidget, public IObserver{
 Q_OBJECT
 
     // show the raw serial data here

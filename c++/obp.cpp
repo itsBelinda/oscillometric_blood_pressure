@@ -15,6 +15,7 @@
 #include "obp.h"
 #include "uitest.h"
 #include "stackedWidgets.h"
+#include "common.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

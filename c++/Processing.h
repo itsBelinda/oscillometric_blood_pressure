@@ -6,6 +6,7 @@
 #include <comedilib.h>
 #include <Iir.h>
 
+#include "common.h"
 #include "CppThread.h"
 #include "datarecord.h"
 #include "ISubject.h"
@@ -13,21 +14,7 @@
 
 #define IIRORDER 6
 
-#define COMEDI_SUB_DEVICE  0
-#define COMEDI_RANGE_ID    0   /* +/- 1.325V  for sigma device*/
-#define COMEDI_NUM_CHANNEL 1
-#define SAMPLING_RATE 1000 // 1kHz
 
-
-
-
-
-class IEventListener { // "Observed" - Listener needs to implement these functions
-public:
-    virtual void eNewData(double pData, double oData) {};
-    virtual void eSwitchScreen(Screen eScreen) {}; //TBD
-
-};
 
 class Processing : public CppThread, public ISubject{
 
@@ -42,7 +29,6 @@ public:
     void startMeasurement();
     void stopMeasurement();
 private:
-    IEventListener* cb = NULL;
     void run() override;
     std::vector<double> pData;// = std::vector<double>(122880);
     std::vector<double> oData;// = std::vector<double>(122880);

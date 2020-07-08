@@ -6,24 +6,23 @@
 #include <QtCore/QDateTime>
 
 #include "Processing.h"
+#include "ComediHandler.h"
 
 #define DEFAULT_MINUTES 2
 #define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
-
-
-
-
 
 
 Processing::Processing() :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
         adChannel(0) {
+
+    PLOG_VERBOSE << "Processing started";
+
     // initialize comedi
     bRunning = false;
     bMeasuring = false;
 
-    std::cout << "processing constructor" << std::endl;
     const char *filename = "/dev/comedi0";
 
     /* open the device */
@@ -43,12 +42,9 @@ Processing::Processing() :
     //printf("crange min: %f, max: %f \n", crange->min, crange->max);
     printf("num channels: %d \n", numChannels);
 
-    if( numChannels < COMEDI_NUM_CHANNEL )
-    {
+    if (numChannels < COMEDI_NUM_CHANNEL) {
         exit(1);
-    }
-    else
-    {
+    } else {
         numChannels = COMEDI_NUM_CHANNEL;
     }
 
@@ -174,7 +170,7 @@ void Processing::run() {
             //TODO: does read sleep while waiting?
             if (read(comedi_fileno(dev), buffer, readSize) == 0) {
                 std::cerr << "Error: end of Acquisition!" << std::endl;
-                exit(1);
+                exit(-1);
             }
 
             // TODO: rewrite?
@@ -217,7 +213,7 @@ void Processing::addSample(double sample) {
     pData.push_back(yLP);
     oData.push_back(yHP);
 
-    notifyNewData(yLP,yHP);
+    notifyNewData(yLP, yHP);
 
 
 }
@@ -230,7 +226,7 @@ void Processing::startMeasurement() {
 
 void Processing::stopMeasurement() {
     bMeasuring = false;
-    record->saveAll(Processing::getFilename(),pData);
+    record->saveAll(Processing::getFilename(), pData);
 }
 
 QString Processing::getFilename() {

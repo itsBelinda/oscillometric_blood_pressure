@@ -15,8 +15,15 @@
 #include "Processing.h"
 
 
+#include <plog/Log.h>
+#include <plog/Initializers/RollingFileInitializer.h>
+
 int main(int argc, char **argv) {
 
+    //TODO: possibly add time to log file, so no overwrites happen, for now overwrites are preferred.
+    plog::init(plog::verbose, "log.csv", 1000000, 5);
+
+    PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);
 
     Processing procThread;
@@ -36,6 +43,8 @@ int main(int argc, char **argv) {
 //    std::cout << "user input stops program (press ENTER)..." << std::endl;
 //    std::cin.get();
     int appReturn = app.exec();
+
+    PLOG_VERBOSE << "Application terminated.";
     // TODO: stop properly from program/algo
     procThread.stopMeasurement();
     procThread.stopThread();

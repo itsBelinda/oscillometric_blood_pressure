@@ -1,10 +1,9 @@
-//
-// Created by belinda on 07/07/2020.
-//
-
 #ifndef OBP_COMMON_H
 #define OBP_COMMON_H
 
+#include <plog/Log.h>
+
+#define SAMPLING_RATE      1000 // 1kHz
 
 enum class Screen {
     startScreen,
