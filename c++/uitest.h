@@ -19,11 +19,12 @@
 #include <qwt/qwt_dial.h>
 #include <qwt/qwt_dial_needle.h>
 #include <qwt/qwt_plot.h>
+#include "IObserver.h"
 
 
 QT_BEGIN_NAMESPACE
 
-class TestWindow : public QMainWindow
+class TestWindow : public QMainWindow, public IObserver
 {
 Q_OBJECT
 
@@ -58,7 +59,8 @@ private:
     void setupUi(QMainWindow *window);
     void retranslateUi(QMainWindow *MainWindow);
 
-
+    void eNewData(double pData, double oData) override;
+    void timerEvent(QTimerEvent *);
 };
 
 

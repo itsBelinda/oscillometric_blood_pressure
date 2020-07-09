@@ -1,19 +1,17 @@
 #include <QtWidgets>
+#include <iostream>
 #include "uitest.h"
 
 TestWindow::TestWindow(QWidget *parent)
-          : QMainWindow(parent)
-{
+        : QMainWindow(parent) {
     setupUi(this);
 }
 
-TestWindow::~TestWindow()
-{
+TestWindow::~TestWindow() {
 
 }
 
-void TestWindow::setupUi(QMainWindow *window)
-{
+void TestWindow::setupUi(QMainWindow *window) {
     if (window->objectName().isEmpty())
         window->setObjectName(QString::fromUtf8("TestWindow"));
 
@@ -65,7 +63,7 @@ void TestWindow::setupUi(QMainWindow *window)
     meter->setMaxScaleArc(340.000000000000000);
     QwtDialSimpleNeedle *needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
-            QColor( Qt::gray ).lighter( 130 ) );
+            QColor(Qt::gray).lighter(130));
 
     meter->setNeedle(needle);
 
@@ -122,25 +120,44 @@ void TestWindow::setupUi(QMainWindow *window)
 
     retranslateUi(window);
 
+    // Generate timer event every 50ms
+    (void) startTimer(50);
     QMetaObject::connectSlotsByName(window);
 } // setupUi
 
-void TestWindow::retranslateUi(QMainWindow *window)
-{
+void TestWindow::retranslateUi(QMainWindow *window) {
     window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
-    infoBox->setHtml(QApplication::translate("TestWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                               "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                               "p, li { white-space: pre-wrap; }\n"
-                                                               "</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-                                                               "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Instructions about what to do come here. Explaining what to do.</p></body></html>", nullptr));
-    infoLabel->setText(QApplication::translate("TestWindow", "Alternatively, instructions in a infoLabel. Explaining what to do. However, are these wrapping? \n"
-                                                         "Below is some sort of visual feedback (depending on the state of the application).", nullptr));
+    infoBox->setHtml(QApplication::translate("TestWindow",
+                                             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                             "p, li { white-space: pre-wrap; }\n"
+                                             "</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+                                             "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Instructions about what to do come here. Explaining what to do.</p></body></html>",
+                                             nullptr));
+    infoLabel->setText(QApplication::translate("TestWindow",
+                                               "Alternatively, instructions in a infoLabel. Explaining what to do. However, are these wrapping? \n"
+                                               "Below is some sort of visual feedback (depending on the state of the application).",
+                                               nullptr));
     btnStart->setText(QApplication::translate("MainWindow", "Start ", nullptr));
     lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: RawData", nullptr));
     lTitlePlotOsc->setText(QApplication::translate("TestWindow", "Title of Plot 2: Oscillogram", nullptr));
 } // retranslateUi
 
-void TestWindow::setPressure(double pressure)
-{
+
+void TestWindow::timerEvent(QTimerEvent *) {
+    meter->repaint();
+}
+
+void TestWindow::setPressure(double pressure) {
     meter->setValue(pressure);
+}
+
+
+void TestWindow::eNewData(double pData, double oData) {
+    double ambientV = 0.710; //0.675 # from calibration
+    double mmHg_per_kPa = 7.5006157584566; // from literature
+    double kPa_per_V = 50.0; // 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
+    double corrFact = 2.50; // from calibration
+    double ymmHg = (pData - ambientV) * mmHg_per_kPa * kPa_per_V * corrFact;
+    setPressure(ymmHg);
 }

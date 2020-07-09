@@ -12,10 +12,11 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QSplitter>
+#include "IObserver.h"
 
 QT_BEGIN_NAMESPACE
 
-class StackedWidgetWindow : public QMainWindow
+class StackedWidgetWindow : public QMainWindow, public IObserver
 {
     Q_OBJECT
 public:
@@ -39,6 +40,9 @@ private:
 
     void setupUi(QMainWindow *MainWindow);
     void retranslateUi(QMainWindow *MainWindow);
+
+
+    void eNewData(double pData, double oData) override;
 
     private slots:
     void clkBtn1();

@@ -145,26 +145,7 @@ void MainWindow::timerEvent(QTimerEvent *) {
     LPPlot->replot();
     HPPlot->replot();
 }
-//
-// TODO: changing where the memory address points is not allowed with qwt!
-// copying seems to be the only possibility for now.
-void MainWindow::updatePressurePlot(double *pData, int length){
-    LPPlot->setNewData(pData, length);
-}
 
-//void MainWindow::updateOscillationPlot(double *pData, int length){
-//    HPPlot->setNewData(pData, length);
-//}
-
-void MainWindow::updateRAWPlot(double yNew){
-    RawDataPlot->setNewData(yNew);
-}
-void MainWindow::updatePressurePlot(double yNew){
-    LPPlot->setNewData(yNew);
-}
-void MainWindow::updateOscillationPlot(double yNew){
-    HPPlot->setNewData(yNew);
-}
 
 void MainWindow::eNewData(double pData, double oData) {
     LPPlot->setNewData(pData);

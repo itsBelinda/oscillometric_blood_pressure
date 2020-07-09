@@ -36,7 +36,7 @@
 
 class MainWindow : public QWidget, public IObserver{
 Q_OBJECT
-
+private:
     // show the raw serial data here
     DataPlot *RawDataPlot;
     DataPlot *LPPlot;
@@ -51,7 +51,7 @@ Q_OBJECT
     double timeData[MAX_DATA_LENGTH], spikeCountData[MAX_DATA_LENGTH], psthData[MAX_DATA_LENGTH];
 
     QCheckBox *filter50HzCheckBox;
-private:
+
 
 private slots:
     // actions:
@@ -66,17 +66,12 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void eNewData(double pData, double oData);
+    void eNewData(double pData, double oData) override;
     // potentially model based, view has access to data,
     // just needs input on when to access it
 
     //TODO: update: memory location for data for plot
     // cannot change!
-    void updateRAWPlot(double yNew);
-    void updatePressurePlot(double yNew);
-    void updateOscillationPlot(double yNew);
-
-    void updatePressurePlot(double *pData, int length);
 };
 
 #endif
