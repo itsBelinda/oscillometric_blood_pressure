@@ -30,15 +30,19 @@ void Window::setupUi(QMainWindow *window) {
 
     QIcon icon(QIcon::fromTheme(QString::fromUtf8("Main")));
     window->resize(2081, 1006);
-   // window->setAcceptDrops(true);
+    window->setAcceptDrops(true);
     window->setWindowIcon(icon);
     window->setTabShape(QTabWidget::Triangular);
-    centralwidget = new QWidget(window);
-    centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+
+    //TODO: splitter more visible.
+    //TODO: minimum width for left and right side
+    splitter = new QSplitter(window);
+    splitter->setObjectName(QString::fromUtf8("splitter"));
+    splitter->setOrientation(Qt::Horizontal);
+    lWidget = new QWidget();
+    rWidget = new QWidget();
 
     // Layouts
-    hl = new QHBoxLayout(centralwidget);
-    hl->setObjectName(QString::fromUtf8("hl"));
     vlLeft = new QVBoxLayout();
     vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
     vlRight = new QVBoxLayout();
@@ -50,21 +54,15 @@ void Window::setupUi(QMainWindow *window) {
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    line1 = new QFrame(centralwidget);
-    line1->setObjectName(QString::fromUtf8("line1"));
-    line1->setFrameShape(QFrame::VLine);
-    line1->setFrameShadow(QFrame::Sunken);
-
-    infoBox = new QTextBrowser(centralwidget);
+    infoBox = new QTextBrowser(splitter);
     infoBox->setObjectName(QString::fromUtf8("infoBox"));
     infoBox->setFrameShape(QFrame::HLine);
     infoBox->setFrameShadow(QFrame::Plain);
-    infoLabel = new QLabel(centralwidget);
+    infoLabel = new QLabel(splitter);
     infoLabel->setObjectName(QString::fromUtf8("infoLabel"));
     infoLabel->setWordWrap(true);
 
-    // TODO: needs a separate class to support setting needle directly.
-    meter = new QwtDial(centralwidget);
+    meter = new QwtDial(splitter);
     meter->setObjectName(QString::fromUtf8("meter"));
     meter->setUpperBound(260.000000000000000);
     meter->setScaleStepSize(20.000000000000000);
@@ -77,13 +75,10 @@ void Window::setupUi(QMainWindow *window) {
     QwtDialSimpleNeedle *needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
             QColor(Qt::gray).lighter(130));
-//    needle = new QwtDialSimpleNeedle(
-//            QwtDialSimpleNeedle::Arrow, true, Qt::black,
-//            QColor(Qt::gray).lighter(130));
 
     meter->setNeedle(needle);
 
-    btnStart = new QPushButton(centralwidget);
+    btnStart = new QPushButton(splitter);
     btnStart->setObjectName(QString::fromUtf8("btnStart"));
 
     // build left side of window
@@ -96,36 +91,37 @@ void Window::setupUi(QMainWindow *window) {
     vlLeft->addWidget(btnStart);
     vlLeft->addItem(vSpace4);
 
-    lTitlePlotRaw = new QLabel(centralwidget);
+    lTitlePlotRaw = new QLabel(splitter);
     lTitlePlotRaw->setObjectName(QString::fromUtf8("lTitlePlotRaw"));
-    lTitlePlotOsc = new QLabel(centralwidget);
+    lTitlePlotOsc = new QLabel(splitter);
     lTitlePlotOsc->setObjectName(QString::fromUtf8("lTitlePlotOsc"));
 
-    line2 = new QFrame(centralwidget);
-    line2->setObjectName(QString::fromUtf8("line2"));
-    line2->setFrameShape(QFrame::HLine);
-    line2->setFrameShadow(QFrame::Sunken);
+    line = new QFrame(splitter);
+    line->setObjectName(QString::fromUtf8("line"));
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
 
-    pltPre = new Plot(xData, yLPData, dataLength, 1, 0.6, centralwidget);
+    pltPre = new Plot(xData, yLPData, dataLength, 1, 0.6, splitter);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
-    pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, centralwidget);
+    pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, splitter);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
 
     // build right side of window
     vlRight->addWidget(lTitlePlotRaw);
     vlRight->addWidget(pltPre);
-    vlRight->addWidget(line2);
+    vlRight->addWidget(line);
     vlRight->addItem(vSpace5);
     vlRight->addWidget(lTitlePlotOsc);
     vlRight->addWidget(pltOsc);
 
     // build both sides together
-    hl->addLayout(vlLeft);
-    hl->addWidget(line1);
-    hl->addLayout(vlRight);
+    lWidget->setLayout(vlLeft);
+    rWidget->setLayout(vlRight);
+    splitter->addWidget(lWidget);
+    splitter->addWidget(rWidget);
 
     // TODO: menubar working? just missing content?
-    window->setCentralWidget(centralwidget);
+    window->setCentralWidget(splitter);
     menubar = new QMenuBar(window);
     menubar->setObjectName(QString::fromUtf8("menubar"));
     menubar->setGeometry(QRect(0, 0, 2081, 39));

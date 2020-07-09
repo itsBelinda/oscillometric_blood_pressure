@@ -13,6 +13,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QSplitter>
 #include "IObserver.h"
 #include "Plot.h"
 #include "common.h"
@@ -38,8 +39,11 @@ private:
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
 
-    QWidget *centralwidget;
-    QHBoxLayout *hl;
+    QSplitter *splitter;
+
+    QSplitterHandle *splitterH;
+    QWidget *lWidget;
+    QWidget *rWidget;
     QVBoxLayout *vlLeft;
     QVBoxLayout *vlRight;
     QSpacerItem *vSpace1;
@@ -50,14 +54,12 @@ private:
     QTextBrowser *infoBox;
     QLabel *infoLabel;
     QwtDial *meter;
-    //QwtDialSimpleNeedle *needle;
     QPushButton *btnStart;
     QLabel *lTitlePlotRaw;
     QLabel *lTitlePlotOsc;
     Plot *pltPre;
     Plot *pltOsc;
-    QFrame *line1;
-    QFrame *line2;
+    QFrame *line;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 };
