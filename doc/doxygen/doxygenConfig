@@ -707,7 +707,7 @@ MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
 
 # Set the SHOW_FILES tag to NO to disable the generation of the Files page. This
-# will remove the Files entry from the Quick Index and from the Folder Tree View
+# will remove the Files entry from the Quick Index and from the Folder Tree Window
 # (if specified).
 # The default value is: YES.
 
@@ -715,7 +715,7 @@ SHOW_FILES             = YES
 
 # Set the SHOW_NAMESPACES tag to NO to disable the generation of the Namespaces
 # page. This will remove the Namespaces entry from the Quick Index and from the
-# Folder Tree View (if specified).
+# Folder Tree Window (if specified).
 # The default value is: YES.
 
 SHOW_NAMESPACES        = YES

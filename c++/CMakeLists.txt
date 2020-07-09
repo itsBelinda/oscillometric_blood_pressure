@@ -26,16 +26,14 @@ include_directories(3rdParty/plog/include)
 
 add_executable(obp
         main.cpp
-        obp.cpp
-        dataplot.cpp
-        datarecord.cpp
+        Window.cpp
+        Plot.cpp
         Processing.cpp
-        stackedWidgets.cpp
-        uitest.cpp
+        ComediHandler.cpp
+        datarecord.cpp
         IObserver.h
         ISubject.h
-        common.h
-        ComediHandler.cpp)
+        common.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
 

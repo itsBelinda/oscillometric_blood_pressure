@@ -1,23 +1,36 @@
-#include <QtWidgets>
+
+#include <qwt/qwt_dial_needle.h>
 #include <iostream>
-#include "uitest.h"
+#include "Window.h"
 
-TestWindow::TestWindow(QWidget *parent)
-        : QMainWindow(parent) {
+Window::Window(QWidget *parent) :
+        dataLength(MAX_DATA_LENGTH),
+        QMainWindow(parent) {
+
+    for (int i = 0; i < MAX_DATA_LENGTH; i++) {
+        xData[i] = (double) (MAX_DATA_LENGTH - i) / (double) SAMPLING_RATE;     // time axis in seconds
+        yLPData[i] = 0;
+        yHPData[i] = 0;
+    }
+
     setupUi(this);
+
+    // Generate timer event every 50ms to update the window
+    (void) startTimer(50);
 }
 
-TestWindow::~TestWindow() {
+Window::~Window() {
 
 }
 
-void TestWindow::setupUi(QMainWindow *window) {
+
+void Window::setupUi(QMainWindow *window) {
     if (window->objectName().isEmpty())
-        window->setObjectName(QString::fromUtf8("TestWindow"));
+        window->setObjectName(QString::fromUtf8("MainWindow"));
 
     QIcon icon(QIcon::fromTheme(QString::fromUtf8("Main")));
     window->resize(2081, 1006);
-    window->setAcceptDrops(true);
+   // window->setAcceptDrops(true);
     window->setWindowIcon(icon);
     window->setTabShape(QTabWidget::Triangular);
     centralwidget = new QWidget(window);
@@ -64,6 +77,9 @@ void TestWindow::setupUi(QMainWindow *window) {
     QwtDialSimpleNeedle *needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
             QColor(Qt::gray).lighter(130));
+//    needle = new QwtDialSimpleNeedle(
+//            QwtDialSimpleNeedle::Arrow, true, Qt::black,
+//            QColor(Qt::gray).lighter(130));
 
     meter->setNeedle(needle);
 
@@ -90,14 +106,14 @@ void TestWindow::setupUi(QMainWindow *window) {
     line2->setFrameShape(QFrame::HLine);
     line2->setFrameShadow(QFrame::Sunken);
 
-    pltRaw = new QwtPlot(centralwidget);
-    pltRaw->setObjectName(QString::fromUtf8("pltPre"));
-    pltOsc = new QwtPlot(centralwidget);
+    pltPre = new Plot(xData, yLPData, dataLength, 1, 0.6, centralwidget);
+    pltPre->setObjectName(QString::fromUtf8("pltPre"));
+    pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, centralwidget);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
 
     // build right side of window
     vlRight->addWidget(lTitlePlotRaw);
-    vlRight->addWidget(pltRaw);
+    vlRight->addWidget(pltPre);
     vlRight->addWidget(line2);
     vlRight->addItem(vSpace5);
     vlRight->addWidget(lTitlePlotOsc);
@@ -120,12 +136,11 @@ void TestWindow::setupUi(QMainWindow *window) {
 
     retranslateUi(window);
 
-    // Generate timer event every 50ms
-    (void) startTimer(50);
     QMetaObject::connectSlotsByName(window);
-} // setupUi
+}
 
-void TestWindow::retranslateUi(QMainWindow *window) {
+
+void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
     infoBox->setHtml(QApplication::translate("TestWindow",
                                              "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
@@ -139,28 +154,27 @@ void TestWindow::retranslateUi(QMainWindow *window) {
                                                "Below is some sort of visual feedback (depending on the state of the application).",
                                                nullptr));
     btnStart->setText(QApplication::translate("MainWindow", "Start ", nullptr));
-    lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: RawData", nullptr));
+    lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: Pressure", nullptr));
     lTitlePlotOsc->setText(QApplication::translate("TestWindow", "Title of Plot 2: Oscillogram", nullptr));
-} // retranslateUi
+}
 
 
-void TestWindow::timerEvent(QTimerEvent *) {
+void Window::timerEvent(QTimerEvent *) {
+    pltOsc->replot();
+    pltPre->replot();
     meter->repaint();
 }
 
-void TestWindow::setPressure(double pressure) {
-    meter->setValue(pressure);
-}
 
-
-void TestWindow::eNewData(double pData, double oData) {
+void Window::eNewData(double pData, double oData) {
+    // TODO: calculation does not belong here, just for now
     double ambientV = 0.710; //0.675 # from calibration
     double mmHg_per_kPa = 7.5006157584566; // from literature
     double kPa_per_V = 50.0; // 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
     double corrFact = 2.50; // from calibration
     double ymmHg = (pData - ambientV) * mmHg_per_kPa * kPa_per_V * corrFact;
-    setPressure(ymmHg);
 
-
-
+    pltPre->setNewData(pData);
+    pltOsc->setNewData(oData);
+    meter->setValue(ymmHg);
 }

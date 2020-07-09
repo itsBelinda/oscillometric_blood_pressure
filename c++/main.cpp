@@ -8,13 +8,14 @@
  *   the Free Software Foundation; either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  ***************************************************************************/
-#include "obp.h"
+
 #include <iostream>
 #include <QApplication>
 
 #include "Processing.h"
 #include "stackedWidgets.h"
 #include "uitest.h"
+#include "Window.h"
 
 
 #include <plog/Log.h>
@@ -30,18 +31,13 @@ int main(int argc, char **argv) {
 
     Processing procThread;
 
-    MainWindow w;
-    w.show();
-    w.resize(1400, 400);
+//    StackedWidgetWindow stackedW;
+//    stackedW.show();
 
-    StackedWidgetWindow stackedW;
-    stackedW.show();
-
-    TestWindow testW;
-    testW.show();
+    Window mainW;
+    mainW.show();
     //Todo: maybe have procthread in window (model in view?)
-    procThread.attach(&w);
-    procThread.attach(&testW);
+    procThread.attach(&mainW);
     std::cout << "create thread" << std::endl;
     procThread.start();
     std::cout << "process started" << std::endl;
