@@ -29,7 +29,7 @@ void Window::setupUi(QMainWindow *window) {
         window->setObjectName(QString::fromUtf8("MainWindow"));
 
     QIcon icon(QIcon::fromTheme(QString::fromUtf8("Main")));
-    window->resize(2081, 1006);
+    window->resize(1920, 1080);
     window->setAcceptDrops(true);
     window->setWindowIcon(icon);
     window->setTabShape(QTabWidget::Triangular);
@@ -39,7 +39,10 @@ void Window::setupUi(QMainWindow *window) {
     splitter = new QSplitter(window);
     splitter->setObjectName(QString::fromUtf8("splitter"));
     splitter->setOrientation(Qt::Horizontal);
+    splitter->setHandleWidth(5);
+    splitter->setChildrenCollapsible(false);
     lWidget = new QWidget();
+    lWidget->setMinimumWidth(400);
     rWidget = new QWidget();
 
     // Layouts
@@ -119,6 +122,8 @@ void Window::setupUi(QMainWindow *window) {
     rWidget->setLayout(vlRight);
     splitter->addWidget(lWidget);
     splitter->addWidget(rWidget);
+    splitter->setStretchFactor(0,1);
+    splitter->setStretchFactor(1,3);
 
     // TODO: menubar working? just missing content?
     window->setCentralWidget(splitter);
