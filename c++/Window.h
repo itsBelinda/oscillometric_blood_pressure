@@ -57,12 +57,18 @@ private:
     QWidget *lInstrResult;
     QWidget *rWidget;
     QVBoxLayout *vlLeft;
+    QVBoxLayout *vlStart;
+    QVBoxLayout *vlRelease;
+    QVBoxLayout *vlDeflate;
+    QVBoxLayout *vlResult;
     QVBoxLayout *vlRight;
     QSpacerItem *vSpace1;
     QSpacerItem *vSpace2;
     QSpacerItem *vSpace3;
     QSpacerItem *vSpace4;
     QSpacerItem *vSpace5;
+    QSpacerItem *vSpace6;
+    QTextBrowser *ibStart;
     QTextBrowser *infoBox;
     QLabel *infoLabel;
     QwtDial *meter;

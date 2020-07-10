@@ -146,7 +146,27 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
 
 QWidget *Window::setupStartPage(QWidget *parent) {
-    return lInstrStart = new QWidget(parent);
+    lInstrStart = new QWidget(parent);
+
+    vlStart = new QVBoxLayout();
+    vlStart->setObjectName(QString::fromUtf8("vlStart"));
+    ibStart = new QTextBrowser(parent);
+    ibStart->setObjectName(QString::fromUtf8("ibStart"));
+    ibStart->setFrameShape(QFrame::HLine);
+    ibStart->setFrameShadow(QFrame::Plain);
+    btnStart = new QPushButton(parent);
+    btnStart->setObjectName(QString::fromUtf8("btnStart"));
+
+    vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+    vlStart->addItem(vSpace6);
+    vlStart->addWidget(ibStart);
+    vlStart->addWidget(btnStart);
+    vlStart->addItem(vSpace4);
+    lInstrStart->setLayout(vlStart);
+
+    return lInstrStart;
 
 }
 
@@ -159,11 +179,9 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
     vlLeft = new QVBoxLayout();
     vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
 
-
     vSpace1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     infoBox = new QTextBrowser(parent);
@@ -190,9 +208,6 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
 
     meter->setNeedle(needle);
 
-    btnStart = new QPushButton(parent);
-    btnStart->setObjectName(QString::fromUtf8("btnStart"));
-
     // build left side of window
     vlLeft->addWidget(infoBox);
     vlLeft->addItem(vSpace1);
@@ -200,8 +215,6 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
     vlLeft->addItem(vSpace2);
     vlLeft->addWidget(meter);
     vlLeft->addItem(vSpace3);
-    vlLeft->addWidget(btnStart);
-    vlLeft->addItem(vSpace4);
 
     lInstrPump->setLayout(vlLeft);
     return lInstrPump;
@@ -209,7 +222,29 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
 
 
 QWidget *Window::setupReleasePage(QWidget *parent) {
-    return lInstrRelease = new QWidget(parent);
+
+    lInstrRelease = new QWidget(parent);
+
+    vlRelease = new QVBoxLayout();
+    vlRelease->setObjectName(QString::fromUtf8("vlStart"));
+    ibStart = new QTextBrowser(parent);
+    ibStart->setObjectName(QString::fromUtf8("ibStart"));
+    ibStart->setFrameShape(QFrame::HLine);
+    ibStart->setFrameShadow(QFrame::Plain);
+    btnStart = new QPushButton(parent);
+    btnStart->setObjectName(QString::fromUtf8("btnStart"));
+
+    vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+    vlRelease->addItem(vSpace6);
+    vlRelease->addWidget(ibStart);
+    vlRelease->addWidget(btnStart);
+    vlRelease->addItem(vSpace4);
+    lInstrRelease->setLayout(vlRelease);
+
+
+    return lInstrRelease;
 }
 
 QWidget *Window::setupDeflatePage(QWidget *parent) {
@@ -223,6 +258,13 @@ QWidget *Window::setupResultPage(QWidget *parent) {
 
 void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
+    ibStart->setHtml(QApplication::translate("TestWindow",
+                                             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                             "p, li { white-space: pre-wrap; }\n"
+                                             "</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
+                                             "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Put on cuff on your upper arm. Make sure it is completely deflated but the valve is closed. When you're ready, push the 'Start' button to start the measurment.</p></body></html>",
+                                             nullptr));
     infoBox->setHtml(QApplication::translate("TestWindow",
                                              "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                              "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
@@ -232,7 +274,8 @@ void Window::retranslateUi(QMainWindow *window) {
                                              nullptr));
     infoLabel->setText(QApplication::translate("TestWindow",
                                                "Alternatively, instructions in a infoLabel. Explaining what to do. However, are these wrapping? \n"
-                                               "Below is some sort of visual feedback (depending on the state of the application).",
+                                               "Below is some sort of visual feedback (depending on the state of the application). \n"
+                                               "In this screen, the user is asked to pump the pressure up to 180 mmHg. \n",
                                                nullptr));
     btnStart->setText(QApplication::translate("MainWindow", "Start ", nullptr));
     lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: Pressure", nullptr));
@@ -245,26 +288,6 @@ void Window::timerEvent(QTimerEvent *) {
     pltPre->replot();
     meter->repaint();
 }
-
-
-
-void Window::clkBtn1(){
-    eSwitchScreen(Screen::startScreen);
-}
-void Window::clkBtn2(){
-    eSwitchScreen(Screen::inflateScreen);
-}
-void Window::clkBtn3(){
-    eSwitchScreen(Screen::releaseScreen);
-}
-void Window::clkBtn4(){
-    eSwitchScreen(Screen::deflateScreen);
-
-}
-void Window::clkBtn5(){
-    eSwitchScreen(Screen::resultScreen);
-}
-
 
 void Window::eNewData(double pData, double oData) {
     // TODO: calculation does not belong here, just for now
@@ -299,4 +322,22 @@ void Window::eSwitchScreen(Screen eScreen) {
             lInstructions->setCurrentIndex(4);
             break;
     }
+}
+
+//TODO: remove those after debugging
+void Window::clkBtn1(){
+    eSwitchScreen(Screen::startScreen);
+}
+void Window::clkBtn2(){
+    eSwitchScreen(Screen::inflateScreen);
+}
+void Window::clkBtn3(){
+    eSwitchScreen(Screen::releaseScreen);
+}
+void Window::clkBtn4(){
+    eSwitchScreen(Screen::deflateScreen);
+
+}
+void Window::clkBtn5(){
+    eSwitchScreen(Screen::resultScreen);
 }
