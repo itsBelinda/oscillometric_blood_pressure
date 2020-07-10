@@ -82,6 +82,31 @@ void Window::setupUi(QMainWindow *window) {
     // Set start page for instructions
     lInstructions->setCurrentIndex(1);
     QMetaObject::connectSlotsByName(window);
+
+
+    //TODO: only for now to be able to switch between the pages of the stacked widget
+    auto * widget = new QWidget();
+    auto  * but0 = new QPushButton("0");
+    auto  * but1 = new QPushButton("1");
+    auto  * but2 = new QPushButton("2");
+    auto  * but3 = new QPushButton("3");
+    auto  * but4 = new QPushButton("4");
+
+    auto *spacer = new QLabel(); // fake spacer
+    statusbar->addPermanentWidget(but0);
+    statusbar->addPermanentWidget(but1);
+    statusbar->addPermanentWidget(but2);
+    statusbar->addPermanentWidget(but3);
+    statusbar->addPermanentWidget(but4);
+    auto *spacerbnt = new QLabel(); // fake spacer
+    statusbar->addPermanentWidget(spacerbnt, 1);
+
+    connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
+    connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
+    connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
+    connect(but3, SIGNAL (released()), this, SLOT (clkBtn4()));
+    connect(but4, SIGNAL (released()), this, SLOT (clkBtn5()));
+
 }
 
 
@@ -219,6 +244,25 @@ void Window::timerEvent(QTimerEvent *) {
     pltOsc->replot();
     pltPre->replot();
     meter->repaint();
+}
+
+
+
+void Window::clkBtn1(){
+    eSwitchScreen(Screen::startScreen);
+}
+void Window::clkBtn2(){
+    eSwitchScreen(Screen::inflateScreen);
+}
+void Window::clkBtn3(){
+    eSwitchScreen(Screen::releaseScreen);
+}
+void Window::clkBtn4(){
+    eSwitchScreen(Screen::deflateScreen);
+
+}
+void Window::clkBtn5(){
+    eSwitchScreen(Screen::resultScreen);
 }
 
 

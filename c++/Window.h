@@ -74,6 +74,14 @@ private:
     QFrame *line;
     QMenuBar *menubar;
     QStatusBar *statusbar;
+
+private slots:
+
+    void clkBtn1();
+    void clkBtn2();
+    void clkBtn3();
+    void clkBtn4();
+    void clkBtn5();
 };
 
 
