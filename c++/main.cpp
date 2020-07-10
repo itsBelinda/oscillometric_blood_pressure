@@ -12,13 +12,9 @@
 #include <iostream>
 #include <QApplication>
 
+#include "common.h"
 #include "Processing.h"
-#include "stackedWidgets.h"
-#include "uitest.h"
 #include "Window.h"
-
-
-#include <plog/Log.h>
 #include <plog/Initializers/RollingFileInitializer.h>
 
 int main(int argc, char **argv) {
@@ -30,9 +26,6 @@ int main(int argc, char **argv) {
     QApplication app(argc, argv);
 
     Processing procThread;
-
-//    StackedWidgetWindow stackedW;
-//    stackedW.show();
 
     Window mainW;
     mainW.show();

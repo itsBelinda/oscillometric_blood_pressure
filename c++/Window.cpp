@@ -41,15 +41,99 @@ void Window::setupUi(QMainWindow *window) {
     splitter->setOrientation(Qt::Horizontal);
     splitter->setHandleWidth(5);
     splitter->setChildrenCollapsible(false);
-    lWidget = new QWidget();
-    lWidget->setMinimumWidth(400);
-    rWidget = new QWidget();
 
-    // Layouts
-    vlLeft = new QVBoxLayout();
-    vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
+    // the left side is a stacked widget with several pages
+    lInstructions = new QStackedWidget(window);
+    lInstructions->setMinimumWidth(400);
+
+    // Build pages and add them to the instructions panel
+    lInstructions->addWidget(setupStartPage(lInstructions));
+    lInstructions->addWidget(setupPumpPage(lInstructions));
+    lInstructions->addWidget(setupReleasePage(lInstructions));
+    lInstructions->addWidget(setupDeflatePage(lInstructions));
+    lInstructions->addWidget(setupResultPage(lInstructions));
+
+    // Add the instructions panel to the splitter
+    splitter->addWidget(lInstructions);
+
+    // Build and add the plot panel to the splitter
+    splitter->addWidget(setupPlots(splitter));
+
+    // Set default stretch factors
+    splitter->setStretchFactor(0, 1);
+    splitter->setStretchFactor(1, 3);
+
+    // Add splitter to main window.
+    window->setCentralWidget(splitter);
+
+    // TODO: menubar working? just missing content?
+    menubar = new QMenuBar(window);
+    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menubar->setGeometry(QRect(0, 0, 2081, 39));
+    window->setMenuBar(menubar);
+    statusbar = new QStatusBar(window);
+    statusbar->setObjectName(QString::fromUtf8("statusbar"));
+    window->setStatusBar(statusbar);
+
+    // Update Text.
+    retranslateUi(window);
+
+    //Screen::startScreen
+    // Set start page for instructions
+    lInstructions->setCurrentIndex(1);
+    QMetaObject::connectSlotsByName(window);
+}
+
+
+QWidget *Window::setupPlots(QWidget *parent) {
+    rWidget = new QWidget(parent);
+
     vlRight = new QVBoxLayout();
     vlRight->setObjectName(QString::fromUtf8("vlRight"));
+
+    lTitlePlotRaw = new QLabel(parent);
+    lTitlePlotRaw->setObjectName(QString::fromUtf8("lTitlePlotRaw"));
+    lTitlePlotOsc = new QLabel(parent);
+    lTitlePlotOsc->setObjectName(QString::fromUtf8("lTitlePlotOsc"));
+
+    line = new QFrame(parent);
+    line->setObjectName(QString::fromUtf8("line"));
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    pltPre = new Plot(xData, yLPData, dataLength, 1, 0.6, parent);
+    pltPre->setObjectName(QString::fromUtf8("pltPre"));
+    pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, parent);
+    pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
+
+    // build right side of window
+    vlRight->addWidget(lTitlePlotRaw);
+    vlRight->addWidget(pltPre);
+    vlRight->addWidget(line);
+    vlRight->addItem(vSpace5);
+    vlRight->addWidget(lTitlePlotOsc);
+    vlRight->addWidget(pltOsc);
+    rWidget->setLayout(vlRight);
+
+    return rWidget;
+
+}
+
+
+QWidget *Window::setupStartPage(QWidget *parent) {
+    return lInstrStart = new QWidget(parent);
+
+}
+
+
+QWidget *Window::setupPumpPage(QWidget *parent) {
+
+    lInstrPump = new QWidget(parent);
+
+    // Layout for this page:
+    vlLeft = new QVBoxLayout();
+    vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
+
 
     vSpace1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
@@ -57,15 +141,15 @@ void Window::setupUi(QMainWindow *window) {
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    infoBox = new QTextBrowser(splitter);
+    infoBox = new QTextBrowser(parent);
     infoBox->setObjectName(QString::fromUtf8("infoBox"));
     infoBox->setFrameShape(QFrame::HLine);
     infoBox->setFrameShadow(QFrame::Plain);
-    infoLabel = new QLabel(splitter);
+    infoLabel = new QLabel(parent);
     infoLabel->setObjectName(QString::fromUtf8("infoLabel"));
     infoLabel->setWordWrap(true);
 
-    meter = new QwtDial(splitter);
+    meter = new QwtDial(parent);
     meter->setObjectName(QString::fromUtf8("meter"));
     meter->setUpperBound(260.000000000000000);
     meter->setScaleStepSize(20.000000000000000);
@@ -75,13 +159,13 @@ void Window::setupUi(QMainWindow *window) {
     meter->setMode(QwtDial::RotateNeedle);
     meter->setMinScaleArc(20.000000000000000);
     meter->setMaxScaleArc(340.000000000000000);
-    QwtDialSimpleNeedle *needle = new QwtDialSimpleNeedle(
+    auto *needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
             QColor(Qt::gray).lighter(130));
 
     meter->setNeedle(needle);
 
-    btnStart = new QPushButton(splitter);
+    btnStart = new QPushButton(parent);
     btnStart->setObjectName(QString::fromUtf8("btnStart"));
 
     // build left side of window
@@ -94,50 +178,21 @@ void Window::setupUi(QMainWindow *window) {
     vlLeft->addWidget(btnStart);
     vlLeft->addItem(vSpace4);
 
-    lTitlePlotRaw = new QLabel(splitter);
-    lTitlePlotRaw->setObjectName(QString::fromUtf8("lTitlePlotRaw"));
-    lTitlePlotOsc = new QLabel(splitter);
-    lTitlePlotOsc->setObjectName(QString::fromUtf8("lTitlePlotOsc"));
+    lInstrPump->setLayout(vlLeft);
+    return lInstrPump;
+}
 
-    line = new QFrame(splitter);
-    line->setObjectName(QString::fromUtf8("line"));
-    line->setFrameShape(QFrame::HLine);
-    line->setFrameShadow(QFrame::Sunken);
 
-    pltPre = new Plot(xData, yLPData, dataLength, 1, 0.6, splitter);
-    pltPre->setObjectName(QString::fromUtf8("pltPre"));
-    pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, splitter);
-    pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
+QWidget *Window::setupReleasePage(QWidget *parent) {
+    return lInstrRelease = new QWidget(parent);
+}
 
-    // build right side of window
-    vlRight->addWidget(lTitlePlotRaw);
-    vlRight->addWidget(pltPre);
-    vlRight->addWidget(line);
-    vlRight->addItem(vSpace5);
-    vlRight->addWidget(lTitlePlotOsc);
-    vlRight->addWidget(pltOsc);
+QWidget *Window::setupDeflatePage(QWidget *parent) {
+    return lInstrResult = new QWidget(parent);
+}
 
-    // build both sides together
-    lWidget->setLayout(vlLeft);
-    rWidget->setLayout(vlRight);
-    splitter->addWidget(lWidget);
-    splitter->addWidget(rWidget);
-    splitter->setStretchFactor(0,1);
-    splitter->setStretchFactor(1,3);
-
-    // TODO: menubar working? just missing content?
-    window->setCentralWidget(splitter);
-    menubar = new QMenuBar(window);
-    menubar->setObjectName(QString::fromUtf8("menubar"));
-    menubar->setGeometry(QRect(0, 0, 2081, 39));
-    window->setMenuBar(menubar);
-    statusbar = new QStatusBar(window);
-    statusbar->setObjectName(QString::fromUtf8("statusbar"));
-    window->setStatusBar(statusbar);
-
-    retranslateUi(window);
-
-    QMetaObject::connectSlotsByName(window);
+QWidget *Window::setupResultPage(QWidget *parent) {
+    return lInstrResult = new QWidget(parent);
 }
 
 
@@ -175,7 +230,29 @@ void Window::eNewData(double pData, double oData) {
     double corrFact = 2.50; // from calibration
     double ymmHg = (pData - ambientV) * mmHg_per_kPa * kPa_per_V * corrFact;
 
+    //TODO: depending on screen state?
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
     meter->setValue(ymmHg);
+}
+
+void Window::eSwitchScreen(Screen eScreen) {
+    // TODO: add more
+    switch (eScreen) {
+        case Screen::startScreen:
+            lInstructions->setCurrentIndex(0);
+            break;
+        case Screen::inflateScreen:
+            lInstructions->setCurrentIndex(1);
+            break;
+        case Screen::releaseScreen:
+            lInstructions->setCurrentIndex(2);
+            break;
+        case Screen::deflateScreen:
+            lInstructions->setCurrentIndex(3);
+            break;
+        case Screen::resultScreen:
+            lInstructions->setCurrentIndex(4);
+            break;
+    }
 }

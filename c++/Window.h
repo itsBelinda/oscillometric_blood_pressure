@@ -14,6 +14,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QSplitter>
+#include <QtWidgets/QStackedWidget>
 #include "IObserver.h"
 #include "Plot.h"
 #include "common.h"
@@ -29,8 +30,16 @@ protected:
     void timerEvent(QTimerEvent *e);
 private:
     void eNewData(double pData, double oData) override;
+    void eSwitchScreen(Screen eScreen) override;
 
     void setupUi(QMainWindow *window);
+    QWidget * setupPlots(QWidget *parent);
+    QWidget * setupStartPage(QWidget *parent);
+    QWidget * setupPumpPage(QWidget *parent);
+    QWidget * setupReleasePage(QWidget *parent);
+    QWidget * setupDeflatePage(QWidget *parent);
+    QWidget * setupResultPage(QWidget *parent);
+
     void retranslateUi(QMainWindow *MainWindow);
 
 
@@ -40,9 +49,12 @@ private:
     int dataLength;
 
     QSplitter *splitter;
-
-    QSplitterHandle *splitterH;
-    QWidget *lWidget;
+    QStackedWidget *lInstructions;
+    QWidget *lInstrStart;
+    QWidget *lInstrPump;
+    QWidget *lInstrRelease;
+    QWidget *lInstrDeflate;
+    QWidget *lInstrResult;
     QWidget *rWidget;
     QVBoxLayout *vlLeft;
     QVBoxLayout *vlRight;
