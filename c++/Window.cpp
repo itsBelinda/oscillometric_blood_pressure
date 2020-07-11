@@ -59,9 +59,6 @@ void Window::setupUi(QMainWindow *window) {
     // Build and add the plot panel to the splitter
     splitter->addWidget(setupPlots(splitter));
 
-    // Set default stretch factors
-    splitter->setStretchFactor(0, 1);
-    splitter->setStretchFactor(1, 3);
 
     // Add splitter to main window.
     window->setCentralWidget(splitter);
@@ -83,16 +80,21 @@ void Window::setupUi(QMainWindow *window) {
     lInstructions->setCurrentIndex(1);
     QMetaObject::connectSlotsByName(window);
 
+    // Set stretch factor of left part to zero so it will not resize
+    splitter->setStretchFactor(0, 0);
 
+    // Set default look, specify percentage of left side:
+    double leftSide = 0.3;
+    QList<int> Sizes({(int)(leftSide * width()), (int)((1.0-leftSide)* width())});
+    splitter->setSizes(Sizes);
     //TODO: only for now to be able to switch between the pages of the stacked widget
-    auto * widget = new QWidget();
+
     auto  * but0 = new QPushButton("0");
     auto  * but1 = new QPushButton("1");
     auto  * but2 = new QPushButton("2");
     auto  * but3 = new QPushButton("3");
     auto  * but4 = new QPushButton("4");
 
-    auto *spacer = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(but0);
     statusbar->addPermanentWidget(but1);
     statusbar->addPermanentWidget(but2);
@@ -150,22 +152,24 @@ QWidget *Window::setupStartPage(QWidget *parent) {
 
     vlStart = new QVBoxLayout();
     vlStart->setObjectName(QString::fromUtf8("vlStart"));
-    ibStart = new QTextBrowser(parent);
-    ibStart->setObjectName(QString::fromUtf8("ibStart"));
-    ibStart->setFrameShape(QFrame::HLine);
-    ibStart->setFrameShadow(QFrame::Plain);
+
+    lInfoStart = new QLabel(parent);
+    lInfoStart->setObjectName(QString::fromUtf8("lInfoStart"));
+    lInfoStart->setWordWrap(true);
+    lInfoStart->setAlignment(Qt::AlignCenter);
+
     btnStart = new QPushButton(parent);
     btnStart->setObjectName(QString::fromUtf8("btnStart"));
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    vlStart->addItem(vSpace6);
-    vlStart->addWidget(ibStart);
-    vlStart->addWidget(btnStart);
     vlStart->addItem(vSpace4);
-    lInstrStart->setLayout(vlStart);
+    vlStart->addWidget(lInfoStart);
+    vlStart->addItem(vSpace6);
+    vlStart->addWidget(btnStart);
 
+    lInstrStart->setLayout(vlStart);
     return lInstrStart;
 
 }
@@ -184,13 +188,10 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
     vSpace3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    infoBox = new QTextBrowser(parent);
-    infoBox->setObjectName(QString::fromUtf8("infoBox"));
-    infoBox->setFrameShape(QFrame::HLine);
-    infoBox->setFrameShadow(QFrame::Plain);
-    infoLabel = new QLabel(parent);
-    infoLabel->setObjectName(QString::fromUtf8("infoLabel"));
-    infoLabel->setWordWrap(true);
+    lInfoPump = new QLabel(parent);
+    lInfoPump->setObjectName(QString::fromUtf8("lInfoPump"));
+    lInfoPump->setWordWrap(true);
+    lInfoPump->setAlignment(Qt::AlignCenter);
 
     meter = new QwtDial(parent);
     meter->setObjectName(QString::fromUtf8("meter"));
@@ -209,9 +210,8 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
     meter->setNeedle(needle);
 
     // build left side of window
-    vlLeft->addWidget(infoBox);
     vlLeft->addItem(vSpace1);
-    vlLeft->addWidget(infoLabel);
+    vlLeft->addWidget(lInfoPump);
     vlLeft->addItem(vSpace2);
     vlLeft->addWidget(meter);
     vlLeft->addItem(vSpace3);
@@ -226,60 +226,85 @@ QWidget *Window::setupReleasePage(QWidget *parent) {
     lInstrRelease = new QWidget(parent);
 
     vlRelease = new QVBoxLayout();
-    vlRelease->setObjectName(QString::fromUtf8("vlStart"));
-    ibStart = new QTextBrowser(parent);
-    ibStart->setObjectName(QString::fromUtf8("ibStart"));
-    ibStart->setFrameShape(QFrame::HLine);
-    ibStart->setFrameShadow(QFrame::Plain);
-    btnStart = new QPushButton(parent);
-    btnStart->setObjectName(QString::fromUtf8("btnStart"));
+    lInfoRelease = new QLabel(parent);
+    lInfoRelease->setObjectName(QString::fromUtf8("lInfoRelease"));
+    lInfoRelease->setWordWrap(true);
+    lInfoRelease->setAlignment(Qt::AlignCenter);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     vlRelease->addItem(vSpace6);
-    vlRelease->addWidget(ibStart);
-    vlRelease->addWidget(btnStart);
+    vlRelease->addWidget(lInfoRelease);
     vlRelease->addItem(vSpace4);
+    //vlLeft->addWidget(meter);??
+
     lInstrRelease->setLayout(vlRelease);
-
-
     return lInstrRelease;
 }
 
 QWidget *Window::setupDeflatePage(QWidget *parent) {
-    return lInstrResult = new QWidget(parent);
+    lInstrDeflate = new QWidget(parent);
+
+    vlDeflate = new QVBoxLayout();
+    lInfoDeflate = new QLabel(parent);
+    lInfoDeflate->setObjectName(QString::fromUtf8("lInfoDeflate"));
+    lInfoDeflate->setWordWrap(true);
+    lInfoDeflate->setAlignment(Qt::AlignCenter);
+
+    vlDeflate->addWidget(lInfoDeflate);
+    lInstrDeflate->setLayout(vlDeflate);
+    return lInstrDeflate ;
 }
 
 QWidget *Window::setupResultPage(QWidget *parent) {
-    return lInstrResult = new QWidget(parent);
+    lInstrResult = new QWidget(parent);
+
+    vlResult = new QVBoxLayout();
+    lInfoResult = new QLabel(parent);
+    lInfoResult->setObjectName(QString::fromUtf8("lInfoDeflate"));
+    lInfoResult->setWordWrap(true);
+    lInfoResult->setAlignment(Qt::AlignCenter);
+
+    btnReset = new QPushButton(parent);
+    btnStart->setObjectName(QString::fromUtf8("btnReset"));
+
+    vlResult->addWidget(lInfoResult);
+    vlResult->addWidget(btnReset);
+    lInstrResult->setLayout(vlResult);
+    return lInstrResult;
 }
 
 
 void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
-    ibStart->setHtml(QApplication::translate("TestWindow",
-                                             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                             "p, li { white-space: pre-wrap; }\n"
-                                             "</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-                                             "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Put on cuff on your upper arm. Make sure it is completely deflated but the valve is closed. When you're ready, push the 'Start' button to start the measurment.</p></body></html>",
-                                             nullptr));
-    infoBox->setHtml(QApplication::translate("TestWindow",
-                                             "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                             "p, li { white-space: pre-wrap; }\n"
-                                             "</style></head><body style=\" font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-                                             "<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Instructions about what to do come here. Explaining what to do.</p></body></html>",
-                                             nullptr));
-    infoLabel->setText(QApplication::translate("TestWindow",
-                                               "Alternatively, instructions in a infoLabel. Explaining what to do. However, are these wrapping? \n"
-                                               "Below is some sort of visual feedback (depending on the state of the application). \n"
-                                               "In this screen, the user is asked to pump the pressure up to 180 mmHg. \n",
-                                               nullptr));
+
+    lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
+                        "1. Put the cuff on your upper arm of your unfavoured hand, making sure it is tight."
+                        "2. Rest your arm on a flat surface.<br>"
+                        "3. Take the pump into your favoured hand.<br>"
+                        "4. Make sure the valve is closed, but you can handle it easily."
+                        "5. Press Start when you are ready."
+                        "<br><br> <i>Picture missing</i><br>");
+    lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
+                       "Using your favoured hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
+                       "Make sure the valve is fully closed.<br>"
+                       "Use the dial below for reference.");
+    lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
+                          "Open the valve slightly to release pressure at about 3 mmHg per second."
+                          "Once the valve is opened, wait calmly and try not to move. <br><br>"
+                          "<i>Add deflation feedback. Possibly have meter here, too.</i>");
+    lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
+                          "Wait for the pressure to go down to 0 mmHg.<br><br>"
+                          "You will see the results next.");
+    lInfoResult->setText("<b>Results:</b><br><br>"
+                         "Click Reset to start a new measurement<br>");
     btnStart->setText(QApplication::translate("MainWindow", "Start ", nullptr));
+    btnReset->setText("Reset");
     lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: Pressure", nullptr));
     lTitlePlotOsc->setText(QApplication::translate("TestWindow", "Title of Plot 2: Oscillogram", nullptr));
+
+
 }
 
 
