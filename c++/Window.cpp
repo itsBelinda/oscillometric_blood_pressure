@@ -13,6 +13,7 @@ Window::Window(Processing *process, QWidget *parent) :
         yHPData[i] = 0;
     }
 
+    currentScreen = Screen::startScreen;
     setupUi(this);
     this->process = process;
     // Generate timer event every 50ms to update the window
@@ -79,7 +80,7 @@ void Window::setupUi(QMainWindow *window) {
 
     //Screen::startScreen
     // Set start page for instructions
-    lInstructions->setCurrentIndex(0);
+   // lInstructions->setCurrentIndex(0);
     QMetaObject::connectSlotsByName(window);
 
     // Set stretch factor of left part to zero so it will not resize
@@ -348,17 +349,8 @@ void Window::timerEvent(QTimerEvent *) {
     pltOsc->replot();
     pltPre->replot();
     meter->repaint();
-}
 
-void Window::eNewData(double pData, double oData) {
-    pltPre->setNewData(pData);
-    pltOsc->setNewData(oData);
-    meter->setValue(pData); //TODO: maybe meter should be shown all the time?
-}
-
-void Window::eSwitchScreen(Screen eScreen) {
-    // TODO: add more
-    switch (eScreen) {
+    switch (currentScreen) {
         case Screen::startScreen:
             lInstructions->setCurrentIndex(0);
             break;
@@ -375,6 +367,17 @@ void Window::eSwitchScreen(Screen eScreen) {
             lInstructions->setCurrentIndex(4);
             break;
     }
+}
+
+void Window::eNewData(double pData, double oData) {
+    pltPre->setNewData(pData);
+    pltOsc->setNewData(oData);
+    meter->setValue(pData); //TODO: maybe meter should be shown all the time?
+}
+
+void Window::eSwitchScreen(Screen eScreen) {
+    currentScreen = eScreen;
+    // TODO: add more
 }
 
 void Window::eResults(double map, double sbp, double dbp) {

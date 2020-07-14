@@ -50,6 +50,7 @@ private:
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
+    Screen currentScreen;
 
     QSplitter *splitter;
     QStackedWidget *lInstructions;
