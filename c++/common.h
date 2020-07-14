@@ -13,8 +13,8 @@
 enum class Screen {
     startScreen,
     inflateScreen,
-    releaseScreen,
     deflateScreen,
+    emptyCuffScreen,
     resultScreen
 };
 

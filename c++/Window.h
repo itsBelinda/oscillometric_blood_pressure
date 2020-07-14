@@ -19,12 +19,13 @@
 #include "IObserver.h"
 #include "Plot.h"
 #include "common.h"
+#include "Processing.h"
 
 
 class Window : public QMainWindow, public IObserver{
 Q_OBJECT
 public:
-    Window(QWidget *parent = 0);
+    Window(Processing *process, QWidget *parent = 0);
     ~Window();
 
 
@@ -38,14 +39,14 @@ private:
     void setupUi(QMainWindow *window);
     QWidget * setupPlots(QWidget *parent);
     QWidget * setupStartPage(QWidget *parent);
-    QWidget * setupPumpPage(QWidget *parent);
-    QWidget * setupReleasePage(QWidget *parent);
+    QWidget * setupInflatePage(QWidget *parent);
     QWidget * setupDeflatePage(QWidget *parent);
+    QWidget * setupEmptyCuffPage(QWidget *parent);
     QWidget * setupResultPage(QWidget *parent);
 
     void retranslateUi(QMainWindow *MainWindow);
 
-
+    Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
 
@@ -93,7 +94,8 @@ private:
     QStatusBar *statusbar;
 
 private slots:
-
+    void clkBtnStart();
+    void clkBtnReset();
     void clkBtn1();
     void clkBtn2();
     void clkBtn3();

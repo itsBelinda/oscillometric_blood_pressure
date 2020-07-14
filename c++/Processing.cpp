@@ -45,15 +45,10 @@ Processing::~Processing() {
     stopThread();
 }
 
-bool Processing::bSaveToFile() {
-    //TODO: implement saving data to file here.
-    return false;
-}
 
 void Processing::run() {
 
     std::cout << "run ..." << std::endl;
-    unsigned char buffer[readSize];
 
     bRunning = true;
 
@@ -62,8 +57,8 @@ void Processing::run() {
         if (comedi->getBufferContents() > 0) {
 
             double y = comedi->getVoltageSample();
+            addSample(y);
             if (bMeasuring) {
-                addSample(y);
                 //TODO: do not just save data, but "process" it
             }
         } else {
@@ -93,18 +88,31 @@ void Processing::addSample(double sample) {
 
     notifyNewData(yLP, yHP);
 
-
 }
 
+/**
+ * Starts a new measurment.
+ */
 void Processing::startMeasurement() {
     pData.clear();
     oData.clear();
     bMeasuring = true;
 }
-
+/**
+ * Stops the measurement and saves the data to a file.
+ */
 void Processing::stopMeasurement() {
+    if(bMeasuring)
+    {
+        bMeasuring = false;
+        record->saveAll(Processing::getFilename(), pData);
+    }
+}
+/**
+ * Stops the measurement, but without saving the data.
+ */
+void Processing::resetMeasurement(){
     bMeasuring = false;
-    record->saveAll(Processing::getFilename(), pData);
 }
 
 QString Processing::getFilename() {

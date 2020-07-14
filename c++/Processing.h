@@ -21,13 +21,22 @@ public:
     Processing();
     ~Processing() override;
 
-    bool bSaveToFile();
     void stopThread();
 
     void startMeasurement();
     void stopMeasurement();
+
+
+    enum class ProcState {
+        Idle,
+        PumpUp,
+        Medium,
+        High
+    };
+
 private:
     void run() override;
+    void resetMeasurement();
     std::vector<double> pData;// = std::vector<double>(122880);
     std::vector<double> oData;// = std::vector<double>(122880);
 
@@ -42,19 +51,7 @@ private:
 
 //TODO: move to comedi class?
 
-    /**
-   * file descriptor for /dev/comedi0
-   **/
-    comedi_cmd comediCommand;
-    comedi_t *dev;
-    size_t readSize;
-    bool sigmaBoard;//TODO: warning, if not sigma board
-    lsampl_t maxdata;
-    comedi_range *crange;
     double sampling_rate;
-
-    int numChannels;
-    unsigned *chanlist;
 
     void addSample(double sample);
 

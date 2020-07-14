@@ -24,28 +24,17 @@ int main(int argc, char **argv) {
     PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);
 
+    // TODO: reason to not have process created inside window?
+    // needs reference anyway.
     Processing procThread;
 
-    Window mainW;
+    Window mainW(&procThread);
     mainW.show();
-    //Todo: maybe have procthread in window (model in view?)
+
     procThread.attach(&mainW);
-    std::cout << "create thread" << std::endl;
     procThread.start();
-    std::cout << "process started" << std::endl;
-    //todo: should be done by algorithm
-    procThread.startMeasurement();
 
-//    std::cout << "user input stops program (press ENTER)..." << std::endl;
-//    std::cin.get();
-    int appReturn = app.exec();
-
-    PLOG_VERBOSE << "Application terminated.";
-    // TODO: stop properly from program/algo
-    procThread.stopMeasurement();
-    procThread.stopThread();
-    procThread.join();
-    return appReturn;
+    return app.exec();
 
 }
 

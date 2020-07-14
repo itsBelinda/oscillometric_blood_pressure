@@ -3,7 +3,7 @@
 #include <iostream>
 #include "Window.h"
 
-Window::Window(QWidget *parent) :
+Window::Window(Processing *process, QWidget *parent) :
         dataLength(MAX_DATA_LENGTH),
         QMainWindow(parent) {
 
@@ -14,13 +14,17 @@ Window::Window(QWidget *parent) :
     }
 
     setupUi(this);
-
+    this->process = process;
     // Generate timer event every 50ms to update the window
     (void) startTimer(50);
 }
 
 Window::~Window() {
 
+    PLOG_VERBOSE << "Cleanup:";
+    process->stopThread();
+    process->join();
+    PLOG_VERBOSE << "Application terminated.";
 }
 
 void Window::setupUi(QMainWindow *window) {
@@ -47,9 +51,9 @@ void Window::setupUi(QMainWindow *window) {
 
     // Build pages and add them to the instructions panel
     lInstructions->addWidget(setupStartPage(lInstructions));
-    lInstructions->addWidget(setupPumpPage(lInstructions));
-    lInstructions->addWidget(setupReleasePage(lInstructions));
+    lInstructions->addWidget(setupInflatePage(lInstructions));
     lInstructions->addWidget(setupDeflatePage(lInstructions));
+    lInstructions->addWidget(setupEmptyCuffPage(lInstructions));
     lInstructions->addWidget(setupResultPage(lInstructions));
 
     // Add the instructions panel to the splitter
@@ -57,7 +61,6 @@ void Window::setupUi(QMainWindow *window) {
 
     // Build and add the plot panel to the splitter
     splitter->addWidget(setupPlots(splitter));
-
 
     // Add splitter to main window.
     window->setCentralWidget(splitter);
@@ -101,6 +104,9 @@ void Window::setupUi(QMainWindow *window) {
     statusbar->addPermanentWidget(but4);
     auto *spacerbnt = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(spacerbnt, 1);
+
+    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
+    connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
 
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
@@ -174,7 +180,7 @@ QWidget *Window::setupStartPage(QWidget *parent) {
 }
 
 
-QWidget *Window::setupPumpPage(QWidget *parent) {
+QWidget *Window::setupInflatePage(QWidget *parent) {
 
     lInstrPump = new QWidget(parent);
 
@@ -220,7 +226,7 @@ QWidget *Window::setupPumpPage(QWidget *parent) {
 }
 
 
-QWidget *Window::setupReleasePage(QWidget *parent) {
+QWidget *Window::setupDeflatePage(QWidget *parent) {
 
     lInstrRelease = new QWidget(parent);
 
@@ -242,7 +248,7 @@ QWidget *Window::setupReleasePage(QWidget *parent) {
     return lInstrRelease;
 }
 
-QWidget *Window::setupDeflatePage(QWidget *parent) {
+QWidget *Window::setupEmptyCuffPage(QWidget *parent) {
     lInstrDeflate = new QWidget(parent);
 
     vlDeflate = new QVBoxLayout();
@@ -366,10 +372,10 @@ void Window::eSwitchScreen(Screen eScreen) {
         case Screen::inflateScreen:
             lInstructions->setCurrentIndex(1);
             break;
-        case Screen::releaseScreen:
+        case Screen::deflateScreen:
             lInstructions->setCurrentIndex(2);
             break;
-        case Screen::deflateScreen:
+        case Screen::emptyCuffScreen:
             lInstructions->setCurrentIndex(3);
             break;
         case Screen::resultScreen:
@@ -385,6 +391,14 @@ void Window::eResults(double map, double sbp, double dbp) {
     lDBPval->setText( QString::number(dbp) + " mmHg");
 }
 
+void Window::clkBtnStart(){
+    eSwitchScreen(Screen::inflateScreen);
+    process->startMeasurement();
+}
+void Window::clkBtnReset(){
+    eSwitchScreen(Screen::startScreen);
+}
+
 //TODO: remove those after debugging
 void Window::clkBtn1(){
     eSwitchScreen(Screen::startScreen);
@@ -393,10 +407,10 @@ void Window::clkBtn2(){
     eSwitchScreen(Screen::inflateScreen);
 }
 void Window::clkBtn3(){
-    eSwitchScreen(Screen::releaseScreen);
+    eSwitchScreen(Screen::deflateScreen);
 }
 void Window::clkBtn4(){
-    eSwitchScreen(Screen::deflateScreen);
+    eSwitchScreen(Screen::emptyCuffScreen);
 
 }
 void Window::clkBtn5(){
