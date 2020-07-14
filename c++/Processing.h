@@ -17,6 +17,7 @@
 class Processing : public CppThread, public ISubject{
 
     enum class ProcState {
+        Config,
         Idle,
         Inflate,
         Deflate,
@@ -61,7 +62,7 @@ private:
     const double kPa_per_V = 50; // data sheet
 
     double sampling_rate = 1000.0;
-    double mmHgInflate = 180.0;
+    double mmHgInflate = 30.0;
     double ambientVoltage = 0.65;
     double corrFactor = 2.5; // due to voltage divider
 

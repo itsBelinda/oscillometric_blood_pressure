@@ -20,7 +20,7 @@ Processing::Processing() :
 
     PLOG_VERBOSE << "Processing started";
 
-    currentState = ProcState::Idle;
+    currentState = ProcState::Config;
     comedi = new ComediHandler();
 
     sampling_rate = comedi->getSamplingRate(); //TODO: calculation seems to be wrong, setting manually for now
@@ -80,9 +80,9 @@ void Processing::stopThread() {
  * Starts a new measurment.
  */
 void Processing::startMeasurement() {
-    pData.clear();
-    oData.clear();
+    PLOG_VERBOSE << "start Measurement";
     bMeasuring = true;
+    PLOG_VERBOSE << "started";
 }
 
 /**
@@ -122,14 +122,30 @@ void Processing::processSample(double newSample) {
 
 
     switch (currentState) {
-        case ProcState::Idle:
+        case ProcState::Config:
             //TODO: here I am using the "raw" voltage data, i am missusing the data buffer,
             // this will not cause problems, as long as it is reset afterwards,
-            pData.push_back(yLP);
             // detect ambient pressure,
             if (checkAmbient()) {
                 //enable Start button
+                currentState = ProcState::Idle;
                 notifyReady();
+                pData.clear();
+
+            }
+            else {
+                pData.push_back(yLP);
+            }
+
+            break;
+
+        case ProcState::Idle:
+
+            if( bMeasuring ) {
+                currentState = ProcState::Inflate;
+                //TODO: should be empty
+                pData.clear();
+                oData.clear();
             }
             //TODO: only enable start button if successfully detected
             break;
@@ -183,7 +199,7 @@ bool Processing::checkAmbient() {
         double av = 1.0 * std::accumulate(pData.begin(), pData.end(), 0.0) / pData.size();
         double max = *std::max_element(pData.begin(), pData.end());
         auto min = *std::min_element(pData.begin(), pData.end());
-        std::cout << "min: " << min << " max: " << max << " av: " << av << std::endl;
+
         PLOG_VERBOSE << "min: " << min << " max: " << max << " av: " << av << std::endl;
         if (std::abs(av - max) < AMBIENT_DEVIATION) {
             setAmbientVoltage(av);
