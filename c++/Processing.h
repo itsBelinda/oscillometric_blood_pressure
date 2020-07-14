@@ -16,6 +16,12 @@
 
 class Processing : public CppThread, public ISubject{
 
+    enum class ProcState {
+        Idle,
+        Inflate,
+        Deflate,
+        Calculate,
+    };
 
 public:
     Processing();
@@ -25,18 +31,17 @@ public:
 
     void startMeasurement();
     void stopMeasurement();
+    inline ProcState getCurrentState() const { return currentState; }
 
-
-    enum class ProcState {
-        Idle,
-        PumpUp,
-        Medium,
-        High
-    };
+    void setAmbientVoltage(double voltage);
 
 private:
     void run() override;
     void resetMeasurement();
+    static QString getFilename();
+    void processSample(double newSample);
+    double getmmHgValue(double voltageValue);
+    bool checkAmbient();
     std::vector<double> pData;// = std::vector<double>(122880);
     std::vector<double> oData;// = std::vector<double>(122880);
 
@@ -47,15 +52,22 @@ private:
     ComediHandler *comedi;
     bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
     bool bMeasuring;
+    ProcState currentState;
 
+    /**
+     * Important data acquisition values
+     */
+    const double mmHg_per_kPa = 7.5006157584566; // literature
+    const double kPa_per_V = 50; // data sheet
 
-//TODO: move to comedi class?
+    double sampling_rate = 1000.0;
+    double mmHgInflate = 180.0;
+    double ambientVoltage = 0.65;
+    double corrFactor = 2.5; // due to voltage divider
 
-    double sampling_rate;
+    double ratio_SBP = 0.57;    // from literature, might be changed in settings later
+    double ratio_DBP = 0.75;    // from literature, might be changed in settings later
 
-    void addSample(double sample);
-
-    static QString getFilename();
 };
 
 

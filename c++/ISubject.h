@@ -20,6 +20,13 @@ public:
         observerList.remove(observer);
     }
 
+    virtual void notifyReady() {
+        std::for_each(observerList.begin(), observerList.end(),
+                      [](IObserver *observer) {
+                          observer->eReady();
+                      });
+    }
+
     virtual void notifyNewData(double pData, double oData) {
         std::for_each(observerList.begin(), observerList.end(),
                       [pData, oData](IObserver *observer) {

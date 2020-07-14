@@ -79,7 +79,7 @@ void Window::setupUi(QMainWindow *window) {
 
     //Screen::startScreen
     // Set start page for instructions
-    lInstructions->setCurrentIndex(1);
+    lInstructions->setCurrentIndex(0);
     QMetaObject::connectSlotsByName(window);
 
     // Set stretch factor of left part to zero so it will not resize
@@ -133,7 +133,7 @@ QWidget *Window::setupPlots(QWidget *parent) {
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Sunken);
 
-    pltPre = new Plot(xData, yLPData, dataLength, 1, 0.6, parent);
+    pltPre = new Plot(xData, yLPData, dataLength, 250, 0.0, parent);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
     pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, parent);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
@@ -165,6 +165,7 @@ QWidget *Window::setupStartPage(QWidget *parent) {
 
     btnStart = new QPushButton(parent);
     btnStart->setObjectName(QString::fromUtf8("btnStart"));
+    btnStart->setDisabled(true);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
@@ -350,17 +351,9 @@ void Window::timerEvent(QTimerEvent *) {
 }
 
 void Window::eNewData(double pData, double oData) {
-    // TODO: calculation does not belong here, just for now
-    double ambientV = 0.710; //0.675 # from calibration
-    double mmHg_per_kPa = 7.5006157584566; // from literature
-    double kPa_per_V = 50.0; // 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
-    double corrFact = 2.50; // from calibration
-    double ymmHg = (pData - ambientV) * mmHg_per_kPa * kPa_per_V * corrFact;
-
-    //TODO: depending on screen state?
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
-    meter->setValue(ymmHg);
+    meter->setValue(pData); //TODO: maybe meter should be shown all the time?
 }
 
 void Window::eSwitchScreen(Screen eScreen) {
@@ -389,6 +382,10 @@ void Window::eResults(double map, double sbp, double dbp) {
     lMAPval->setText( QString::number(map) + " mmHg" );
     lSBPval->setText( QString::number(sbp) + " mmHg" );
     lDBPval->setText( QString::number(dbp) + " mmHg");
+}
+
+void Window::eReady() {
+    btnStart->setDisabled(false);
 }
 
 void Window::clkBtnStart(){

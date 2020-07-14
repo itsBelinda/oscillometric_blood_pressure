@@ -35,6 +35,7 @@ private:
     void eNewData(double pData, double oData) override;
     void eSwitchScreen(Screen eScreen) override;
     void eResults(double map, double sbp, double dbp) override;
+    void eReady() override;
 
     void setupUi(QMainWindow *window);
     QWidget * setupPlots(QWidget *parent);
@@ -101,6 +102,7 @@ private slots:
     void clkBtn3();
     void clkBtn4();
     void clkBtn5();
+
 };
 
 

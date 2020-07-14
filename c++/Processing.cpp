@@ -16,10 +16,11 @@ Processing::Processing() :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
         bRunning(false),
-        bMeasuring(false){
+        bMeasuring(false) {
 
     PLOG_VERBOSE << "Processing started";
 
+    currentState = ProcState::Idle;
     comedi = new ComediHandler();
 
     sampling_rate = comedi->getSamplingRate(); //TODO: calculation seems to be wrong, setting manually for now
@@ -45,6 +46,9 @@ Processing::~Processing() {
     stopThread();
 }
 
+void Processing::setAmbientVoltage(double voltage){
+    ambientVoltage = voltage;
+}
 
 void Processing::run() {
 
@@ -56,11 +60,8 @@ void Processing::run() {
     while (bRunning) {
         if (comedi->getBufferContents() > 0) {
 
-            double y = comedi->getVoltageSample();
-            addSample(y);
-            if (bMeasuring) {
-                //TODO: do not just save data, but "process" it
-            }
+            processSample(comedi->getVoltageSample());
+
         } else {
             // If there was no data in the buffer, sleep for 1ms.
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -74,21 +75,6 @@ void Processing::stopThread() {
     bRunning = false;
 }
 
-void Processing::addSample(double sample) {
-//        ambientV = 0.710#0.675 # from calibration
-//        mmHg_per_kPa = 7.5006157584566 # from literature
-//        kPa_per_V = 50 # 20mV per 1kPa / 0.02 or * 50 - from sensor datasheet
-//        corrFact = 2.50 # from calibration
-//
-//        ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
-    double yLP = iirLP->filter(sample);
-    double yHP = iirHP->filter(yLP);
-    pData.push_back(yLP);
-    oData.push_back(yHP);
-
-    notifyNewData(yLP, yHP);
-
-}
 
 /**
  * Starts a new measurment.
@@ -98,20 +84,21 @@ void Processing::startMeasurement() {
     oData.clear();
     bMeasuring = true;
 }
+
 /**
  * Stops the measurement and saves the data to a file.
  */
 void Processing::stopMeasurement() {
-    if(bMeasuring)
-    {
+    if (bMeasuring) {
         bMeasuring = false;
         record->saveAll(Processing::getFilename(), pData);
     }
 }
+
 /**
  * Stops the measurement, but without saving the data.
  */
-void Processing::resetMeasurement(){
+void Processing::resetMeasurement() {
     bMeasuring = false;
 }
 
@@ -120,4 +107,92 @@ QString Processing::getFilename() {
     QString dateTimeString = dateTime.toString("yyyy-MM-dd_hh:mm:ss");
     dateTimeString.append("_test.dat");
     return dateTimeString;
+}
+
+void Processing::processSample(double newSample) {
+
+    /**
+     * Every sample is filtered and sent to the Observers
+     */
+    double yLP = iirLP->filter(newSample);
+    double yHP = iirHP->filter(yLP);
+    double ymmHg = getmmHgValue(yLP);
+
+    notifyNewData(ymmHg, yHP);
+
+
+    switch (currentState) {
+        case ProcState::Idle:
+            //TODO: here I am using the "raw" voltage data, i am missusing the data buffer,
+            // this will not cause problems, as long as it is reset afterwards,
+            pData.push_back(yLP);
+            // detect ambient pressure,
+            if (checkAmbient()) {
+                //enable Start button
+                notifyReady();
+            }
+            //TODO: only enable start button if successfully detected
+            break;
+        case ProcState::Inflate:
+            pData.push_back(ymmHg);
+            oData.push_back(yHP);
+            /**
+             * Check if the pressure in the cuff is big enough yet.
+             * If so, change to the next state.
+             */
+            if (ymmHg > mmHgInflate) {
+
+                notifySwitchScreen(Screen::deflateScreen);
+                // TODO: possibly add entry end exit functions for each state
+                // function: switch state: returns new state
+                // performs entry and exit operations (notifications)
+                // would that work with the state class being a friendly to Processing?
+                currentState = ProcState::Deflate;
+            }
+            break;
+        case ProcState::Deflate:
+            pData.push_back(ymmHg);
+            oData.push_back(yHP);
+            /**
+             * THIS IS WHERE THE MAGIC HAPPENS:
+             * detect max/min in oscillations, possibly more (other algorithms)
+             */
+            break;
+        case ProcState::Calculate:
+            pData.push_back(ymmHg);
+            oData.push_back(yHP);
+            /**
+             * Some more magic here:
+             * reverse search of ratios in recorded data set since deflate
+             */
+            break;
+
+    }
+
+
+}
+
+double Processing::getmmHgValue(double voltageValue) {
+    return ((voltageValue - ambientVoltage) * mmHg_per_kPa * kPa_per_V * corrFactor);
+}
+
+bool Processing::checkAmbient() {
+    bool bAmbientValid = false;
+
+    if (pData.size() == AMBIENT_AV_TIME) {
+        double av = 1.0 * std::accumulate(pData.begin(), pData.end(), 0.0) / pData.size();
+        double max = *std::max_element(pData.begin(), pData.end());
+        auto min = *std::min_element(pData.begin(), pData.end());
+        std::cout << "min: " << min << " max: " << max << " av: " << av << std::endl;
+        PLOG_VERBOSE << "min: " << min << " max: " << max << " av: " << av << std::endl;
+        if (std::abs(av - max) < AMBIENT_DEVIATION) {
+            setAmbientVoltage(av);
+            bAmbientValid = true;
+        } else {
+            pData.clear();
+            oData.clear();
+        }
+    }
+
+    return bAmbientValid;
 }
