@@ -15,6 +15,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QFormLayout>
 #include "IObserver.h"
 #include "Plot.h"
 #include "common.h"
@@ -26,11 +27,13 @@ public:
     Window(QWidget *parent = 0);
     ~Window();
 
+
 protected:
     void timerEvent(QTimerEvent *e);
 private:
     void eNewData(double pData, double oData) override;
     void eSwitchScreen(Screen eScreen) override;
+    void eResults(double map, double sbp, double dbp) override;
 
     void setupUi(QMainWindow *window);
     QWidget * setupPlots(QWidget *parent);
@@ -42,8 +45,6 @@ private:
 
     void retranslateUi(QMainWindow *MainWindow);
 
-
-    // GUI elements, (probably to be moved to separate class)
 
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
@@ -61,6 +62,7 @@ private:
     QVBoxLayout *vlRelease;
     QVBoxLayout *vlDeflate;
     QVBoxLayout *vlResult;
+    QFormLayout *flResults;
     QVBoxLayout *vlRight;
     QSpacerItem *vSpace1;
     QSpacerItem *vSpace2;
@@ -68,8 +70,6 @@ private:
     QSpacerItem *vSpace4;
     QSpacerItem *vSpace5;
     QSpacerItem *vSpace6;
-//    QTextBrowser *ibStart;
-//    QTextBrowser *infoBox;
     QLabel *lInfoStart;
     QLabel *lInfoPump;
     QLabel *lInfoRelease;
@@ -78,6 +78,12 @@ private:
     QwtDial *meter;
     QPushButton *btnStart;
     QPushButton *btnReset;
+    QLabel *lMAP;
+    QLabel *lMAPval;
+    QLabel *lSBP;
+    QLabel *lSBPval;
+    QLabel *lCBP;
+    QLabel *lDBPval;
     QLabel *lTitlePlotRaw;
     QLabel *lTitlePlotOsc;
     Plot *pltPre;

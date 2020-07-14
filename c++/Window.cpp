@@ -23,7 +23,6 @@ Window::~Window() {
 
 }
 
-
 void Window::setupUi(QMainWindow *window) {
     if (window->objectName().isEmpty())
         window->setObjectName(QString::fromUtf8("MainWindow"));
@@ -267,11 +266,37 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     lInfoResult->setAlignment(Qt::AlignCenter);
 
     btnReset = new QPushButton(parent);
-    btnStart->setObjectName(QString::fromUtf8("btnReset"));
+    btnReset->setObjectName(QString::fromUtf8("btnReset"));
+
+    flResults = new QFormLayout();
+    flResults->setObjectName(QString::fromUtf8("flResults"));
+    lMAP = new QLabel(parent);
+    lMAP->setObjectName(QString::fromUtf8("lMAP"));
+    lMAP->setMinimumSize(QSize(100, 0));
+    lMAPval = new QLabel(parent);
+    lMAPval->setObjectName(QString::fromUtf8("lMAPval"));
+    lSBP = new QLabel(parent);
+    lSBP->setObjectName(QString::fromUtf8("lSBP"));
+    lSBPval = new QLabel(parent);
+    lSBPval->setObjectName(QString::fromUtf8("lSBPval"));
+    lCBP = new QLabel(parent);
+    lCBP->setObjectName(QString::fromUtf8("lCBP"));
+    lDBPval = new QLabel(parent);
+    lDBPval->setObjectName(QString::fromUtf8("lDBPval"));
+
+    flResults->setWidget(0, QFormLayout::LabelRole, lMAP);
+    flResults->setWidget(0, QFormLayout::FieldRole, lMAPval);
+    flResults->setWidget(1, QFormLayout::LabelRole, lSBP);
+    flResults->setWidget(1, QFormLayout::FieldRole, lSBPval);
+    flResults->setWidget(2, QFormLayout::LabelRole, lCBP);
+    flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
+    flResults->setContentsMargins(50,0,50,0);
 
     vlResult->addWidget(lInfoResult);
+    vlResult->addLayout(flResults);
     vlResult->addWidget(btnReset);
     lInstrResult->setLayout(vlResult);
+
     return lInstrResult;
 }
 
@@ -280,7 +305,7 @@ void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
 
     lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
-                        "1. Put the cuff on your upper arm of your unfavoured hand, making sure it is tight."
+                        "1. Put the cuff on your upper arm of your unfavoured hand, making sure it is tight.<br>"
                         "2. Rest your arm on a flat surface.<br>"
                         "3. Take the pump into your favoured hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily."
@@ -299,11 +324,15 @@ void Window::retranslateUi(QMainWindow *window) {
                           "You will see the results next.");
     lInfoResult->setText("<b>Results:</b><br><br>"
                          "Click Reset to start a new measurement<br>");
-    btnStart->setText(QApplication::translate("MainWindow", "Start ", nullptr));
-    btnReset->setText("Reset");
-    lTitlePlotRaw->setText(QApplication::translate("TestWindow", "Title of Plot 1: Pressure", nullptr));
-    lTitlePlotOsc->setText(QApplication::translate("TestWindow", "Title of Plot 2: Oscillogram", nullptr));
 
+    btnStart->setText("Start");
+    btnReset->setText("Reset");
+    lMAP->setText("MAP:");
+    lMAPval->setText("- mmHg" );
+    lSBP->setText("SPB:");
+    lSBPval->setText("- mmHg" );
+    lCBP->setText("DBP:");
+    lDBPval->setText("- mmHg");
 
 }
 
@@ -347,6 +376,13 @@ void Window::eSwitchScreen(Screen eScreen) {
             lInstructions->setCurrentIndex(4);
             break;
     }
+}
+
+void Window::eResults(double map, double sbp, double dbp) {
+
+    lMAPval->setText( QString::number(map) + " mmHg" );
+    lSBPval->setText( QString::number(sbp) + " mmHg" );
+    lDBPval->setText( QString::number(dbp) + " mmHg");
 }
 
 //TODO: remove those after debugging

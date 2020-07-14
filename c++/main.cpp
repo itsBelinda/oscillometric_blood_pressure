@@ -19,7 +19,6 @@
 
 int main(int argc, char **argv) {
 
-    //TODO: possibly add time to log file, so no overwrites happen, for now overwrites are preferred.
     plog::init(plog::verbose, "log.csv", 1000000, 5);
 
     PLOG_VERBOSE << "Application started.";
