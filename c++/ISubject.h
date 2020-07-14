@@ -27,6 +27,7 @@ public:
                       });
     }
 
+
     virtual void notifySwitchScreen(Screen eScreen) {
         std::for_each(observerList.begin(), observerList.end(),
                       [eScreen](IObserver *observer) {
@@ -34,6 +35,12 @@ public:
                       });
     }
 
+    virtual void notifyResults(double map, double sbp, double obp) {
+        std::for_each(observerList.begin(), observerList.end(),
+                      [map, sbp, obp](IObserver *observer) {
+                          observer->eResults(map, sbp, obp);
+                      });
+    }
 private:
     std::list<IObserver *> observerList;
 
