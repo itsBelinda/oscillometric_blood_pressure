@@ -136,7 +136,7 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
     pltPre = new Plot(xData, yLPData, dataLength, 250, 0.0, parent);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
-    pltOsc = new Plot(xData, yHPData, dataLength, 0.5, -0.5, parent);
+    pltOsc = new Plot(xData, yHPData, dataLength, 0.003, -0.003, parent);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
 
     // build right side of window
@@ -316,7 +316,7 @@ void Window::retranslateUi(QMainWindow *window) {
                         "1. Put the cuff on your upper arm of your unfavoured hand, making sure it is tight.<br>"
                         "2. Rest your arm on a flat surface.<br>"
                         "3. Take the pump into your favoured hand.<br>"
-                        "4. Make sure the valve is closed, but you can handle it easily."
+                        "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready."
                         "<br><br> <i>Picture missing</i><br>");
     lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"

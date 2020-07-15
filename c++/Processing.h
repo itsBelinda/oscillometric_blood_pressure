@@ -43,8 +43,18 @@ private:
     void processSample(double newSample);
     double getmmHgValue(double voltageValue);
     bool checkAmbient();
-    std::vector<double> pData;// = std::vector<double>(122880);
-    std::vector<double> oData;// = std::vector<double>(122880);
+    void checkMaxima(double newOscData);
+    void checkMinima(double newOscData);
+    std::vector<double> nData;
+    std::vector<double> pData;
+    std::vector<double> oData;
+    double lastTimeMax;
+    double lastDataMax;
+    //TODO: std::map?
+    std::vector<double> maxtime;
+    std::vector<double> mintime;
+    std::vector<double> maxAmp;
+    std::vector<double> minAmp;
 
     Iir::Butterworth::LowPass<IIRORDER> *iirLP;
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
@@ -62,7 +72,7 @@ private:
     const double kPa_per_V = 50; // data sheet
 
     double sampling_rate = 1000.0;
-    double mmHgInflate = 30.0;
+    double mmHgInflate = 180.0;
     double ambientVoltage = 0.65;
     double corrFactor = 2.5; // due to voltage divider
 

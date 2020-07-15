@@ -13,6 +13,7 @@
 
 
 Processing::Processing() :
+        nData(DEFAULT_DATA_SIZE),
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
         bRunning(false),
@@ -46,7 +47,7 @@ Processing::~Processing() {
     stopThread();
 }
 
-void Processing::setAmbientVoltage(double voltage){
+void Processing::setAmbientVoltage(double voltage) {
     ambientVoltage = voltage;
 }
 
@@ -59,7 +60,8 @@ void Processing::run() {
     double i = 0.6;
     while (bRunning) {
         if (comedi->getBufferContents() > 0) {
-
+            // TODO: move this into separate "algorithm class" that
+            // can process a single sample and make it testable?
             processSample(comedi->getVoltageSample());
 
         } else {
@@ -77,7 +79,7 @@ void Processing::stopThread() {
 
 
 /**
- * Starts a new measurment.
+ * Starts a new measurement.
  */
 void Processing::startMeasurement() {
     PLOG_VERBOSE << "start Measurement";
@@ -122,8 +124,11 @@ void Processing::processSample(double newSample) {
 
 
     switch (currentState) {
+        /**
+         * Configure the ambient pressure.
+         */
         case ProcState::Config:
-            //TODO: here I am using the "raw" voltage data, i am missusing the data buffer,
+            //TODO: here I am using the "raw" voltage data, i am miss-using the data buffer,
             // this will not cause problems, as long as it is reset afterwards,
             // detect ambient pressure,
             if (checkAmbient()) {
@@ -132,18 +137,21 @@ void Processing::processSample(double newSample) {
                 notifyReady();
                 pData.clear();
 
-            }
-            else {
+            } else {
                 pData.push_back(yLP);
             }
 
             break;
 
+            /**
+             * Waiting for user to start the measurement.
+             */
         case ProcState::Idle:
 
-            if( bMeasuring ) {
+            if (bMeasuring) {
                 currentState = ProcState::Inflate;
                 //TODO: should be empty
+                nData.clear();
                 pData.clear();
                 oData.clear();
             }
@@ -151,7 +159,7 @@ void Processing::processSample(double newSample) {
             break;
         case ProcState::Inflate:
             pData.push_back(ymmHg);
-            oData.push_back(yHP);
+//            oData.push_back(yHP) //TODO: no need to record this here.
             /**
              * Check if the pressure in the cuff is big enough yet.
              * If so, change to the next state.
@@ -173,6 +181,7 @@ void Processing::processSample(double newSample) {
              * THIS IS WHERE THE MAGIC HAPPENS:
              * detect max/min in oscillations, possibly more (other algorithms)
              */
+            checkMaxima(yHP);
             break;
         case ProcState::Calculate:
             pData.push_back(ymmHg);
@@ -211,4 +220,27 @@ bool Processing::checkAmbient() {
     }
 
     return bAmbientValid;
+}
+
+/**
+ * Checks a new sample if it is a local maxima and puts it in a vector to hold all local maxima,
+ * together with a reference to the 'time' (sample number) it was recorded.
+ * @param newOscData
+ */
+void Processing::checkMaxima(double newOscData) {
+    static double lastdetect = 0.0;
+    if (oData.size() > 200) {
+        if (newOscData > 0.001) {
+            auto i = std::max_element((oData.end()-200),oData.end());
+            if( (i != oData.end()) &&( i != (oData.end()-200)) && (*i != lastdetect) ) {
+                lastdetect = *i;
+                std::cout << "time: " << (pData.size()/1000.0) << " osc value: " << *i << std::endl;
+            }
+        }
+
+    }
+}
+
+void Processing::checkMinima(double newOscData) {
+
 }
