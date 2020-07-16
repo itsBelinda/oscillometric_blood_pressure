@@ -46,8 +46,9 @@ private:
     void processSample(double newSample);
     double getmmHgValue(double voltageValue);
     bool checkAmbient();
-    void checkMaxima(double newOscData);
+    bool checkMaxima(double newOscData);
     void checkMinima(double newOscData);
+    bool isPastDBP();
 
     bool isPulseValid( double pulse );
     std::vector<double> nData;
