@@ -36,6 +36,9 @@ public:
 
     void setAmbientVoltage(double voltage);
 
+    static int maxValidPulse;
+    static int minValidPulse;
+    static double maxPulseChange;
 private:
     void run() override;
     void resetMeasurement();
@@ -45,15 +48,18 @@ private:
     bool checkAmbient();
     void checkMaxima(double newOscData);
     void checkMinima(double newOscData);
+
+    bool isPulseValid( double pulse );
     std::vector<double> nData;
     std::vector<double> pData;
     std::vector<double> oData;
     unsigned long lastTimeMax;
     double lastDataMax;
     double currentPulse;
+    double avPulse;
     //TODO: std::map?
-    std::vector<double> maxtime;
-    std::vector<double> mintime;
+    std::vector<int> maxtime;
+    std::vector<int> mintime;
     std::vector<double> maxAmp;
     std::vector<double> minAmp;
 

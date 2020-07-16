@@ -228,25 +228,71 @@ bool Processing::checkAmbient() {
  * @param newOscData
  */
 void Processing::checkMaxima(double newOscData) {
+    static int validPulseCnt = 0;
 
-    static double lastdetect = 0.0;
 
-    if (oData.size() > 1200) { // ignores the first second
+    if (oData.size() > 1200) { // ignores the first second or so
 
-        if (newOscData > 0.0005) {
-            auto i = std::max_element((oData.end()-3),oData.end());
+//        if (newOscData > 0.000) {
+//TODO: calculating each time too much? use FIR filter?
+        //double movingAV = std::accumulate(oData.end() - 1000, oData.end(), 0.0) / 1000;
+        if (newOscData > 0.0005 ) {
+            auto i = std::max_element((oData.end() - 3), oData.end());
+            double testingSample = *(oData.end() - 1);
 
-            if ((std::distance( i, oData.end() ) == 1))  { // checks if the result is the last entry
+            if ((std::distance(i, oData.end()) == 1)) { // checks if the result is the last entry
                 //std::cout << "rising.. " << std::endl;
-            }
-            else if (std::distance( i, oData.end() ) == 3){
+            } else if (std::distance(i, oData.end()) == 3) {
                 //std::cout << "falling.. " << std::endl; // checks if the result is the first entry
+            } else { // otherwise, the result is the middle entry
+
+                if( !maxtime.empty() ) {
+                    //time since last max is <0.3s and the new sample is larger: replace the old value
+                    if(((oData.size() - 1 - maxtime.back()) < 300) && maxAmp.back() < testingSample ){
+                        maxAmp.back() = testingSample;
+                        maxtime.back() = (oData.size() - 1);
+                        std::cout << "replaced: ";
+                    }
+                } else
+                {
+                    maxtime.push_back(oData.size() - 1);
+                    maxAmp.push_back(testingSample);
+                }
+
+                assert( !maxtime.empty() );
+                assert( !maxAmp.empty() );
+                double newPulse = 60000.0 / (double) (oData.size() - 1 - maxtime.back() );
+
+                std::cout << "pulse: " << newPulse << " time: " << (maxtime.back() / 1000.0) << " osc value: "
+                          << maxAmp.back() << std::endl;
+                if (isPulseValid(newPulse)) {
+//                    avPulse = (avPulse + newPulse) / 2;
+                    currentPulse = newPulse;
+                    validPulseCnt++;
+                    std::cout << "valid pulse: " << currentPulse << std::endl;
+                    maxAmp.push_back( *(oData.end() - 1));
+                    maxtime.push_back( oData.size() - 1 );
+
+                } else {
+                    validPulseCnt = 0;
+                    maxAmp.clear();
+                    maxtime.clear();
+                    maxtime.push_back(oData.size() - 1);
+                    maxAmp.push_back(testingSample);
+                }
+
+                if(validPulseCnt > 5){
+                    std::cout << "average pulse: " << currentPulse << std::endl;
+
+                }
+//                lastTimeMax = oData.size() - 1;
+//                lastDataMax = *(oData.end() - 1);
+//                if( !maxtime.empty() && !maxAmp.empty()) {
+//                    std::cout << "pulse: " << currentPulse << " time: " << (maxtime.back() / 1000.0) << " osc value: "
+//                              << maxAmp.back() << std::endl;
+//                }
             }
-            else { // otherwise, the result is the middle entry
-                currentPulse = 60000.0/(double)(oData.size()-1 -lastTimeMax);
-                lastTimeMax = oData.size()-1;
-                lastDataMax = *(oData.end()-1);
-                std::cout << "pulse: " <<  currentPulse << " time: " << (lastTimeMax/1000.0) << " osc value: " << lastDataMax << std::endl;
+
 
 //                if( ((oData.size()-1) - lastTimeMax) < 300){
 //
@@ -257,7 +303,7 @@ void Processing::checkMaxima(double newOscData) {
 //                    std::cout << "time: " << (lastTimeMax/1000.0) << " osc value: " << lastDataMax << std::endl;
 //                }
 
-            }
+//            }
 
         }
 
@@ -292,4 +338,29 @@ void Processing::checkMaxima(double newOscData) {
 
 void Processing::checkMinima(double newOscData) {
 
+}
+
+int Processing::maxValidPulse{100};
+int Processing::minValidPulse{50};
+double Processing::maxPulseChange{0.15};
+
+bool Processing::isPulseValid(double pulse) {
+    bool isValid = false;
+
+    if (minValidPulse <= pulse && pulse <= maxValidPulse) {
+//        if( currentPulse != 0.0) {
+//            double diff = ((pulse - currentPulse) * 100) / currentPulse;
+//            if (diff < maxPulseChange) {
+//                isValid = true;
+//            }
+//        }
+//        else {
+        isValid = true;
+//        }
+    } else {
+        // If the detected pulse is out of bounds, reset the current pulse
+        //currentPulse = 0.0;
+    }
+
+    return isValid;
 }
