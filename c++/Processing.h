@@ -19,7 +19,7 @@ class Processing : public CppThread, public ISubject{
     enum class ProcState {
         Config,
         Idle,
-        Inflate,
+        Inflate, //possilbly: wait for smallest oscillatin
         Deflate,
         Calculate,
     };
@@ -48,8 +48,9 @@ private:
     std::vector<double> nData;
     std::vector<double> pData;
     std::vector<double> oData;
-    double lastTimeMax;
+    unsigned long lastTimeMax;
     double lastDataMax;
+    double currentPulse;
     //TODO: std::map?
     std::vector<double> maxtime;
     std::vector<double> mintime;

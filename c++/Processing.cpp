@@ -228,17 +228,66 @@ bool Processing::checkAmbient() {
  * @param newOscData
  */
 void Processing::checkMaxima(double newOscData) {
+
     static double lastdetect = 0.0;
-    if (oData.size() > 200) {
-        if (newOscData > 0.001) {
-            auto i = std::max_element((oData.end()-200),oData.end());
-            if( (i != oData.end()) &&( i != (oData.end()-200)) && (*i != lastdetect) ) {
-                lastdetect = *i;
-                std::cout << "time: " << (pData.size()/1000.0) << " osc value: " << *i << std::endl;
+
+    if (oData.size() > 1200) { // ignores the first second
+
+        if (newOscData > 0.0005) {
+            auto i = std::max_element((oData.end()-3),oData.end());
+
+            if ((std::distance( i, oData.end() ) == 1))  { // checks if the result is the last entry
+                //std::cout << "rising.. " << std::endl;
             }
+            else if (std::distance( i, oData.end() ) == 3){
+                //std::cout << "falling.. " << std::endl; // checks if the result is the first entry
+            }
+            else { // otherwise, the result is the middle entry
+                currentPulse = 60000.0/(double)(oData.size()-1 -lastTimeMax);
+                lastTimeMax = oData.size()-1;
+                lastDataMax = *(oData.end()-1);
+                std::cout << "pulse: " <<  currentPulse << " time: " << (lastTimeMax/1000.0) << " osc value: " << lastDataMax << std::endl;
+
+//                if( ((oData.size()-1) - lastTimeMax) < 300){
+//
+//                }
+//                else{
+//                    lastTimeMax = oData.size()-1;
+//                    lastDataMax = *(oData.end()-1);
+//                    std::cout << "time: " << (lastTimeMax/1000.0) << " osc value: " << lastDataMax << std::endl;
+//                }
+
+            }
+
         }
 
     }
+
+//    if (!oData.size() ) {
+//        if (newOscData > 0.001) {
+//
+//        } else {
+//            if (maxAmp.empty()) {
+//                maxAmp.push_back(lastDataMax);
+//                maxtime.push_back(lastTimeMax);
+//                std::cout << " max first: " << lastDataMax << " sample: " << lastTimeMax << std::endl;
+//            } else {
+//                if(lastTimeMax != *maxtime.end()) {
+//                    if ((lastTimeMax - *maxtime.end()) > MIN_HEART_TIME) {
+//                        maxAmp.push_back(lastDataMax);
+//                        maxtime.push_back(lastTimeMax);
+//                        std::cout << " max: " << lastDataMax << " sample: " << lastTimeMax << std::endl;
+//                    } else {
+//                        if (*maxAmp.end() > lastDataMax) {
+//                            maxAmp.back() = lastDataMax;
+//                            maxtime.back() = lastTimeMax;
+//                            std::cout << " max replaced: " << lastDataMax << " sample: " << lastTimeMax << std::endl;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
 
 void Processing::checkMinima(double newOscData) {
