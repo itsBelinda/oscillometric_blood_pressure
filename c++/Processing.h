@@ -51,6 +51,7 @@ private:
     bool isPastDBP();
 
     bool isPulseValid( double pulse );
+    bool isValidMaxima();
     std::vector<double> nData;
     std::vector<double> pData;
     std::vector<double> oData;
