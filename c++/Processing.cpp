@@ -93,7 +93,8 @@ void Processing::startMeasurement() {
 void Processing::stopMeasurement() {
     if (bMeasuring) {
         bMeasuring = false;
-        record->saveAll(Processing::getFilename(), pData);
+        // TODO: make dependant on user selection
+        record->saveAll(Processing::getFilename(), rawData);
     }
 }
 
@@ -154,11 +155,13 @@ void Processing::processSample(double newSample) {
                 nData.clear();
                 pData.clear();
                 oData.clear();
+                rawData.clear();
             }
             //TODO: only enable start button if successfully detected
             break;
         case ProcState::Inflate:
             pData.push_back(ymmHg);
+            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
 //            oData.push_back(yHP) //TODO: no need to record this here.
             /**
              * Check if the pressure in the cuff is big enough yet.
@@ -176,25 +179,30 @@ void Processing::processSample(double newSample) {
             break;
         case ProcState::Deflate:
             pData.push_back(ymmHg);
+            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
             oData.push_back(yHP);
             /**
              * THIS IS WHERE THE MAGIC HAPPENS:
              * detect max/min in oscillations, possibly more (other algorithms)
              */
             if (checkMaxima(yHP)) {
+                checkMinima();
                 if (isPastDBP()) {
                     currentState = ProcState::Calculate;
-
                     notifySwitchScreen(Screen::emptyCuffScreen);
+
                 }
             }
             break;
         case ProcState::Calculate:
+
             pData.push_back(ymmHg); //keep filling the values until zero is reached
+            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
             if (ymmHg < 1) {
                 stopMeasurement();
                 notifySwitchScreen(Screen::resultScreen);
             }
+
             /**
              * Some more magic here:
              * reverse search of ratios in recorded data set since deflate
@@ -224,6 +232,7 @@ bool Processing::checkAmbient() {
             bAmbientValid = true;
         } else {
             pData.clear();
+            rawData.clear();
             oData.clear();
         }
     }
@@ -255,7 +264,41 @@ bool Processing::checkMaxima(double newOscData) {
     return isValid;
 }
 
-void Processing::checkMinima(double newOscData) {
+void Processing::checkMinima() {
+    if(maxAmp.size() >= 2 ){
+        //TODO: easier?
+        // get sub vector of oData from second last to last max value
+        std::vector<double>::const_iterator firstMax = oData.begin() + *(maxtime.end()-2);
+        std::vector<double>::const_iterator lastMax = oData.begin() + maxtime.back();//*(maxtime.end()-1)
+        std::vector<double> newVec(firstMax, lastMax);
+
+        // find minimal value in between
+        auto iter = std::min_element(newVec.begin(),newVec.end());
+
+        auto dist = std::distance(oData.begin(), iter);
+//        auto iter = std::min_element(&oData[*(maxtime.end()-2)], &oData[maxtime.back()]);
+//
+//        auto dist = std::distance(oData[*(maxtime.end()-2)], iter);
+//        mintime.push_back(*(maxtime.end()-2) + dist );
+
+        if( mintime.size() == maxtime.size()){
+            minAmp.back() =  *iter ;
+            mintime.back() =  dist ;
+//            std::cout << *iter << " replaced\n";
+        }else{
+            minAmp.push_back( *iter );
+            mintime.push_back( dist );
+//            std::cout << *iter << " appended\n";
+        }
+        //check:
+//        if( oData[mintime.back()] == *iter ){
+//            std::cout << *iter << " the same\n";
+//        }
+//        else {
+//            std::cout << *iter << " iter " << oData[mintime.back()] << "\n";
+//
+//        }
+    }
 
 }
 
@@ -302,9 +345,9 @@ bool Processing::isValidMaxima() {
         //time since last max is <0.3s and the new sample is larger: replace the old value
         if ((testingTime - maxtime.back()) < 300) {
             if (maxAmp.back() < testingSample) {
-                // size should not change here, but aprarently does:
                 maxAmp.back() = testingSample;
                 maxtime.back() = testingTime;
+//                std::cout << maxAmp.back() << " replaced\n";
             } else {
                 // skip this maxima, it's too quick after the last one, but smaller
                 // no new maxima detected, finish function with old values.
@@ -324,6 +367,7 @@ bool Processing::isValidMaxima() {
             if (isPulseValid(newPulse)) {
                 currentPulse = newPulse;
                 validPulseCnt++;
+                isValid = true;
             } else {
                 PLOG_INFO << "invalid pulse after " << validPulseCnt << " valid ones" << std::endl;
                 validPulseCnt = 0;
@@ -331,9 +375,10 @@ bool Processing::isValidMaxima() {
                 maxtime.clear();
                 maxtime.push_back(testingTime);
                 maxAmp.push_back(testingSample);
+                isValid = false;
             }
 
-            if (validPulseCnt > 5) {
+            if (validPulseCnt > 5) { //TODO: valid counting not needed anymore
                 isValid = true;
             }
         }

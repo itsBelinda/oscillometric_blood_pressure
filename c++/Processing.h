@@ -12,7 +12,7 @@
 #include "ISubject.h"
 #include "ComediHandler.h"
 
-#define IIRORDER 6
+#define IIRORDER 4
 
 class Processing : public CppThread, public ISubject{
 
@@ -47,13 +47,14 @@ private:
     double getmmHgValue(double voltageValue);
     bool checkAmbient();
     bool checkMaxima(double newOscData);
-    void checkMinima(double newOscData);
+    void checkMinima();
     bool isPastDBP();
 
     bool isPulseValid( double pulse );
     bool isValidMaxima();
     std::vector<double> nData;
     std::vector<double> pData;
+    std::vector<double> rawData;
     std::vector<double> oData;
     unsigned long lastTimeMax;
     double lastDataMax;
