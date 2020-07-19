@@ -281,7 +281,7 @@ void Processing::checkMinima() {
 //        auto dist = std::distance(oData[*(maxtime.end()-2)], iter);
 //        mintime.push_back(*(maxtime.end()-2) + dist );
 
-        if( mintime.size() == maxtime.size()){
+        if( mintime.size() == (maxtime.size()-1)){
             minAmp.back() =  *iter ;
             mintime.back() =  dist ;
 //            std::cout << *iter << " replaced\n";
@@ -373,6 +373,8 @@ bool Processing::isValidMaxima() {
                 validPulseCnt = 0;
                 maxAmp.clear();
                 maxtime.clear();
+                minAmp.clear();
+                mintime.clear();
                 maxtime.push_back(testingTime);
                 maxAmp.push_back(testingSample);
                 isValid = false;
