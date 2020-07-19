@@ -1,6 +1,7 @@
 #include "Plot.h"
 
-int Plot::nextPenColour = (int) Qt::green;
+//TODO: use static declaration
+int Plot::nextPenColour = (int) Qt::darkRed;
 
 /**
  * Plot constructor, initialises an empty plot curve with no titles.

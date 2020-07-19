@@ -12,24 +12,59 @@
 #include "ISubject.h"
 #include "ComediHandler.h"
 
-#define IIRORDER 6
+#define IIRORDER 4
 
 class Processing : public CppThread, public ISubject{
 
+    enum class ProcState {
+        Config,
+        Idle,
+        Inflate, //possilbly: wait for smallest oscillatin
+        Deflate,
+        Calculate,
+    };
 
 public:
     Processing();
     ~Processing() override;
 
-    bool bSaveToFile();
     void stopThread();
 
     void startMeasurement();
     void stopMeasurement();
+    inline ProcState getCurrentState() const { return currentState; }
+
+    void setAmbientVoltage(double voltage);
+
+    static int maxValidPulse;
+    static int minValidPulse;
+    static double maxPulseChange;
 private:
     void run() override;
-    std::vector<double> pData;// = std::vector<double>(122880);
-    std::vector<double> oData;// = std::vector<double>(122880);
+    void resetMeasurement();
+    static QString getFilename();
+    void processSample(double newSample);
+    double getmmHgValue(double voltageValue);
+    bool checkAmbient();
+    bool checkMaxima(double newOscData);
+    void checkMinima();
+    bool isPastDBP();
+
+    bool isPulseValid( double pulse );
+    bool isValidMaxima();
+    std::vector<double> nData;
+    std::vector<double> pData;
+    std::vector<double> rawData;
+    std::vector<double> oData;
+    unsigned long lastTimeMax;
+    double lastDataMax;
+    double currentPulse;
+    double avPulse;
+    //TODO: std::map?
+    std::vector<int> maxtime;
+    std::vector<int> mintime;
+    std::vector<double> maxAmp;
+    std::vector<double> minAmp;
 
     Iir::Butterworth::LowPass<IIRORDER> *iirLP;
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
@@ -38,27 +73,22 @@ private:
     ComediHandler *comedi;
     bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
     bool bMeasuring;
-
-
-//TODO: move to comedi class?
+    ProcState currentState;
 
     /**
-   * file descriptor for /dev/comedi0
-   **/
-    comedi_cmd comediCommand;
-    comedi_t *dev;
-    size_t readSize;
-    bool sigmaBoard;//TODO: warning, if not sigma board
-    lsampl_t maxdata;
-    comedi_range *crange;
-    double sampling_rate;
+     * Important data acquisition values
+     */
+    const double mmHg_per_kPa = 7.5006157584566; // literature
+    const double kPa_per_V = 50; // data sheet
 
-    int numChannels;
-    unsigned *chanlist;
+    double sampling_rate = 1000.0;
+    double mmHgInflate = 180.0;
+    double ambientVoltage = 0.65;
+    double corrFactor = 2.5; // due to voltage divider
 
-    void addSample(double sample);
+    double ratio_SBP = 0.57;    // from literature, might be changed in settings later
+    double ratio_DBP = 0.75;    // from literature, might be changed in settings later
 
-    static QString getFilename();
 };
 
 
