@@ -47,8 +47,10 @@ private:
     double getmmHgValue(double voltageValue);
     bool checkAmbient();
     bool checkMaxima(double newOscData);
-    void checkMinima();
+    void findMinima();
+    void findMAP();
     bool isPastDBP();
+    double getRatio(double lowerBound, double upperBound, double value);
 
     bool isPulseValid( double pulse );
     bool isValidMaxima();
@@ -56,6 +58,7 @@ private:
     std::vector<double> pData;
     std::vector<double> rawData;
     std::vector<double> oData;
+    std::vector<double> omveData;
     unsigned long lastTimeMax;
     double lastDataMax;
     double currentPulse;

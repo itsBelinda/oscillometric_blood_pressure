@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <iomanip>
+#include <cmath>
 
 #include <QtCore/QDateTime>
 
@@ -40,6 +41,7 @@ Processing::Processing() :
     oData.clear();
 
     record = new Datarecord(sampling_rate);
+
 }
 
 Processing::~Processing() {
@@ -186,15 +188,19 @@ void Processing::processSample(double newSample) {
              * detect max/min in oscillations, possibly more (other algorithms)
              */
             if (checkMaxima(yHP)) {
-                checkMinima();
+                findMinima();
                 if (isPastDBP()) {
                     currentState = ProcState::Calculate;
+
+                    findMAP();
                     notifySwitchScreen(Screen::emptyCuffScreen);
 
                 }
             }
             break;
         case ProcState::Calculate:
+            //TODO: possibly in a separate thread only for the calculation? or too fast?
+
 
             pData.push_back(ymmHg); //keep filling the values until zero is reached
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
@@ -264,7 +270,9 @@ bool Processing::checkMaxima(double newOscData) {
     return isValid;
 }
 
-void Processing::checkMinima() {
+void Processing::findMinima() {
+
+    //TODO: set error flag if minima is not found
     if(maxAmp.size() >= 2 ){
         //TODO: easier?
         // get sub vector of oData from second last to last max value
@@ -388,3 +396,50 @@ bool Processing::isValidMaxima() {
     return isValid;
 }
 
+
+void Processing::findMAP(){
+//    auto timeMin1 = mintime.cbegin();
+    auto timeMax1 = maxtime.cbegin();
+    auto ampMin1 = minAmp.cbegin();
+    auto ampMax1 = maxAmp.cbegin();
+    // forward iteration use const iterator, because they should not be touched
+    auto start = std::chrono::high_resolution_clock::now();
+    std:: cout << "calculating OMVE: mintime size: " << mintime.size() << std::endl;
+    // forward iteration
+    for (auto timeMin1 = mintime.cbegin(); timeMin1 != mintime.cend(); ++timeMin1) {
+        auto timeMin2 = std::next(timeMin1,1);
+        auto timeMax2 = std::next(timeMax1,1);
+        auto ampMin2 = std::next(ampMin1,1);
+        auto ampMax2 = std::next(ampMax1,1);
+
+//        assert(*timeMin1 < *timeMax1); // something went wrong
+//        assert(*timeMin2 < *timeMax2); // something went wrong
+        PLOG_ERROR << "timing error: min1: " << *timeMin1 << " max1 " << *timeMax1; // something went wrong
+        PLOG_ERROR << "timing error: min2: " << *timeMin2 << " max1 " << *timeMax2; // something went wrong
+
+        auto lerpMax = std::lerp(*ampMax1, *ampMax2, getRatio(*timeMax1, *timeMax2, *timeMin1));
+        auto lerpMin = std::lerp(*ampMin1, *ampMin2, getRatio(*timeMin1, *timeMin2, *timeMax1));
+
+        omveData.push_back(lerpMax - *ampMin1);
+        omveData.push_back(*ampMax2 - lerpMin);
+
+        // Inclreasing all the itterators:c
+        timeMax1++;
+        ampMin1++;
+        ampMax1++;
+    }
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns\n";
+}
+
+/**
+ * Helper function that gets the ratio from a value that is i
+ * @param lowerBound
+ * @param upperBound
+ * @param value
+ * @return
+ */
+double Processing::getRatio(double lowerBound, double upperBound, double value){
+//    assert( value > lowerBound && value < upperBound);
+    return ((upperBound - lowerBound) / (value - lowerBound));
+}
