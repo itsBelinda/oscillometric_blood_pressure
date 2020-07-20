@@ -14,7 +14,7 @@
 
 
 Processing::Processing() :
-        nData(DEFAULT_DATA_SIZE),
+        rawData(DEFAULT_DATA_SIZE), //TODO: cleanup, the only thing needed here really
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
         bRunning(false),
@@ -159,7 +159,7 @@ void Processing::processSample(double newSample) {
                 oData.clear();
                 rawData.clear();
             }
-            //TODO: only enable start button if successfully detected
+
             break;
         case ProcState::Inflate:
             pData.push_back(ymmHg);
@@ -192,21 +192,22 @@ void Processing::processSample(double newSample) {
                 if (isPastDBP()) {
                     currentState = ProcState::Calculate;
 
-                    findMAP();
+                    //TODO: possibly in a separate thread only for the calculation? or too fast? ca 50ms
+                    findOWME();
                     notifySwitchScreen(Screen::emptyCuffScreen);
 
                 }
             }
             break;
         case ProcState::Calculate:
-            //TODO: possibly in a separate thread only for the calculation? or too fast?
-
 
             pData.push_back(ymmHg); //keep filling the values until zero is reached
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
             if (ymmHg < 1) {
+                findMAP();
                 stopMeasurement();
                 notifySwitchScreen(Screen::resultScreen);
+                currentState = ProcState::Idle;
             }
 
             /**
@@ -282,8 +283,13 @@ void Processing::findMinima() {
 
         // find minimal value in between
         auto iter = std::min_element(newVec.begin(),newVec.end());
+        auto iter2 = std::min_element(firstMax,lastMax);
 
-        auto dist = std::distance(oData.begin(), iter);
+        if( iter == iter2) {
+            std::cout << "same "; //TODO: why is this not the same?
+        }
+        auto dist = std::distance(newVec.begin(), iter);
+
 //        auto iter = std::min_element(&oData[*(maxtime.end()-2)], &oData[maxtime.back()]);
 //
 //        auto dist = std::distance(oData[*(maxtime.end()-2)], iter);
@@ -291,11 +297,11 @@ void Processing::findMinima() {
 
         if( mintime.size() == (maxtime.size()-1)){
             minAmp.back() =  *iter ;
-            mintime.back() =  dist ;
+            mintime.back() =  dist + *(maxtime.end()-2);
 //            std::cout << *iter << " replaced\n";
         }else{
             minAmp.push_back( *iter );
-            mintime.push_back( dist );
+            mintime.push_back( dist + *(maxtime.end()-2) );
 //            std::cout << *iter << " appended\n";
         }
         //check:
@@ -397,7 +403,7 @@ bool Processing::isValidMaxima() {
 }
 
 
-void Processing::findMAP(){
+void Processing::findOWME(){
 //    auto timeMin1 = mintime.cbegin();
     auto timeMax1 = maxtime.cbegin();
     auto ampMin1 = minAmp.cbegin();
@@ -407,22 +413,26 @@ void Processing::findMAP(){
     std:: cout << "calculating OMVE: mintime size: " << mintime.size() << std::endl;
     // forward iteration
     for (auto timeMin1 = mintime.cbegin(); timeMin1 != mintime.cend(); ++timeMin1) {
-        auto timeMin2 = std::next(timeMin1,1);
+        auto timeMin2 = std::next(timeMin1,1); //TODO: not needed for last one, might be invalid
         auto timeMax2 = std::next(timeMax1,1);
         auto ampMin2 = std::next(ampMin1,1);
         auto ampMax2 = std::next(ampMax1,1);
 
 //        assert(*timeMin1 < *timeMax1); // something went wrong
 //        assert(*timeMin2 < *timeMax2); // something went wrong
-        PLOG_ERROR << "timing error: min1: " << *timeMin1 << " max1 " << *timeMax1; // something went wrong
-        PLOG_ERROR << "timing error: min2: " << *timeMin2 << " max1 " << *timeMax2; // something went wrong
+        PLOG_VERBOSE << "tmin1: " << *timeMin1 << " tmax1: " << *timeMax1;
+        PLOG_VERBOSE << "tmin2: " << *timeMin2 << " tmax2: " << *timeMax2;
+        PLOG_VERBOSE << "ampMin1: " << *ampMin1 << " ampMax1: " << *ampMax1;
+        PLOG_VERBOSE << "ampMin2: " << *ampMin2 << " ampMax2: " << *ampMax2;
 
         auto lerpMax = std::lerp(*ampMax1, *ampMax2, getRatio(*timeMax1, *timeMax2, *timeMin1));
-        auto lerpMin = std::lerp(*ampMin1, *ampMin2, getRatio(*timeMin1, *timeMin2, *timeMax1));
-
+        auto lerpMin = std::lerp(*ampMin1, *ampMin2, getRatio(*timeMin1, *timeMin2, *timeMax2));
+        // TODO: combine all the time & value stuff in one variable (less error prone), but how to use
+        // the max_element stuff ect?
         omveData.push_back(lerpMax - *ampMin1);
+        omveTimes.push_back(*timeMin1);
         omveData.push_back(*ampMax2 - lerpMin);
-
+        omveTimes.push_back(*timeMax2);
         // Inclreasing all the itterators:c
         timeMax1++;
         ampMin1++;
@@ -430,6 +440,15 @@ void Processing::findMAP(){
     }
     auto finish = std::chrono::high_resolution_clock::now();
     std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns\n";
+}
+
+void Processing::findMAP(){
+
+    auto maxOMVE = std::max_element(omveData.begin(),omveData.end());
+    auto time = omveTimes[std::distance(omveData.begin(), maxOMVE)] + (pData.size()-oData.size());
+
+    std::cout << "MAP pressure: " << pData[time];
+    PLOG_DEBUG << "MAP pressure: " << pData[time] << " time: " << time;
 }
 
 /**

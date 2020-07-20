@@ -48,6 +48,7 @@ private:
     bool checkAmbient();
     bool checkMaxima(double newOscData);
     void findMinima();
+    void findOWME();
     void findMAP();
     bool isPastDBP();
     double getRatio(double lowerBound, double upperBound, double value);
@@ -59,6 +60,7 @@ private:
     std::vector<double> rawData;
     std::vector<double> oData;
     std::vector<double> omveData;
+    std::vector<int> omveTimes;
     unsigned long lastTimeMax;
     double lastDataMax;
     double currentPulse;
