@@ -311,7 +311,13 @@ plt.get_current_fig_manager().window.showMaximized()
  
 
 
+dataOSC = np.loadtxt('../data/osc.dat')
+yOSC = dataOSC[:,1]
+tOSC = dataOSC[:,0] 
 
+fig_osc, (plt_osc) = plt.subplots(1,1)
+plt_osc.plot(tOSC, yOSC)
+plt_osc.set_xlim(9, max(tOSC))
 #%% Print out data
 
 plt.show()
