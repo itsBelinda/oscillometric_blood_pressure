@@ -162,7 +162,7 @@ void Processing::processSample(double newSample) {
 
             break;
         case ProcState::Inflate:
-            pData.push_back(ymmHg);
+            //pData.push_back(ymmHg); //TODO: no need to record this here.
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
 //            oData.push_back(yHP) //TODO: no need to record this here.
             /**
@@ -172,7 +172,7 @@ void Processing::processSample(double newSample) {
             if (ymmHg > mmHgInflate) {
 
                 notifySwitchScreen(Screen::deflateScreen);
-                // TODO: possibly add entry end exit functions for each state
+                //TODO: possibly add entry end exit functions for each state
                 // function: switch state: returns new state
                 // performs entry and exit operations (notifications)
                 // would that work with the state class being a friendly to Processing?
@@ -180,6 +180,9 @@ void Processing::processSample(double newSample) {
             }
             break;
         case ProcState::Deflate:
+            //TODO: should the start deflation time be saved? (in terms of raw data)
+            // This could avoid the need to store pData at all because we could just
+            // average over raw for a heart rate period
             pData.push_back(ymmHg);
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
             oData.push_back(yHP);
@@ -201,7 +204,7 @@ void Processing::processSample(double newSample) {
             break;
         case ProcState::Calculate:
 
-            pData.push_back(ymmHg); //keep filling the values until zero is reached
+            pData.push_back(ymmHg); //keep filling the values until zero is reached //TODO: not needed really
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
             if (ymmHg < 1) {
                 findMAP();
@@ -221,7 +224,7 @@ void Processing::processSample(double newSample) {
 
 }
 
-double Processing::getmmHgValue(double voltageValue) {
+double Processing::getmmHgValue(double voltageValue) const {
     return ((voltageValue - ambientVoltage) * mmHg_per_kPa * kPa_per_V * corrFactor);
 }
 
@@ -274,18 +277,18 @@ bool Processing::checkMaxima(double newOscData) {
 void Processing::findMinima() {
 
     //TODO: set error flag if minima is not found
-    if(maxAmp.size() >= 2 ){
+    if (maxAmp.size() >= 2) {
         //TODO: easier?
         // get sub vector of oData from second last to last max value
-        std::vector<double>::const_iterator firstMax = oData.begin() + *(maxtime.end()-2);
+        std::vector<double>::const_iterator firstMax = oData.begin() + *(maxtime.end() - 2);
         std::vector<double>::const_iterator lastMax = oData.begin() + maxtime.back();//*(maxtime.end()-1)
         std::vector<double> newVec(firstMax, lastMax);
 
         // find minimal value in between
-        auto iter = std::min_element(newVec.begin(),newVec.end());
-        auto iter2 = std::min_element(firstMax,lastMax);
+        auto iter = std::min_element(newVec.begin(), newVec.end());
+        auto iter2 = std::min_element(firstMax, lastMax);
 
-        if( iter == iter2) {
+        if (iter == iter2) {
             std::cout << "same "; //TODO: why is this not the same?
         }
         auto dist = std::distance(newVec.begin(), iter);
@@ -295,13 +298,13 @@ void Processing::findMinima() {
 //        auto dist = std::distance(oData[*(maxtime.end()-2)], iter);
 //        mintime.push_back(*(maxtime.end()-2) + dist );
 
-        if( mintime.size() == (maxtime.size()-1)){
-            minAmp.back() =  *iter ;
-            mintime.back() =  dist + *(maxtime.end()-2);
+        if (mintime.size() == (maxtime.size() - 1)) {
+            minAmp.back() = *iter;
+            mintime.back() = dist + *(maxtime.end() - 2);
 //            std::cout << *iter << " replaced\n";
-        }else{
-            minAmp.push_back( *iter );
-            mintime.push_back( dist + *(maxtime.end()-2) );
+        } else {
+            minAmp.push_back(*iter);
+            mintime.push_back(dist + *(maxtime.end() - 2));
 //            std::cout << *iter << " appended\n";
         }
         //check:
@@ -318,12 +321,12 @@ void Processing::findMinima() {
 
 bool Processing::isPastDBP() {
     bool bIsPast = false;
-    if (maxAmp.size() > 10) {
+    if (maxAmp.size() > 10) {//&& pData.back() < 40.0) {
         auto iter = std::max_element(maxAmp.begin(), maxAmp.end());
         double cutoff = (*iter) * (ratio_DBP - 0.2);
         if (maxAmp.back() < cutoff) {
             bIsPast = true;
-       }
+        }
     }
     return bIsPast;
 }
@@ -346,21 +349,24 @@ bool Processing::isPulseValid(double pulse) {
 bool Processing::isValidMaxima() {
     static int validPulseCnt = 0;
     bool isValid = false;
-    const double testingSample = *(oData.end() - 1);
-    const auto testingTime = (oData.size() - 1);
+    const double testingSample = *(oData.end() - 2); // testing the second to last entry
+    const auto testingTimeNbr = (oData.size() - 1); // NEW: in relation to oData for min-detect!
+    //OLD: in relation to pData, because this is the time since the
+                                    // beginning of the measurement and the time where the pressure
+                                    // I am interested in is stored
     // TODO: sanity test: maxTime and maxAmp are either +1/+0 in size afterwards, or size = 1
     if (maxtime.empty()) {
         // Accept any value as a first value, only start testing after the second one
-        maxtime.push_back(oData.size() - 1);
+        maxtime.push_back(testingTimeNbr);
         maxAmp.push_back(testingSample);
     } else {
         assert(!maxtime.empty());
         assert(!maxAmp.empty());
         //time since last max is <0.3s and the new sample is larger: replace the old value
-        if ((testingTime - maxtime.back()) < 300) {
+        if ((testingTimeNbr - maxtime.back()) < 300) {
             if (maxAmp.back() < testingSample) {
                 maxAmp.back() = testingSample;
-                maxtime.back() = testingTime;
+                maxtime.back() = testingTimeNbr;
 //                std::cout << maxAmp.back() << " replaced\n";
             } else {
                 // skip this maxima, it's too quick after the last one, but smaller
@@ -371,7 +377,7 @@ bool Processing::isValidMaxima() {
             }
         } else {
             maxAmp.push_back(testingSample);
-            maxtime.push_back(testingTime);
+            maxtime.push_back(testingTimeNbr);
         }
 
         if (maxtime.size() > 1) {
@@ -389,7 +395,7 @@ bool Processing::isValidMaxima() {
                 maxtime.clear();
                 minAmp.clear();
                 mintime.clear();
-                maxtime.push_back(testingTime);
+                maxtime.push_back(testingTimeNbr);
                 maxAmp.push_back(testingSample);
                 isValid = false;
             }
@@ -403,27 +409,28 @@ bool Processing::isValidMaxima() {
 }
 
 
-void Processing::findOWME(){
+void Processing::findOWME() {
 //    auto timeMin1 = mintime.cbegin();
     auto timeMax1 = maxtime.cbegin();
     auto ampMin1 = minAmp.cbegin();
     auto ampMax1 = maxAmp.cbegin();
     // forward iteration use const iterator, because they should not be touched
     auto start = std::chrono::high_resolution_clock::now();
-    std:: cout << "calculating OMVE: mintime size: " << mintime.size() << std::endl;
+    std::cout << "calculating OMVE: mintime size: " << mintime.size() << std::endl;
     // forward iteration
-    for (auto timeMin1 = mintime.cbegin(); timeMin1 != mintime.cend(); ++timeMin1) {
-        auto timeMin2 = std::next(timeMin1,1); //TODO: not needed for last one, might be invalid
-        auto timeMax2 = std::next(timeMax1,1);
-        auto ampMin2 = std::next(ampMin1,1);
-        auto ampMax2 = std::next(ampMax1,1);
+    for (auto timeMin1 = mintime.cbegin(); timeMin1 != (mintime.cend() - 1); ++timeMin1) {
+        auto timeMin2 = std::next(timeMin1, 1); //TODO: not needed for last one, might be invalid
+        auto timeMax2 = std::next(timeMax1, 1);
+        auto ampMin2 = std::next(ampMin1, 1);
+        auto ampMax2 = std::next(ampMax1, 1);
 
 //        assert(*timeMin1 < *timeMax1); // something went wrong
 //        assert(*timeMin2 < *timeMax2); // something went wrong
-        PLOG_VERBOSE << "tmin1: " << *timeMin1 << " tmax1: " << *timeMax1;
-        PLOG_VERBOSE << "tmin2: " << *timeMin2 << " tmax2: " << *timeMax2;
-        PLOG_VERBOSE << "ampMin1: " << *ampMin1 << " ampMax1: " << *ampMax1;
-        PLOG_VERBOSE << "ampMin2: " << *ampMin2 << " ampMax2: " << *ampMax2;
+        //TODO: increases processing time A LOT, remove!!!
+        PLOG_VERBOSE << " tmax1: " << *timeMax1 << " tmin1: " << *timeMin1;
+        PLOG_VERBOSE << " tmax2: " << *timeMax2 << " tmin2: " << *timeMin2;
+        PLOG_VERBOSE << " ampMax1: " << *ampMax1 << " ampMin1: " << *ampMin1;
+        PLOG_VERBOSE << " ampMax2: " << *ampMax2 << " ampMin2: " << *ampMin2;
 
         auto lerpMax = std::lerp(*ampMax1, *ampMax2, getRatio(*timeMax1, *timeMax2, *timeMin1));
         auto lerpMin = std::lerp(*ampMin1, *ampMin2, getRatio(*timeMin1, *timeMin2, *timeMax2));
@@ -439,16 +446,20 @@ void Processing::findOWME(){
         ampMax1++;
     }
     auto finish = std::chrono::high_resolution_clock::now();
-    std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns\n";
+    std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
 }
 
-void Processing::findMAP(){
+void Processing::findMAP() {
 
-    auto maxOMVE = std::max_element(omveData.begin(),omveData.end());
-    auto time = omveTimes[std::distance(omveData.begin(), maxOMVE)] + (pData.size()-oData.size());
+    auto maxOMVE = std::max_element(omveData.begin(), omveData.end());
+    auto time = omveTimes[std::distance(omveData.begin(), maxOMVE)];
 
-    std::cout << "MAP pressure: " << pData[time];
-    PLOG_DEBUG << "MAP pressure: " << pData[time] << " time: " << time;
+    PLOG_DEBUG << "MAP pressure p: " << pData[time] << " time: " << time
+               << "\n pData.size(): " << pData.size() << " oData.size(): " << oData.size();
+//      TODO: done for testing. Keeping as comment for now, might be useful for report
+//      TODO: size of oData could be used as timeout condition. (normal implementation < 1min == 60000 )
+//    Datarecord recordOSC( 1000.0);
+//    recordOSC.saveAll("osc.dat", oData);
 }
 
 /**
@@ -458,7 +469,7 @@ void Processing::findMAP(){
  * @param value
  * @return
  */
-double Processing::getRatio(double lowerBound, double upperBound, double value){
+double Processing::getRatio(double lowerBound, double upperBound, double value) {
 //    assert( value > lowerBound && value < upperBound);
     return ((upperBound - lowerBound) / (value - lowerBound));
 }

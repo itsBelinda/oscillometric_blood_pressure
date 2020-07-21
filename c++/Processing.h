@@ -44,16 +44,16 @@ private:
     void resetMeasurement();
     static QString getFilename();
     void processSample(double newSample);
-    double getmmHgValue(double voltageValue);
+    [[nodiscard]] double getmmHgValue(double voltageValue) const;
     bool checkAmbient();
     bool checkMaxima(double newOscData);
     void findMinima();
     void findOWME();
     void findMAP();
     bool isPastDBP();
-    double getRatio(double lowerBound, double upperBound, double value);
+    static double getRatio(double lowerBound, double upperBound, double value);
 
-    bool isPulseValid( double pulse );
+    static bool isPulseValid( double pulse );
     bool isValidMaxima();
     std::vector<double> nData;
     std::vector<double> pData;
