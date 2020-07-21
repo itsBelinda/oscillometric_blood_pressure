@@ -30,11 +30,12 @@ public:
 
 
 protected:
-    void timerEvent(QTimerEvent *e);
+    void timerEvent(QTimerEvent *e) override;
 private:
     void eNewData(double pData, double oData) override;
     void eSwitchScreen(Screen eScreen) override;
     void eResults(double map, double sbp, double dbp) override;
+    void eHeartRate(double map) override;
     void eReady() override;
 
     void setupUi(QMainWindow *window);
@@ -50,7 +51,9 @@ private:
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;// TODO: needed ?
+    double valHeartRate;
     Screen currentScreen;
+
 
     QSplitter *splitter;
     QStackedWidget *lInstructions;
@@ -81,6 +84,9 @@ private:
     QwtDial *meter;
     QPushButton *btnStart;
     QPushButton *btnReset;
+    QLabel *lheartRate;
+    QLabel *lheartRateAV;
+    QLabel *lHRvalAV;
     QLabel *lMAP;
     QLabel *lMAPval;
     QLabel *lSBP;

@@ -14,6 +14,7 @@ Window::Window(Processing *process, QWidget *parent) :
     }
 
     currentScreen = Screen::startScreen;
+    valHeartRate = 0.0;
     setupUi(this);
     this->process = process;
     // Generate timer event every 50ms to update the window
@@ -237,6 +238,8 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     lInfoRelease->setObjectName(QString::fromUtf8("lInfoRelease"));
     lInfoRelease->setWordWrap(true);
     lInfoRelease->setAlignment(Qt::AlignCenter);
+    lheartRate = new QLabel(parent);
+    lheartRate->setObjectName(QString::fromUtf8("lheartRate"));
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
@@ -244,6 +247,7 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     vlRelease->addItem(vSpace6);
     vlRelease->addWidget(lInfoRelease);
     vlRelease->addItem(vSpace4);
+    vlRelease->addWidget(lheartRate);
     //vlLeft->addWidget(meter);??
 
     lInstrRelease->setLayout(vlRelease);
@@ -291,6 +295,11 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     lCBP->setObjectName(QString::fromUtf8("lCBP"));
     lDBPval = new QLabel(parent);
     lDBPval->setObjectName(QString::fromUtf8("lDBPval"));
+    lheartRateAV = new QLabel(parent);
+    lheartRateAV->setObjectName(QString::fromUtf8("lheartRateAV"));
+    lHRvalAV = new QLabel(parent);
+    lHRvalAV->setObjectName(QString::fromUtf8("lHRvalAV"));
+
 
     flResults->setWidget(0, QFormLayout::LabelRole, lMAP);
     flResults->setWidget(0, QFormLayout::FieldRole, lMAPval);
@@ -298,6 +307,8 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     flResults->setWidget(1, QFormLayout::FieldRole, lSBPval);
     flResults->setWidget(2, QFormLayout::LabelRole, lCBP);
     flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
+    flResults->setWidget(3, QFormLayout::LabelRole, lheartRateAV);
+    flResults->setWidget(3, QFormLayout::FieldRole, lHRvalAV);
     flResults->setContentsMargins(50,0,50,0);
 
     vlResult->addWidget(lInfoResult);
@@ -337,10 +348,13 @@ void Window::retranslateUi(QMainWindow *window) {
     btnReset->setText("Reset");
     lMAP->setText("MAP:");
     lMAPval->setText("- mmHg" );
-    lSBP->setText("SPB:");
+    lSBP->setText("SBP:");
     lSBPval->setText("- mmHg" );
     lCBP->setText("DBP:");
     lDBPval->setText("- mmHg");
+    lheartRate->setText("Current hart rate: --");
+    lheartRateAV->setText("Average heart rate");
+    lHRvalAV->setText("-");
 
 }
 
@@ -350,6 +364,8 @@ void Window::timerEvent(QTimerEvent *) {
     pltPre->replot();
     meter->repaint();
 
+
+
     switch (currentScreen) {
         case Screen::startScreen:
             lInstructions->setCurrentIndex(0);
@@ -358,12 +374,19 @@ void Window::timerEvent(QTimerEvent *) {
             lInstructions->setCurrentIndex(1);
             break;
         case Screen::deflateScreen:
-            lInstructions->setCurrentIndex(2);
+            lInstructions->setCurrentIndex(2);if( valHeartRate != 0 ){
+                //TODO only needs to be done if new heart rate is available.
+                lheartRate->setText("Current hart rate: " + QString::number(valHeartRate, 'f', 0));
+            }
             break;
         case Screen::emptyCuffScreen:
             lInstructions->setCurrentIndex(3);
             break;
         case Screen::resultScreen:
+            if( valHeartRate != 0 ){
+                //TODO only needs to be done if new heart rate is available.
+                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0));
+            }
             lInstructions->setCurrentIndex(4);
             break;
     }
@@ -385,6 +408,10 @@ void Window::eResults(double map, double sbp, double dbp) {
     lMAPval->setText( QString::number(map) + " mmHg" );
     lSBPval->setText( QString::number(sbp) + " mmHg" );
     lDBPval->setText( QString::number(dbp) + " mmHg");
+}
+
+void Window::eHeartRate(double heartRate) {
+    this->valHeartRate = heartRate;
 }
 
 void Window::eReady() {
