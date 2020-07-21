@@ -11,6 +11,7 @@ public:
     virtual void eNewData(double pData, double oData) {};
     virtual void eSwitchScreen(Screen eScreen) {}; //TBD
     virtual void eResults(double map, double sbp, double dbp) {};
+    virtual void eHeartRate(double heartRate) {};
     virtual void eReady() {};
 
 };

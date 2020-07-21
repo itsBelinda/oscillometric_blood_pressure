@@ -194,7 +194,7 @@ void Processing::processSample(double newSample) {
                 findMinima();
                 if (isPastDBP()) {
                     currentState = ProcState::Calculate;
-
+                    notifyHeartRate(getAverage(heartRate));
                     //TODO: possibly in a separate thread only for the calculation? or too fast? ca 50ms
                     findOWME();
                     notifySwitchScreen(Screen::emptyCuffScreen);
@@ -204,6 +204,10 @@ void Processing::processSample(double newSample) {
             break;
         case ProcState::Calculate:
 
+            /**
+             * Some more magic here:
+             * reverse search of ratios in recorded data set since deflate
+             */
             pData.push_back(ymmHg); //keep filling the values until zero is reached //TODO: not needed really
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
             if (ymmHg < 1) {
@@ -213,10 +217,6 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
             }
 
-            /**
-             * Some more magic here:
-             * reverse search of ratios in recorded data set since deflate
-             */
             break;
 
     }
@@ -385,7 +385,8 @@ bool Processing::isValidMaxima() {
             double newPulse = newPulse = 60000.0 / (double) (maxtime.back() - (*(maxtime.end() - 2)));
 
             if (isPulseValid(newPulse)) {
-                currentPulse = newPulse;
+                heartRate.push_back(newPulse);
+                notifyHeartRate(newPulse);
                 validPulseCnt++;
                 isValid = true;
             } else {
@@ -397,6 +398,7 @@ bool Processing::isValidMaxima() {
                 mintime.clear();
                 maxtime.push_back(testingTimeNbr);
                 maxAmp.push_back(testingSample);
+                heartRate.clear();
                 isValid = false;
             }
 
@@ -514,4 +516,9 @@ void Processing::findMAP() {
 double Processing::getRatio(double lowerBound, double upperBound, double value) {
 //    assert( value > lowerBound && value < upperBound);
     return ((upperBound - lowerBound) / (value - lowerBound));
+}
+
+
+double Processing::getAverage(std::vector<double> avVector){
+    return std::accumulate(avVector.begin(), avVector.end(), 0.0)/avVector.size();
 }
