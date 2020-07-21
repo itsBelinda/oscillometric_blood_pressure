@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.1.0)
-set(CMAKE_CXX_STANDARD 11)
-
+set(CMAKE_CXX_STANDARD 20)
 project(obp)
 
 set(CMAKE_AUTOMOC ON)
@@ -37,3 +36,4 @@ add_executable(obp
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
 
+set_property(TARGET obp PROPERTY CXX_STANDARD 20)
