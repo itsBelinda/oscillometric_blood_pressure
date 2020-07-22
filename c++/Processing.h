@@ -13,6 +13,10 @@
 
 #define IIRORDER 4
 
+//! The Processing Class handles the data acquisition and processing.
+/*!
+ * The UI consists of ...
+ */
 class Processing : public CppThread, public ISubject{
 
     enum class ProcState {

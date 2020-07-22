@@ -30,7 +30,7 @@
 \DTMlangsetup[en-GB]{showdayofmonth=false}
 
 
-\title{Oscillometric Blood Pressure}
+\title{MSc Project: Oscillometric Blood Pressure}
 \author{Belinda Kneubühler}
 \date{\today}
 
@@ -46,24 +46,37 @@
 
 \begin{titlepage}
 \centering
-\vspace*{3cm}  % Need the * or the space is swallowed at the top of the page
+%\vspace*{3cm}  % Need the * or the space is swallowed at the top of the page
+
+\includegraphics[scale=0.125]{GlaLogo.pdf}\\
+\vspace{1cm}
 \bfseries\Large
 \thetitle\\
-\vspace{3cm}
+
+%TODO add a picture here
+
+\vspace*{\fill}
+\begin{tabular}{c c}
+Belinda Kneubühler & \stdNbr\\
+\end{tabular}
+
 \normalfont\large
-Belinda Kneubühler\\
-\stdNbr\\
-\vspace{2cm}
-Submitted in fulfilment of the requirements for the\\
-Degree of \course\\
-\vspace{2cm}
+\vspace{1cm}
 School of Engineering\\
 College of Science and Engineering\\
 University of Glasgow\\
+
 \vspace{1cm}
-\includegraphics[scale=0.125]{GlaLogo.pdf}
-\\
+Submitted in fulfilment of the requirements for the\\
+Degree of \course\\
 \vspace{1cm}
+\begin{flushleft}
+\begin{tabular}{l r}
+Supervisor: & Bernd Porr\\
+Second Supervisor: & Kiran Ramesh\\
+\end{tabular}
+\end{flushleft}
+
 % Insert month and year of date deposited with library for final version
 \thedate
 
@@ -78,7 +91,10 @@ University of Glasgow\\
 
 \mainmatter % Turn on chapter numbering, reset page numbers, use arabic
 \include{introduction}
-\include{methodology}
+\include{theory}
+\include{software}
+\include{results}
+\include{conclusion}
 % and the other chapters
 \appendix
 \include{derivation}
