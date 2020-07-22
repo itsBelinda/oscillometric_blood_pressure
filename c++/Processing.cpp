@@ -1,9 +1,6 @@
-
 #include <iostream>
 #include <unistd.h>
-#include <iomanip>
 #include <cmath>
-
 #include <QtCore/QDateTime>
 
 #include "Processing.h"
@@ -12,7 +9,11 @@
 #define DEFAULT_MINUTES 2
 #define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
 
-
+/**
+ * The constructor of the Processing thread.
+ *
+ * Initialises internal objects and prepares the thread for running.
+ */
 Processing::Processing() :
         rawData(DEFAULT_DATA_SIZE), //TODO: cleanup, the only thing needed here really
         pData(DEFAULT_DATA_SIZE),
@@ -43,7 +44,11 @@ Processing::Processing() :
     record = new Datarecord(sampling_rate);
 
 }
-
+/**
+ * The destructor of the Processing thread.
+ *
+ * Stops the measurement if not already done and stops the thread.
+ */
 Processing::~Processing() {
     stopMeasurement();
     stopThread();
@@ -53,6 +58,9 @@ void Processing::setAmbientVoltage(double voltage) {
     ambientVoltage = voltage;
 }
 
+/**
+ * The main function of the thread.
+ */
 void Processing::run() {
 
     std::cout << "run ..." << std::endl;
@@ -73,7 +81,9 @@ void Processing::run() {
     }
 }
 
-
+/**
+ * Stops the thread by stopping the data aquisition so the thread teminates and can be joined.
+ */
 void Processing::stopThread() {
     // TODO: safely abort measurement
     bRunning = false;
@@ -106,7 +116,10 @@ void Processing::stopMeasurement() {
 void Processing::resetMeasurement() {
     bMeasuring = false;
 }
-
+/**
+ * Gets a file name (string) from the current time.
+ * @return The file name as a QString.
+ */
 QString Processing::getFilename() {
     QDateTime dateTime = QDateTime::currentDateTime();
     QString dateTimeString = dateTime.toString("yyyy-MM-dd_hh-mm-ss");
@@ -114,6 +127,10 @@ QString Processing::getFilename() {
     return dateTimeString;
 }
 
+/**
+ * Processing a single new sample in a state machine.
+ * @param newSample
+ */
 void Processing::processSample(double newSample) {
 
     /**
@@ -224,6 +241,11 @@ void Processing::processSample(double newSample) {
 
 }
 
+/**
+ * Calculates the mmHg value from the given voltage input.
+ * @param voltageValue The voltage input.
+ * @return The corresponding value in mmHg.
+ */
 double Processing::getmmHgValue(double voltageValue) const {
     return ((voltageValue - ambientVoltage) * mmHg_per_kPa * kPa_per_V * corrFactor);
 }
@@ -496,16 +518,18 @@ void Processing::findMAP() {
             lbSBP = *omveDBP;
             lbTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
             break;
+
         }
     }
     // because the curve is falling, the ratio needs to be 1- the calculated value, right?
     auto lerpDBPtime = std::lerp(lbTime, ubTime, 1.0 - getRatio(lbSBP, ubSBP, sbpSearch));
     double valDBP = pData[lerpDBPtime];
+
     notifyResults(valMAP, valSBP, valDBP);
 }
 
 /**
- * Helper function that gets the ratio from a value that is in between two others
+ * Helper function that calculates the ratio from a value that is in between two others
  * to then calculate the interpolated value between the two with the std::lerp
  * function.
  * @param lowerBound    the upper bound value
@@ -518,7 +542,11 @@ double Processing::getRatio(double lowerBound, double upperBound, double value) 
     return ((upperBound - lowerBound) / (value - lowerBound));
 }
 
-
+/**
+ * Helper function that calculates the average value in a vector.
+ * @param avVector The input vector over which the average is calculated.
+ * @return The average value in the vector.
+ */
 double Processing::getAverage(std::vector<double> avVector){
     return std::accumulate(avVector.begin(), avVector.end(), 0.0)/avVector.size();
 }
