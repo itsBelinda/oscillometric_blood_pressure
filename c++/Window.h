@@ -21,7 +21,10 @@
 #include "common.h"
 #include "Processing.h"
 
-
+//! The Window Class handles the user interface (UI).
+/*!
+ * The UI consists of ... 
+ */
 class Window : public QMainWindow, public IObserver{
 Q_OBJECT
 public:

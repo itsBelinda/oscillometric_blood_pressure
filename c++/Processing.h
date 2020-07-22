@@ -2,7 +2,6 @@
 #define OBP_PROCESSING_H
 
 #include <vector>
-
 #include <comedilib.h>
 #include <Iir.h>
 
@@ -14,6 +13,10 @@
 
 #define IIRORDER 4
 
+//! The Processing Class handles the data acquisition and processing.
+/*!
+ * The UI consists of ...
+ */
 class Processing : public CppThread, public ISubject{
 
     enum class ProcState {

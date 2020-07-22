@@ -1,10 +1,17 @@
-
-#include <qwt/qwt_dial_needle.h>
-#include <iostream>
 #include "Window.h"
+#include <qwt/qwt_dial_needle.h>
 
+/**
+ * The constructor of the Window Class.
+ *
+ * Needs a Processing object as an argument. It is used to send user input to the Processing Class.
+ * Additionally, a QWidget can be passed as an argument to act as the classes parent widget.
+ * @param process The Processing class to handle the user inputs.
+ * @param parent  The QWidget that is the parent (default 0).
+ */
 Window::Window(Processing *process, QWidget *parent) :
         dataLength(MAX_DATA_LENGTH),
+        process(process),
         QMainWindow(parent) {
 
     for (int i = 0; i < MAX_DATA_LENGTH; i++) {
@@ -15,13 +22,17 @@ Window::Window(Processing *process, QWidget *parent) :
 
     valHeartRate = 0.0;
     setupUi(this);
-    this->process = process;
-
-    eSwitchScreen(Screen::startScreen);
+    currentScreen = Screen::startScreen
+            ;
     // Generate timer event every 50ms to update the window
     (void) startTimer(50);
 }
 
+/**
+ * The destructor of the Window class.
+ *
+ * Stops the process thread if window is closed.
+ */
 Window::~Window() {
 
     PLOG_VERBOSE << "Cleanup:";
@@ -154,7 +165,18 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
-
+/**
+ * Sets up the page with two plots to display the data.
+ *
+ * Both plots have time as the x axis.
+ * The first plot displays low pass filtered pressure data the y axis is in
+ * mmHg pressure.
+ * The second plot displays the high pass filtered oscillation data, it is in
+ * arbitrary units.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupPlots(QWidget *parent) {
     rWidget = new QWidget(parent);
 
@@ -189,7 +211,14 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
 }
 
-
+/**
+ * Sets up the start page with instructions.
+ *
+ * A button on the button can start the measurements.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupStartPage(QWidget *parent) {
     lInstrStart = new QWidget(parent);
 
@@ -218,7 +247,14 @@ QWidget *Window::setupStartPage(QWidget *parent) {
 
 }
 
-
+/**
+ * Sets up the inflation page with instructions.
+ *
+ * Instructs the user to pump up the cuff.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupInflatePage(QWidget *parent) {
 
     lInstrPump = new QWidget(parent);
@@ -245,7 +281,14 @@ QWidget *Window::setupInflatePage(QWidget *parent) {
     return lInstrPump;
 }
 
-
+/**
+ * Sets up the inflation page with instructions.
+ *
+ * Instructs the user to pump up the cuff.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupDeflatePage(QWidget *parent) {
 
     lInstrRelease = new QWidget(parent);
@@ -326,7 +369,6 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
     flResults->setWidget(3, QFormLayout::LabelRole, lheartRateAV);
     flResults->setWidget(3, QFormLayout::FieldRole, lHRvalAV);
-//    flResults->setContentsMargins(5, 0, 5, 0);
 
     vlResult->addWidget(lInfoResult);
     vlResult->addLayout(flResults);
