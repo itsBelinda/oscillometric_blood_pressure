@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(obp)
 
 set(CMAKE_AUTOMOC ON)
@@ -32,8 +33,6 @@ add_executable(obp
         datarecord.cpp
         IObserver.h
         ISubject.h
-        common.h)
+        common.h OBPdetection.cpp OBPdetection.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
-
-set_property(TARGET obp PROPERTY CXX_STANDARD 20)

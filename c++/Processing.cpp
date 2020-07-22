@@ -154,7 +154,6 @@ void Processing::processSample(double newSample) {
             if (bMeasuring) {
                 currentState = ProcState::Inflate;
                 //TODO: should be empty
-                nData.clear();
                 pData.clear();
                 oData.clear();
                 rawData.clear();
@@ -183,8 +182,8 @@ void Processing::processSample(double newSample) {
             //TODO: should the start deflation time be saved? (in terms of raw data)
             // This could avoid the need to store pData at all because we could just
             // average over raw for a heart rate period
-            pData.push_back(ymmHg);
             rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+            pData.push_back(ymmHg);
             oData.push_back(yHP);
             /**
              * THIS IS WHERE THE MAGIC HAPPENS:
@@ -352,8 +351,8 @@ bool Processing::isValidMaxima() {
     const double testingSample = *(oData.end() - 2); // testing the second to last entry
     const auto testingTimeNbr = (oData.size() - 1); // NEW: in relation to oData for min-detect!
     //OLD: in relation to pData, because this is the time since the
-                                    // beginning of the measurement and the time where the pressure
-                                    // I am interested in is stored
+    // beginning of the measurement and the time where the pressure
+    // I am interested in is stored
     // TODO: sanity test: maxTime and maxAmp are either +1/+0 in size afterwards, or size = 1
     if (maxtime.empty()) {
         // Accept any value as a first value, only start testing after the second one
@@ -456,57 +455,85 @@ void Processing::findMAP() {
     auto maxOMVE = std::max_element(omveData.begin(), omveData.end());
     auto time = omveTimes[std::distance(omveData.begin(), maxOMVE)];
 
+    std::cout << "maxOMVE: " << *maxOMVE << std::endl;
+
     double valMAP = pData[time]; //MAP: get it from average heart rate
 //    PLOG_DEBUG << "MAP pressure p: " << pData[time] << " time: " << time
 //               << "\n pData.size(): " << pData.size() << " oData.size(): " << oData.size();
 //      TODO: done for testing. Keeping as comment for now, might be useful for report
 //      TODO: size of oData could be used as timeout condition. (normal implementation < 1min == 60000 )
-//    Datarecord recordOSC( 1000.0);
-//    recordOSC.saveAll("osc.dat", oData);
+    Datarecord recordOSC(1.0);
+    recordOSC.saveAll("osc.dat", oData);
+    Datarecord recordP(1.0);
+    recordP.saveAll("p.dat", pData);
+    Datarecord recordOMVE(1.0);
+    recordOMVE.saveAll("omve.dat", omveData);
 
-
+    std::for_each(omveTimes.begin(), omveTimes.end(),
+                  [](int time) {
+                      std::cout << "t: " << time << std::endl;
+                  });
     // FIND SBP: //TODO: validate
     double maxVAL = *maxOMVE;
-    double sbpSearch = ratio_SBP*maxVAL;
+    double sbpSearch = ratio_SBP * maxVAL;
     double ubSBP;
     double lbSBP;
     int lbTime;
     int ubTime;
-    for (auto omveSBP = omveData.begin(); omveSBP != maxOMVE; ++omveSBP){
-        if(*omveSBP > sbpSearch){
+
+    std::cout << "SBP search: " << sbpSearch << std::endl;
+    for (auto omveSBP = omveData.begin(); omveSBP != maxOMVE; ++omveSBP) {
+        if (*omveSBP > sbpSearch) {
             ubSBP = *omveSBP;
             ubTime = omveTimes[std::distance(omveData.begin(), omveSBP)];
             omveSBP--;
             lbSBP = *omveSBP;
             lbTime = omveTimes[std::distance(omveData.begin(), omveSBP)];
+            std::cout << "ubSBP: " << ubSBP << std::endl;
+            std::cout << "ubTime: " << ubTime << std::endl;
+            std::cout << "lbSBP: " << lbSBP << std::endl;
+            std::cout << "lbTime: " << lbTime << std::endl;
             break; //TODO: do while without break?
         }
     }
 
-    auto lerpSBPtime = std::lerp(lbTime, ubTime, getRatio(lbSBP, ubSBP, sbpSearch));
+    int lerpSBPtime = (int) std::lerp(lbTime, ubTime, getRatio(lbSBP, ubSBP, sbpSearch));
     double valSBP = pData[lerpSBPtime];
+    std::cout << "lerpSBPtime: " << lerpSBPtime << std::endl;
 
     // FIND DBP: // TODO: validate!
-    double obpSearch = ratio_SBP*maxVAL;
-    for (auto omveDBP = maxOMVE; omveDBP != omveData.end(); ++omveDBP){
-        if(*omveDBP < obpSearch){
-            ubSBP = *omveDBP;
-            ubTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
-            omveDBP--;
+
+    double dbpSearch = ratio_DBP * maxVAL;
+    std::cout << "DBP search: " << dbpSearch << std::endl;
+    for (auto omveDBP = maxOMVE; omveDBP != omveData.end(); ++omveDBP) {
+        if (*omveDBP < dbpSearch) {
             lbSBP = *omveDBP;
             lbTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
+            omveDBP--;
+            ubSBP = *omveDBP;
+            ubTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
+            std::cout << "ubDBP: " << ubSBP << std::endl;
+            std::cout << "ubTime: " << ubTime << std::endl;
+            std::cout << "lbDBP: " << lbSBP << std::endl;
+            std::cout << "lbTime: " << lbTime << std::endl;
             break;
         }
     }
-    // because the curve is falling, the ratio needs to be 1- the calculated value, right?
-    auto lerpDBPtime = std::lerp(lbTime, ubTime, 1.0 - getRatio(lbSBP, ubSBP, sbpSearch));
+
+    // The curve is falling, "upper bound" time is lower than "lower bound" time.
+    // The ratio is calculated the same way as before, but to account for the lower
+    // value relating to the higher time the ratio is inverted.
+    // The interpolation is done from the "upper bound" time (earlier in time) to the
+    // "lower bound" time (later in time).
+    int lerpDBPtime = (int) std::lerp(ubTime, lbTime, 1.0 - getRatio(lbSBP, ubSBP, dbpSearch));
+    std::cout << "lerpDBPtime: " << lerpDBPtime << std::endl;
     double valDBP = pData[lerpDBPtime];
     notifyResults(valMAP, valSBP, valDBP);
 }
 
 /**
  * Helper function that gets the ratio from a value that is in between two others
- * to then calculate the interpolated value between the two with the std::lerp
+ * to then calculate the interpolated value between the two with the std::lerp (C++20)
  * function.
  * @param lowerBound    the upper bound value
  * @param upperBound    the lower bound value
@@ -515,10 +542,17 @@ void Processing::findMAP() {
  */
 double Processing::getRatio(double lowerBound, double upperBound, double value) {
 //    assert( value > lowerBound && value < upperBound);
-    return ((upperBound - lowerBound) / (value - lowerBound));
+    return ((value - lowerBound) / (upperBound - lowerBound));
 }
 
 
-double Processing::getAverage(std::vector<double> avVector){
-    return std::accumulate(avVector.begin(), avVector.end(), 0.0)/avVector.size();
+double Processing::getAverage(std::vector<double> avVector) {
+    return std::accumulate(avVector.begin(), avVector.end(), 0.0) / avVector.size();
 }
+
+/**
+ * Getter function for the current state of the state machine.
+ *
+ * @return The current state of the state machine.
+ */
+Processing::ProcState Processing::getCurrentState() const { return currentState; }

@@ -2,7 +2,6 @@
 #define OBP_PROCESSING_H
 
 #include <vector>
-
 #include <comedilib.h>
 #include <Iir.h>
 
@@ -32,7 +31,7 @@ public:
 
     void startMeasurement();
     void stopMeasurement();
-    inline ProcState getCurrentState() const { return currentState; }
+    inline ProcState getCurrentState() const;
 
     void setAmbientVoltage(double voltage);
 
@@ -55,9 +54,8 @@ private:
     static double getAverage(std::vector<double> avVector);
     static bool isPulseValid( double pulse );
     bool isValidMaxima();
-    std::vector<double> nData;
-    std::vector<double> pData;
     std::vector<double> rawData;
+    std::vector<double> pData;
     std::vector<double> oData;
     std::vector<double> omveData;
     std::vector<double> heartRate;
