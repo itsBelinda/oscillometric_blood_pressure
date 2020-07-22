@@ -13,10 +13,11 @@ Window::Window(Processing *process, QWidget *parent) :
         yHPData[i] = 0;
     }
 
-    currentScreen = Screen::startScreen;
     valHeartRate = 0.0;
     setupUi(this);
     this->process = process;
+
+    eSwitchScreen(Screen::startScreen);
     // Generate timer event every 50ms to update the window
     (void) startTimer(50);
 }
@@ -29,6 +30,11 @@ Window::~Window() {
     PLOG_VERBOSE << "Application terminated.";
 }
 
+/**
+ * This functions is to be called at the initialisation of the object.
+ * It builds the whole user interface.
+ * @param window  A reference to the parent object.
+ */
 void Window::setupUi(QMainWindow *window) {
     if (window->objectName().isEmpty())
         window->setObjectName(QString::fromUtf8("MainWindow"));
@@ -47,9 +53,35 @@ void Window::setupUi(QMainWindow *window) {
     splitter->setHandleWidth(5);
     splitter->setChildrenCollapsible(false);
 
-    // the left side is a stacked widget with several pages
-    lInstructions = new QStackedWidget(window);
-    lInstructions->setMinimumWidth(400);
+    // The left side is a stacked widget with several pages in a vertical box
+    // layout with some permanent information on the bottom.
+    lWidget = new QWidget(splitter);
+    vlLeft = new QVBoxLayout(lWidget);
+    vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
+    lInstructions = new QStackedWidget(lWidget);
+    lInstructions->setMinimumWidth(500);
+
+    btnCancel = new QPushButton(lWidget);
+    btnCancel->setObjectName(QString::fromUtf8("btnCancel"));
+
+    lMeter = new QLabel(lWidget);
+    lMeter->setObjectName(QString::fromUtf8("lMeter"));
+    lMeter->setAlignment(Qt::AlignCenter);
+    meter = new QwtDial(lWidget);
+    meter->setObjectName(QString::fromUtf8("meter"));
+    meter->setUpperBound(260.000000000000000);
+    meter->setScaleStepSize(20.000000000000000);
+    meter->setWrapping(false);
+    meter->setInvertedControls(false);
+    meter->setLineWidth(4);
+    meter->setMode(QwtDial::RotateNeedle);
+    meter->setMinScaleArc(20.000000000000000);
+    meter->setMaxScaleArc(340.000000000000000);
+    meter->setMinimumSize(400, 400);
+    needle = new QwtDialSimpleNeedle(
+            QwtDialSimpleNeedle::Arrow, true, Qt::black,
+            QColor(Qt::gray).lighter(130));
+    meter->setNeedle(needle);
 
     // Build pages and add them to the instructions panel
     lInstructions->addWidget(setupStartPage(lInstructions));
@@ -59,10 +91,17 @@ void Window::setupUi(QMainWindow *window) {
     lInstructions->addWidget(setupResultPage(lInstructions));
 
     // Add the instructions panel to the splitter
-    splitter->addWidget(lInstructions);
+    vlLeft->addWidget(lMeter);
+    vlLeft->addWidget(meter);
+    vlLeft->addWidget(lInstructions);
+    vlLeft->addWidget(btnCancel);
+    btnCancel->hide();
+    splitter->addWidget(lWidget);
 
     // Build and add the plot panel to the splitter
     splitter->addWidget(setupPlots(splitter));
+    // Set stretch factor of left part to zero so it will not resize
+    splitter->setStretchFactor(0, 0);
 
     // Add splitter to main window.
     window->setCentralWidget(splitter);
@@ -76,28 +115,24 @@ void Window::setupUi(QMainWindow *window) {
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     window->setStatusBar(statusbar);
 
-    // Update Text.
+    // Set all text fields in one place.
     retranslateUi(window);
 
-    //Screen::startScreen
-    // Set start page for instructions
-   // lInstructions->setCurrentIndex(0);
+    // Connect UI events (slots)
     QMetaObject::connectSlotsByName(window);
-
-    // Set stretch factor of left part to zero so it will not resize
-    splitter->setStretchFactor(0, 0);
 
     // Set default look, specify percentage of left side:
     double leftSide = 0.3;
-    QList<int> Sizes({(int)(leftSide * width()), (int)((1.0-leftSide)* width())});
+    QList<int> Sizes({(int) (leftSide * width()), (int) ((1.0 - leftSide) * width())});
     splitter->setSizes(Sizes);
-    //TODO: only for now to be able to switch between the pages of the stacked widget
 
-    auto  * but0 = new QPushButton("0");
-    auto  * but1 = new QPushButton("1");
-    auto  * but2 = new QPushButton("2");
-    auto  * but3 = new QPushButton("3");
-    auto  * but4 = new QPushButton("4");
+
+    //TODO: only for now to be able to switch between the pages of the stacked widget
+    auto *but0 = new QPushButton("0");
+    auto *but1 = new QPushButton("1");
+    auto *but2 = new QPushButton("2");
+    auto *but3 = new QPushButton("3");
+    auto *but4 = new QPushButton("4");
 
     statusbar->addPermanentWidget(but0);
     statusbar->addPermanentWidget(but1);
@@ -108,6 +143,7 @@ void Window::setupUi(QMainWindow *window) {
     statusbar->addPermanentWidget(spacerbnt, 1);
 
     connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
+    connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
 
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
@@ -188,12 +224,11 @@ QWidget *Window::setupInflatePage(QWidget *parent) {
     lInstrPump = new QWidget(parent);
 
     // Layout for this page:
-    vlLeft = new QVBoxLayout();
-    vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
+    vlInflate = new QVBoxLayout();
+    vlInflate->setObjectName(QString::fromUtf8("vlInflate"));
 
     vSpace1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     lInfoPump = new QLabel(parent);
@@ -201,30 +236,12 @@ QWidget *Window::setupInflatePage(QWidget *parent) {
     lInfoPump->setWordWrap(true);
     lInfoPump->setAlignment(Qt::AlignCenter);
 
-    meter = new QwtDial(parent);
-    meter->setObjectName(QString::fromUtf8("meter"));
-    meter->setUpperBound(260.000000000000000);
-    meter->setScaleStepSize(20.000000000000000);
-    meter->setWrapping(false);
-    meter->setInvertedControls(false);
-    meter->setLineWidth(4);
-    meter->setMode(QwtDial::RotateNeedle);
-    meter->setMinScaleArc(20.000000000000000);
-    meter->setMaxScaleArc(340.000000000000000);
-    auto *needle = new QwtDialSimpleNeedle(
-            QwtDialSimpleNeedle::Arrow, true, Qt::black,
-            QColor(Qt::gray).lighter(130));
-
-    meter->setNeedle(needle);
-
     // build left side of window
-    vlLeft->addItem(vSpace1);
-    vlLeft->addWidget(lInfoPump);
-    vlLeft->addItem(vSpace2);
-    vlLeft->addWidget(meter);
-    vlLeft->addItem(vSpace3);
+    vlInflate->addItem(vSpace1);
+    vlInflate->addWidget(lInfoPump);
+    vlInflate->addItem(vSpace2);
 
-    lInstrPump->setLayout(vlLeft);
+    lInstrPump->setLayout(vlInflate);
     return lInstrPump;
 }
 
@@ -240,6 +257,7 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     lInfoRelease->setAlignment(Qt::AlignCenter);
     lheartRate = new QLabel(parent);
     lheartRate->setObjectName(QString::fromUtf8("lheartRate"));
+    lheartRate->setAlignment(Qt::AlignCenter);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
@@ -248,7 +266,6 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     vlRelease->addWidget(lInfoRelease);
     vlRelease->addItem(vSpace4);
     vlRelease->addWidget(lheartRate);
-    //vlLeft->addWidget(meter);??
 
     lInstrRelease->setLayout(vlRelease);
     return lInstrRelease;
@@ -265,7 +282,7 @@ QWidget *Window::setupEmptyCuffPage(QWidget *parent) {
 
     vlDeflate->addWidget(lInfoDeflate);
     lInstrDeflate->setLayout(vlDeflate);
-    return lInstrDeflate ;
+    return lInstrDeflate;
 }
 
 QWidget *Window::setupResultPage(QWidget *parent) {
@@ -284,7 +301,6 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     flResults->setObjectName(QString::fromUtf8("flResults"));
     lMAP = new QLabel(parent);
     lMAP->setObjectName(QString::fromUtf8("lMAP"));
-    lMAP->setMinimumSize(QSize(100, 0));
     lMAPval = new QLabel(parent);
     lMAPval->setObjectName(QString::fromUtf8("lMAPval"));
     lSBP = new QLabel(parent);
@@ -297,9 +313,10 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     lDBPval->setObjectName(QString::fromUtf8("lDBPval"));
     lheartRateAV = new QLabel(parent);
     lheartRateAV->setObjectName(QString::fromUtf8("lheartRateAV"));
+    lheartRateAV->setMinimumWidth(250);
     lHRvalAV = new QLabel(parent);
     lHRvalAV->setObjectName(QString::fromUtf8("lHRvalAV"));
-
+    lHRvalAV->setMinimumWidth(150);
 
     flResults->setWidget(0, QFormLayout::LabelRole, lMAP);
     flResults->setWidget(0, QFormLayout::FieldRole, lMAPval);
@@ -309,7 +326,7 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
     flResults->setWidget(3, QFormLayout::LabelRole, lheartRateAV);
     flResults->setWidget(3, QFormLayout::FieldRole, lHRvalAV);
-    flResults->setContentsMargins(50,0,50,0);
+//    flResults->setContentsMargins(5, 0, 5, 0);
 
     vlResult->addWidget(lInfoResult);
     vlResult->addLayout(flResults);
@@ -324,37 +341,39 @@ void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
 
     lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
-                        "1. Put the cuff on your upper arm of your unfavoured hand, making sure it is tight.<br>"
+                        "1. Put the cuff on your upper arm of your nondominant hand, making sure it is tight.<br>"
                         "2. Rest your arm on a flat surface.<br>"
-                        "3. Take the pump into your favoured hand.<br>"
+                        "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
-                        "5. Press Start when you are ready."
-                        "<br><br> <i>Picture missing</i><br>");
+                        "5. Press Start when you are ready.");
+                        //"<br><br> <i>Picture missing</i><br>"
     lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
-                       "Using your favoured hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
+                       "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
                        "Make sure the valve is fully closed.<br>"
-                       "Use the dial below for reference.");
+                       "Use the dial above for reference.");
     lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
                           "Open the valve slightly to release pressure at about 3 mmHg per second."
-                          "Once the valve is opened, wait calmly and try not to move. <br><br>"
-                          "<i>Add deflation feedback. Possibly have meter here, too.</i>");
+                          "Wait calmly and try not to move. <br><br>");
+                          //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
     lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
                           "Wait for the pressure to go down to 0 mmHg.<br><br>"
                           "You will see the results next.");
     lInfoResult->setText("<b>Results:</b><br><br>"
                          "Click Reset to start a new measurement<br>");
 
+    lMeter->setText("<b>Pressure in mmHg:</b>");
     btnStart->setText("Start");
     btnReset->setText("Reset");
+    btnCancel->setText("Cancel");
     lMAP->setText("MAP:");
-    lMAPval->setText("- mmHg" );
+    lMAPval->setText("- mmHg");
     lSBP->setText("SBP:");
-    lSBPval->setText("- mmHg" );
+    lSBPval->setText("- mmHg");
     lCBP->setText("DBP:");
     lDBPval->setText("- mmHg");
-    lheartRate->setText("Current hart rate: --");
-    lheartRateAV->setText("Average heart rate");
-    lHRvalAV->setText("-");
+    lheartRate->setText("Current heart rate:<br><b>--</b>");
+    lheartRateAV->setText("Average heart rate:");
+    lHRvalAV->setText("- beats/min");
 
 }
 
@@ -365,7 +384,6 @@ void Window::timerEvent(QTimerEvent *) {
     meter->repaint();
 
 
-
     switch (currentScreen) {
         case Screen::startScreen:
             lInstructions->setCurrentIndex(0);
@@ -374,19 +392,12 @@ void Window::timerEvent(QTimerEvent *) {
             lInstructions->setCurrentIndex(1);
             break;
         case Screen::deflateScreen:
-            lInstructions->setCurrentIndex(2);if( valHeartRate != 0 ){
-                //TODO only needs to be done if new heart rate is available.
-                lheartRate->setText("Current hart rate: " + QString::number(valHeartRate, 'f', 0));
-            }
+            lInstructions->setCurrentIndex(2);
             break;
         case Screen::emptyCuffScreen:
             lInstructions->setCurrentIndex(3);
             break;
         case Screen::resultScreen:
-            if( valHeartRate != 0 ){
-                //TODO only needs to be done if new heart rate is available.
-                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0));
-            }
             lInstructions->setCurrentIndex(4);
             break;
     }
@@ -399,15 +410,40 @@ void Window::eNewData(double pData, double oData) {
 }
 
 void Window::eSwitchScreen(Screen eScreen) {
+
+    switch (eScreen) {
+        case Screen::startScreen:
+            btnCancel->hide();
+            break;
+        case Screen::inflateScreen:
+            btnCancel->show();
+            break;
+        case Screen::deflateScreen:
+            btnCancel->show();
+            if (valHeartRate != 0) {
+                //TODO only needs to be done if new heart rate is available.
+                lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
+            }
+            break;
+        case Screen::emptyCuffScreen:
+            btnCancel->show();
+            break;
+        case Screen::resultScreen:
+            btnCancel->hide();
+            if (valHeartRate != 0) {
+                //TODO only needs to be done if new heart rate is available.
+                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0) + " beats/min");
+            }
+            break;
+    }
+
     currentScreen = eScreen;
-    // TODO: add more
 }
 
 void Window::eResults(double map, double sbp, double dbp) {
-
-    lMAPval->setText( QString::number(map) + " mmHg" );
-    lSBPval->setText( QString::number(sbp) + " mmHg" );
-    lDBPval->setText( QString::number(dbp) + " mmHg");
+    lMAPval->setText(QString::number(map) + " mmHg");
+    lSBPval->setText(QString::number(sbp) + " mmHg");
+    lDBPval->setText(QString::number(dbp) + " mmHg");
 }
 
 void Window::eHeartRate(double heartRate) {
@@ -418,28 +454,38 @@ void Window::eReady() {
     btnStart->setDisabled(false);
 }
 
-void Window::clkBtnStart(){
+void Window::clkBtnStart() {
     eSwitchScreen(Screen::inflateScreen);
     process->startMeasurement();
 }
-void Window::clkBtnReset(){
+
+void Window::clkBtnCancel() {
+    eSwitchScreen(Screen::startScreen);
+    process->stopMeasurement(); //TODO: make safe
+}
+
+void Window::clkBtnReset() {
     eSwitchScreen(Screen::startScreen);
 }
 
 //TODO: remove those after debugging
-void Window::clkBtn1(){
+void Window::clkBtn1() {
     eSwitchScreen(Screen::startScreen);
 }
-void Window::clkBtn2(){
+
+void Window::clkBtn2() {
     eSwitchScreen(Screen::inflateScreen);
 }
-void Window::clkBtn3(){
+
+void Window::clkBtn3() {
     eSwitchScreen(Screen::deflateScreen);
 }
-void Window::clkBtn4(){
+
+void Window::clkBtn4() {
     eSwitchScreen(Screen::emptyCuffScreen);
 
 }
-void Window::clkBtn5(){
+
+void Window::clkBtn5() {
     eSwitchScreen(Screen::resultScreen);
 }
