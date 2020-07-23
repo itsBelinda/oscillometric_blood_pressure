@@ -407,11 +407,11 @@ void Window::retranslateUi(QMainWindow *window) {
     btnStart->setText("Start");
     btnReset->setText("Reset");
     btnCancel->setText("Cancel");
-    lMAP->setText("MAP:");
+    lMAP->setText("<b><font color=\"red\">MAP:</font></b>");
     lMAPval->setText("- mmHg");
-    lSBP->setText("SBP:");
+    lSBP->setText("<font color=\"blue\">SBP:</font>");
     lSBPval->setText("- mmHg");
-    lCBP->setText("DBP:");
+    lCBP->setText("<font color=\"green\">DBP:</font>");
     lDBPval->setText("- mmHg");
     lheartRate->setText("Current heart rate:<br><b>--</b>");
     lheartRateAV->setText("Average heart rate:");
@@ -428,32 +428,35 @@ void Window::timerEvent(QTimerEvent *) {
 //    pltMtx.unlock();
 
 //    if (bUpdateUI) {
-        switch (currentScreen) {
-            case Screen::startScreen:
-                btnCancel->hide();
-                btnStart->setDisabled(false);
-                lInstructions->setCurrentIndex(0);
-                break;
-            case Screen::inflateScreen:
-                btnCancel->show();
-                lInstructions->setCurrentIndex(1);
-                break;
-            case Screen::deflateScreen:
-                btnCancel->show();
-                if (valHeartRate != 0) {
-                    lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
-                }
-                lInstructions->setCurrentIndex(2);
-                break;
-            case Screen::emptyCuffScreen:
-                btnCancel->show();
-                lInstructions->setCurrentIndex(3);
-                break;
-            case Screen::resultScreen:
-                btnCancel->hide();
-                lInstructions->setCurrentIndex(4);
-                break;
-        }
+    switch (currentScreen) {
+        case Screen::startScreen:
+            btnCancel->hide();
+            //btnStart->setDisabled(false);
+            lInstructions->setCurrentIndex(0);
+            break;
+        case Screen::inflateScreen:
+            btnCancel->show();
+            lInstructions->setCurrentIndex(1);
+            break;
+        case Screen::deflateScreen:
+            btnCancel->show();
+            if (valHeartRate != 0) {
+                lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
+            }
+            lInstructions->setCurrentIndex(2);
+            break;
+        case Screen::emptyCuffScreen:
+            btnCancel->show();
+            lInstructions->setCurrentIndex(3);
+            break;
+        case Screen::resultScreen:
+            if (valHeartRate != 0) {
+                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0) + " beats/min");
+            }
+            btnCancel->hide();
+            lInstructions->setCurrentIndex(4);
+            break;
+    }
 //        bUpdateUI = false;
 //    }
 }
@@ -474,10 +477,10 @@ void Window::eSwitchScreen(Screen eNewScreen) {
 void Window::eResults(double map, double sbp, double dbp) {
     //TODO: thread safe because UI never accesses them ?
     // necessary to only save the values and then update?
-    // as with the heart rate
-    lMAPval->setText(QString::number(map) + " mmHg");
-    lSBPval->setText(QString::number(sbp) + " mmHg");
-    lDBPval->setText(QString::number(dbp) + " mmHg");
+    // as with the heart rateQString::number(valHeartRate, 'f', 0)
+    lMAPval->setText(QString::number(map, 'f', 0) + " mmHg");
+    lSBPval->setText(QString::number(sbp, 'f', 0) + " mmHg");
+    lDBPval->setText(QString::number(dbp, 'f', 0) + " mmHg");
 }
 
 void Window::eHeartRate(double heartRate) {
@@ -486,6 +489,7 @@ void Window::eHeartRate(double heartRate) {
 }
 
 void Window::eReady() {
+    btnStart->setDisabled(false);
     bUpdateUI = true; // first update will set the button enabled.
 }
 

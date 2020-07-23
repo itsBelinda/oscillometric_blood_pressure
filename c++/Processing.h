@@ -10,6 +10,7 @@
 #include "datarecord.h"
 #include "ISubject.h"
 #include "ComediHandler.h"
+#include "OBPDetection.h"
 
 #define IIRORDER 4
 
@@ -36,44 +37,22 @@ public:
     void startMeasurement();
     void stopMeasurement();
     inline ProcState getCurrentState() const;
-
     void setAmbientVoltage(double voltage);
 
-    static int maxValidPulse;
-    static int minValidPulse;
-    static double maxPulseChange;
 private:
     void run() override;
     static QString getFilename();
     void processSample(double newSample);
     [[nodiscard]] double getmmHgValue(double voltageValue) const;
     bool checkAmbient();
-    bool checkMaxima(double newOscData);
-    void findMinima();
-    void findOWME();
-    void findMAP();
-    bool isPastDBP();
-    static double getRatio(double lowerBound, double upperBound, double value);
-    static double getAverage(std::vector<double> avVector);
-    static bool isPulseValid( double pulse );
-    bool isValidMaxima();
     std::vector<double> rawData;
-    std::vector<double> pData;
-    std::vector<double> oData;
-    std::vector<double> omveData;
-    std::vector<double> heartRate;
-    std::vector<int> omveTimes;
-    //TODO: std::map?
-    std::vector<int> maxtime;
-    std::vector<int> mintime;
-    std::vector<double> maxAmp;
-    std::vector<double> minAmp;
 
     Iir::Butterworth::LowPass<IIRORDER> *iirLP;
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     Datarecord *record;
     ComediHandler *comedi;
+    OBPDetection *obpDetect;
     std::atomic<bool> bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
     std::atomic<bool> bMeasuring;
     ProcState currentState;
@@ -88,9 +67,6 @@ private:
     double mmHgInflate = 180.0;
     double ambientVoltage = 0.65;
     double corrFactor = 2.5; // due to voltage divider
-
-    double ratio_SBP = 0.57;    // from literature, might be changed in settings later
-    double ratio_DBP = 0.75;    // from literature, might be changed in settings later
 
 };
 

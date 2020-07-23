@@ -15,8 +15,8 @@
 OBPDetection::OBPDetection() :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
-        resValid(false){
-
+        enoughData(false){
+    reset();
 }
 
 /**
@@ -31,8 +31,8 @@ OBPDetection::~OBPDetection(){
  */
 double OBPDetection::getCurrentHeartRate() {
     double cHR = 0.0;
-    if (!heartRate.empty()) {
-        cHR = heartRate.back();
+    if (!hrData.empty()) {
+        cHR = hrData.back();
     }
     return cHR;
 }
@@ -42,7 +42,7 @@ double OBPDetection::getCurrentHeartRate() {
  * @return The average heart rate in the current calculations.
  */
 double OBPDetection::getAverageHeartRate() {
-    return getAverage(heartRate);
+    return getAverage(hrData);
 }
 
 /**
@@ -69,8 +69,8 @@ double OBPDetection::getDBP(){
     return resDBP;
 }
 
-bool OBPDetection::getResValid(){
-    return resValid;
+bool OBPDetection::getIsEnoughData(){
+    return enoughData;
 }
 
 /**
@@ -87,23 +87,23 @@ bool OBPDetection::getResValid(){
  //TODO: check if better: true means: new values available
  // e.g.: new pulse
 bool OBPDetection::processSample(double pressure, double oscillation){
-    bool isDone = false;
+    bool newMax = false;
     pData.push_back(pressure);
     oData.push_back(oscillation);
     if (checkMaxima()) {
         findMinima();
         if (isEnoughData()) {
 //            currentState = ProcState::Calculate;
-//            notifyHeartRate(getAverage(heartRate));
+//            notifyHeartRate(getAverage(hrData));
             //TODO: possibly in a separate thread only for the calculation? or too fast? ca 50ms
             findOWME();
             findMAP();
 //            notifySwitchScreen(Screen::emptyCuffScreen);
-            isDone = true;
+            enoughData = true;
         }
-        //isDone = true;
+        newMax = true;
     }
-    return isDone;
+    return newMax;
 }
 
 
@@ -177,8 +177,7 @@ bool OBPDetection::isValidMaxima() {
             double newPulse = newPulse = 60000.0 / (double) (maxtime.back() - (*(maxtime.end() - 2)));
 
             if (isHeartRateValid(newPulse)) {
-                heartRate.push_back(newPulse);
-                //notifyHeartRate(newPulse);
+                hrData.push_back(newPulse);
                 validPulseCnt++;
                 isValid = true;
             } else {
@@ -190,7 +189,7 @@ bool OBPDetection::isValidMaxima() {
                 mintime.clear();
                 maxtime.push_back(testSmplNbr);
                 maxAmp.push_back(testValue);
-                heartRate.clear();
+                hrData.clear();
                 isValid = false;
             }
 
@@ -272,8 +271,8 @@ void OBPDetection::findOWME() {
     auto ampMin1 = minAmp.cbegin();
     auto ampMax1 = maxAmp.cbegin();
     // forward iteration use const iterator, because they should not be touched
-    auto start = std::chrono::high_resolution_clock::now();
-    std::cout << "calculating OMVE: mintime size: " << mintime.size() << std::endl;
+//    auto start = std::chrono::high_resolution_clock::now();
+//    std::cout << "calculating OMVE: mintime size: " << mintime.size() << std::endl;
     // forward iteration
     for (auto timeMin1 = mintime.cbegin(); timeMin1 != (mintime.cend() - 1); ++timeMin1) {
         auto timeMin2 = std::next(timeMin1, 1); //TODO: not needed for last one, might be invalid
@@ -303,7 +302,7 @@ void OBPDetection::findOWME() {
         ampMax1++;
     }
     auto finish = std::chrono::high_resolution_clock::now();
-    std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
+//    std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
 }
 
 void OBPDetection::findMAP() {
@@ -311,7 +310,7 @@ void OBPDetection::findMAP() {
     auto maxOMVE = std::max_element(omveData.begin(), omveData.end());
     auto time = omveTimes[std::distance(omveData.begin(), maxOMVE)];
 
-    std::cout << "maxOMVE: " << *maxOMVE << std::endl;
+//    std::cout << "maxOMVE: " << *maxOMVE << std::endl;
 
     resMAP = pData[time]; //TODO MAP: get it from average heart rate
 //    PLOG_DEBUG << "MAP pressure p: " << pData[time] << " time: " << time
@@ -337,7 +336,7 @@ void OBPDetection::findMAP() {
     int lbTime;
     int ubTime;
 
-    std::cout << "SBP search: " << sbpSearch << std::endl;
+//    std::cout << "SBP search: " << sbpSearch << std::endl;
     for (auto omveSBP = omveData.begin(); omveSBP != maxOMVE; ++omveSBP) {
         if (*omveSBP > sbpSearch) {
             ubSBP = *omveSBP;
@@ -345,22 +344,22 @@ void OBPDetection::findMAP() {
             omveSBP--;
             lbSBP = *omveSBP;
             lbTime = omveTimes[std::distance(omveData.begin(), omveSBP)];
-            std::cout << "ubSBP: " << ubSBP << std::endl;
-            std::cout << "ubTime: " << ubTime << std::endl;
-            std::cout << "lbSBP: " << lbSBP << std::endl;
-            std::cout << "lbTime: " << lbTime << std::endl;
+//            std::cout << "ubSBP: " << ubSBP << std::endl;
+//            std::cout << "ubTime: " << ubTime << std::endl;
+//            std::cout << "lbSBP: " << lbSBP << std::endl;
+//            std::cout << "lbTime: " << lbTime << std::endl;
             break; //TODO: do while without break?
         }
     }
 
     int lerpSBPtime = (int) std::lerp(lbTime, ubTime, getRatio(lbSBP, ubSBP, sbpSearch));
     resSBP = pData[lerpSBPtime];
-    std::cout << "lerpSBPtime: " << lerpSBPtime << std::endl;
+//    std::cout << "lerpSBPtime: " << lerpSBPtime << std::endl;
 
     // FIND DBP: // TODO: validate!
 
     double dbpSearch = ratio_DBP * maxVAL;
-    std::cout << "DBP search: " << dbpSearch << std::endl;
+//    std::cout << "DBP search: " << dbpSearch << std::endl;
     for (auto omveDBP = maxOMVE; omveDBP != omveData.end(); ++omveDBP) {
         if (*omveDBP < dbpSearch) {
             lbSBP = *omveDBP;
@@ -368,10 +367,10 @@ void OBPDetection::findMAP() {
             omveDBP--;
             ubSBP = *omveDBP;
             ubTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
-            std::cout << "ubDBP: " << ubSBP << std::endl;
-            std::cout << "ubTime: " << ubTime << std::endl;
-            std::cout << "lbDBP: " << lbSBP << std::endl;
-            std::cout << "lbTime: " << lbTime << std::endl;
+//            std::cout << "ubDBP: " << ubSBP << std::endl;
+//            std::cout << "ubTime: " << ubTime << std::endl;
+//            std::cout << "lbDBP: " << lbSBP << std::endl;
+//            std::cout << "lbTime: " << lbTime << std::endl;
             break;
 
         }
@@ -383,7 +382,7 @@ void OBPDetection::findMAP() {
     // The interpolation is done from the "upper bound" time (earlier in time) to the
     // "lower bound" time (later in time).
     int lerpDBPtime = (int) std::lerp(ubTime, lbTime, 1.0 - getRatio(lbSBP, ubSBP, dbpSearch));
-    std::cout << "lerpDBPtime: " << lerpDBPtime << std::endl;
+//    std::cout << "lerpDBPtime: " << lerpDBPtime << std::endl;
     resDBP = pData[lerpDBPtime];
 
     //notifyResults(valMAP, valSBP, valDBP);
@@ -410,8 +409,26 @@ double OBPDetection::getRatio(double lowerBound, double upperBound, double value
  */
 double OBPDetection::getAverage(std::vector<double> avVector) {
     double av = 0.0;
-    if(avVector.empty()){
+    if(!avVector.empty()){
         av = std::accumulate(avVector.begin(), avVector.end(), 0.0) / avVector.size();
     }
     return av;
+}
+
+void OBPDetection::reset() {
+    pData.clear();
+    oData.clear();
+    omveData.clear();
+    omveTimes.clear();
+    maxAmp.clear();
+    maxtime.clear();
+    minAmp.clear();
+    mintime.clear();
+    hrData.clear();
+
+    // variables to store results
+    resMAP = 0.0;
+    resSBP = 0.0;
+    resDBP = 0.0;
+    enoughData = false;
 }

@@ -25,7 +25,10 @@
  * the MAP.
  */
 class OBPDetection {
-
+//TODO: add configurable parameters in constructor
+//TODO: "reset"
+//TODO: change osc to use mmHg values
+//TODO: MAP, DBP, SBP as average over heart rate
 public:
     OBPDetection();
     ~OBPDetection();
@@ -35,9 +38,10 @@ public:
     double getMAP();
     double getSBP();
     double getDBP();
-    bool getResValid();
+    bool getIsEnoughData();
 
     bool processSample(double pressure, double oscillation);
+    void reset();
 private:
     // vectors to store values for calculations
     std::vector<double> pData;
@@ -48,13 +52,13 @@ private:
     std::vector<int> maxtime;
     std::vector<double> minAmp;
     std::vector<int> mintime;
-    std::vector<double> heartRate;
+    std::vector<double> hrData;
 
     // variables to store results
     double resMAP{};
     double resSBP{};
     double resDBP{};
-    bool resValid;
+    bool enoughData;
 
     // variables to store configurations
     static double maxValidPulse;
