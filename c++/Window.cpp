@@ -21,9 +21,9 @@ Window::Window(Processing *process, QWidget *parent) :
     }
 
     valHeartRate = 0.0;
+    currentScreen = Screen::startScreen;
     setupUi(this);
-    currentScreen = Screen::startScreen
-            ;
+
     // Generate timer event every 50ms to update the window
     (void) startTimer(50);
 }
@@ -80,14 +80,14 @@ void Window::setupUi(QMainWindow *window) {
     lMeter->setAlignment(Qt::AlignCenter);
     meter = new QwtDial(lWidget);
     meter->setObjectName(QString::fromUtf8("meter"));
-    meter->setUpperBound(260.000000000000000);
-    meter->setScaleStepSize(20.000000000000000);
+    meter->setUpperBound(260.0);
+    meter->setScaleStepSize(20.0);
     meter->setWrapping(false);
     meter->setInvertedControls(false);
     meter->setLineWidth(4);
     meter->setMode(QwtDial::RotateNeedle);
-    meter->setMinScaleArc(20.000000000000000);
-    meter->setMaxScaleArc(340.000000000000000);
+    meter->setMinScaleArc(20.0);
+    meter->setMaxScaleArc(300.0);
     meter->setMinimumSize(400, 400);
     needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
@@ -156,7 +156,7 @@ void Window::setupUi(QMainWindow *window) {
     connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
-
+//    QObject::connect(this, SIGNAL(setLabelText(const QString &)), label, SLOT(setText(const QString &), Qt::QueuedConnection);
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
     connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
@@ -388,7 +388,7 @@ void Window::retranslateUi(QMainWindow *window) {
                         "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready.");
-                        //"<br><br> <i>Picture missing</i><br>"
+    //"<br><br> <i>Picture missing</i><br>"
     lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
                        "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
                        "Make sure the valve is fully closed.<br>"
@@ -396,7 +396,7 @@ void Window::retranslateUi(QMainWindow *window) {
     lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
                           "Open the valve slightly to release pressure at about 3 mmHg per second."
                           "Wait calmly and try not to move. <br><br>");
-                          //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
+    //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
     lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
                           "Wait for the pressure to go down to 0 mmHg.<br><br>"
                           "You will see the results next.");
@@ -421,79 +421,72 @@ void Window::retranslateUi(QMainWindow *window) {
 
 
 void Window::timerEvent(QTimerEvent *) {
+//    pltMtx.lock(); //TODO: Mutex seems to make it worse..
     pltOsc->replot();
     pltPre->replot();
     meter->repaint();
+//    pltMtx.unlock();
 
-
-    switch (currentScreen) {
-        case Screen::startScreen:
-            lInstructions->setCurrentIndex(0);
-            break;
-        case Screen::inflateScreen:
-            lInstructions->setCurrentIndex(1);
-            break;
-        case Screen::deflateScreen:
-            lInstructions->setCurrentIndex(2);
-            break;
-        case Screen::emptyCuffScreen:
-            lInstructions->setCurrentIndex(3);
-            break;
-        case Screen::resultScreen:
-            lInstructions->setCurrentIndex(4);
-            break;
-    }
+//    if (bUpdateUI) {
+        switch (currentScreen) {
+            case Screen::startScreen:
+                btnCancel->hide();
+                btnStart->setDisabled(false);
+                lInstructions->setCurrentIndex(0);
+                break;
+            case Screen::inflateScreen:
+                btnCancel->show();
+                lInstructions->setCurrentIndex(1);
+                break;
+            case Screen::deflateScreen:
+                btnCancel->show();
+                if (valHeartRate != 0) {
+                    lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
+                }
+                lInstructions->setCurrentIndex(2);
+                break;
+            case Screen::emptyCuffScreen:
+                btnCancel->show();
+                lInstructions->setCurrentIndex(3);
+                break;
+            case Screen::resultScreen:
+                btnCancel->hide();
+                lInstructions->setCurrentIndex(4);
+                break;
+        }
+//        bUpdateUI = false;
+//    }
 }
 
 void Window::eNewData(double pData, double oData) {
+//    pltMtx.lock();
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
-    meter->setValue(pData); //TODO: maybe meter should be shown all the time?
+    meter->setValue(pData);
+//    pltMtx.unlock();
 }
 
-void Window::eSwitchScreen(Screen eScreen) {
-
-    switch (eScreen) {
-        case Screen::startScreen:
-            btnCancel->hide();
-            break;
-        case Screen::inflateScreen:
-            btnCancel->show();
-            break;
-        case Screen::deflateScreen:
-            btnCancel->show();
-            if (valHeartRate != 0) {
-                //TODO only needs to be done if new heart rate is available.
-                lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
-            }
-            break;
-        case Screen::emptyCuffScreen:
-            btnCancel->show();
-            break;
-        case Screen::resultScreen:
-            btnCancel->hide();
-            if (valHeartRate != 0) {
-                //TODO only needs to be done if new heart rate is available.
-                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0) + " beats/min");
-            }
-            break;
-    }
-
-    currentScreen = eScreen;
+void Window::eSwitchScreen(Screen eNewScreen) {
+    currentScreen = eNewScreen;
+    bUpdateUI = true;
 }
 
 void Window::eResults(double map, double sbp, double dbp) {
+    //TODO: thread safe because UI never accesses them ?
+    // necessary to only save the values and then update?
+    // as with the heart rate
     lMAPval->setText(QString::number(map) + " mmHg");
     lSBPval->setText(QString::number(sbp) + " mmHg");
     lDBPval->setText(QString::number(dbp) + " mmHg");
 }
 
 void Window::eHeartRate(double heartRate) {
-    this->valHeartRate = heartRate;
+    valHeartRate = heartRate;
+    bUpdateUI = true;
 }
 
 void Window::eReady() {
-    btnStart->setDisabled(false);
+    bUpdateUI = true; // first update will set the button enabled.
 }
 
 void Window::clkBtnStart() {

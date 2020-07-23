@@ -82,10 +82,9 @@ void Processing::run() {
 }
 
 /**
- * Stops the thread by stopping the data aquisition so the thread teminates and can be joined.
+ * Stops the thread by stopping the data acquisition so the thread terminates and can be joined.
  */
 void Processing::stopThread() {
-    // TODO: safely abort measurement
     bRunning = false;
 }
 
@@ -103,19 +102,9 @@ void Processing::startMeasurement() {
  * Stops the measurement and saves the data to a file.
  */
 void Processing::stopMeasurement() {
-    if (bMeasuring) {
-        bMeasuring = false;
-        // TODO: make dependant on user selection
-        record->saveAll(Processing::getFilename(), rawData);
-    }
-}
-
-/**
- * Stops the measurement, but without saving the data.
- */
-void Processing::resetMeasurement() {
     bMeasuring = false;
 }
+
 /**
  * Gets a file name (string) from the current time.
  * @return The file name as a QString.
@@ -179,60 +168,76 @@ void Processing::processSample(double newSample) {
 
             break;
         case ProcState::Inflate:
-            //pData.push_back(ymmHg); //TODO: no need to record this here.
-            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-//            oData.push_back(yHP) //TODO: no need to record this here.
-            /**
-             * Check if the pressure in the cuff is big enough yet.
-             * If so, change to the next state.
-             */
-            if (ymmHg > mmHgInflate) {
-
-                notifySwitchScreen(Screen::deflateScreen);
-                //TODO: possibly add entry end exit functions for each state
-                // function: switch state: returns new state
-                // performs entry and exit operations (notifications)
-                // would that work with the state class being a friendly to Processing?
-                currentState = ProcState::Deflate;
+            if(!bMeasuring){
+                    currentState = ProcState::Idle;
             }
+            else {
+                //pData.push_back(ymmHg); //TODO: no need to record this here.
+                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+//            oData.push_back(yHP) //TODO: no need to record this here.
+                /**
+                 * Check if the pressure in the cuff is big enough yet.
+                 * If so, change to the next state.
+                 */
+                if (ymmHg > mmHgInflate) {
+
+                    notifySwitchScreen(Screen::deflateScreen);
+                    //TODO: possibly add entry end exit functions for each state
+                    // function: switch state: returns new state
+                    // performs entry and exit operations (notifications)
+                    // would that work with the state class being a friendly to Processing?
+                    currentState = ProcState::Deflate;
+                }
+            }
+
             break;
         case ProcState::Deflate:
-            //TODO: should the start deflation time be saved? (in terms of raw data)
-            // This could avoid the need to store pData at all because we could just
-            // average over raw for a heart rate period
-            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-            pData.push_back(ymmHg);
-            oData.push_back(yHP);
-            /**
-             * THIS IS WHERE THE MAGIC HAPPENS:
-             * detect max/min in oscillations, possibly more (other algorithms)
-             */
-            if (checkMaxima(yHP)) {
-                findMinima();
-                if (isPastDBP()) {
-                    currentState = ProcState::Calculate;
-                    notifyHeartRate(getAverage(heartRate));
-                    //TODO: possibly in a separate thread only for the calculation? or too fast? ca 50ms
-                    findOWME();
-                    notifySwitchScreen(Screen::emptyCuffScreen);
+            if(!bMeasuring){
+                currentState = ProcState::Idle;
+            }
+            else {
+                //TODO: should the start deflation time be saved? (in terms of raw data)
+                // This could avoid the need to store pData at all because we could just
+                // average over raw for a heart rate period
+                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                pData.push_back(ymmHg);
+                oData.push_back(yHP);
+                /**
+                 * THIS IS WHERE THE MAGIC HAPPENS:
+                 * detect max/min in oscillations, possibly more (other algorithms)
+                 */
+                if (checkMaxima(yHP)) {
+                    findMinima();
+                    if (isPastDBP()) {
+                        currentState = ProcState::Calculate;
+                        notifyHeartRate(getAverage(heartRate));
+                        //TODO: possibly in a separate thread only for the calculation? or too fast? ca 50ms
+                        findOWME();
+                        notifySwitchScreen(Screen::emptyCuffScreen);
 
+                    }
+                }
+                if (bMeasuring == false) {
+                    currentState = ProcState::Idle;
                 }
             }
             break;
         case ProcState::Calculate:
-
-            /**
-             * Some more magic here:
-             * reverse search of ratios in recorded data set since deflate
-             */
-            pData.push_back(ymmHg); //keep filling the values until zero is reached //TODO: not needed really
-            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-            if (ymmHg < 1) {
-                findMAP();
-                stopMeasurement();
-                notifySwitchScreen(Screen::resultScreen);
+            if(!bMeasuring){
                 currentState = ProcState::Idle;
             }
+            else {
+                pData.push_back(ymmHg); //keep filling the values until zero is reached //TODO: not needed really
+                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                if (ymmHg < 1) {
+                    findMAP();
+                    record->saveAll(Processing::getFilename(), rawData);
+                    stopMeasurement();
+                    notifySwitchScreen(Screen::resultScreen);
+                    currentState = ProcState::Idle;
+                }
+            }
+
 
             break;
 

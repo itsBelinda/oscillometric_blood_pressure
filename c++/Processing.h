@@ -44,7 +44,6 @@ public:
     static double maxPulseChange;
 private:
     void run() override;
-    void resetMeasurement();
     static QString getFilename();
     void processSample(double newSample);
     [[nodiscard]] double getmmHgValue(double voltageValue) const;
@@ -75,8 +74,8 @@ private:
 
     Datarecord *record;
     ComediHandler *comedi;
-    bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
-    bool bMeasuring;
+    std::atomic<bool> bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
+    std::atomic<bool> bMeasuring;
     ProcState currentState;
 
     /**

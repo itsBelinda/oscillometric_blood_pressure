@@ -16,6 +16,7 @@
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QFormLayout>
+#include <mutex>
 #include "IObserver.h"
 #include "Plot.h"
 #include "common.h"
@@ -35,12 +36,15 @@ public:
 protected:
     void timerEvent(QTimerEvent *e) override;
 private:
+    // Callbacks from observable class, need to be implemented
+    // in a thread safe way:
     void eNewData(double pData, double oData) override;
-    void eSwitchScreen(Screen eScreen) override;
+    void eSwitchScreen(Screen eNewScreen) override;
     void eResults(double map, double sbp, double dbp) override;
     void eHeartRate(double map) override;
     void eReady() override;
 
+    // Setting up the UI:
     void setupUi(QMainWindow *window);
     QWidget * setupPlots(QWidget *parent);
     QWidget * setupStartPage(QWidget *parent);
@@ -48,16 +52,22 @@ private:
     QWidget * setupDeflatePage(QWidget *parent);
     QWidget * setupEmptyCuffPage(QWidget *parent);
     QWidget * setupResultPage(QWidget *parent);
-
     void retranslateUi(QMainWindow *MainWindow);
 
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;// TODO: needed ?
-    double valHeartRate;
-    Screen currentScreen;
 
+    // Variables that are changed from outside the UI are made
+    // atomic, so access to them is thread safe.
+    std::atomic<double> valHeartRate;
+    std::atomic<Screen> currentScreen;
+    std::atomic<bool> bUpdateUI;
 
+    // mutex for thread save access to the plots:
+    std::mutex pltMtx;
+
+    // UI components:
     QSplitter *splitter;
     QVBoxLayout *vlLeft;
     QStackedWidget *lInstructions;
