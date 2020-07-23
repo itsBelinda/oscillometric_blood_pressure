@@ -136,6 +136,7 @@ void Processing::processSample(double newSample) {
     /**
      * Every sample is filtered and sent to the Observers
      */
+     //TODO: change to work with getmmHgValue(newSample)
     double yLP = iirLP->filter(newSample);
     double yHP = iirHP->filter(yLP);
     double ymmHg = getmmHgValue(yLP);

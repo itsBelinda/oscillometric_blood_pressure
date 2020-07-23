@@ -31,8 +31,9 @@ add_executable(obp
         Processing.cpp
         ComediHandler.cpp
         datarecord.cpp
+        OBPDetection.cpp
         IObserver.h
         ISubject.h
-        common.h OBPdetection.cpp OBPdetection.h)
+        common.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})

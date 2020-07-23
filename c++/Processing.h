@@ -13,9 +13,9 @@
 
 #define IIRORDER 4
 
-//! The Processing Class handles the data acquisition and processing.
+//! The Processing class handles the data acquisition and processing.
 /*!
- * The UI consists of ...
+ * What happens here ...
  */
 class Processing : public CppThread, public ISubject{
 
@@ -64,9 +64,6 @@ private:
     std::vector<double> omveData;
     std::vector<double> heartRate;
     std::vector<int> omveTimes;
-    unsigned long lastTimeMax;
-    double lastDataMax;
-    double avPulse;
     //TODO: std::map?
     std::vector<int> maxtime;
     std::vector<int> mintime;
