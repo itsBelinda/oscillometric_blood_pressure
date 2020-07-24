@@ -20,10 +20,11 @@ Window::Window(Processing *process, QWidget *parent) :
         yHPData[i] = 0;
     }
 
-    valHeartRate = 0.0;
+    std::lock_guard<std::mutex> guard(pltMtx); //automatically releases mutex when control leaves scope.
+    currentScreen = Screen::startScreen;
     setupUi(this);
-    currentScreen = Screen::startScreen
-            ;
+
+    // TODO: read settings and potentially set them in Processing.
     // Generate timer event every 50ms to update the window
     (void) startTimer(50);
 }
@@ -56,8 +57,6 @@ void Window::setupUi(QMainWindow *window) {
     window->setWindowIcon(icon);
     window->setTabShape(QTabWidget::Triangular);
 
-    //TODO: splitter more visible.
-    //TODO: minimum width for left and right side
     splitter = new QSplitter(window);
     splitter->setObjectName(QString::fromUtf8("splitter"));
     splitter->setOrientation(Qt::Horizontal);
@@ -80,14 +79,14 @@ void Window::setupUi(QMainWindow *window) {
     lMeter->setAlignment(Qt::AlignCenter);
     meter = new QwtDial(lWidget);
     meter->setObjectName(QString::fromUtf8("meter"));
-    meter->setUpperBound(260.000000000000000);
-    meter->setScaleStepSize(20.000000000000000);
+    meter->setUpperBound(260.0);
+    meter->setScaleStepSize(20.0);
     meter->setWrapping(false);
     meter->setInvertedControls(false);
     meter->setLineWidth(4);
     meter->setMode(QwtDial::RotateNeedle);
-    meter->setMinScaleArc(20.000000000000000);
-    meter->setMaxScaleArc(340.000000000000000);
+    meter->setMinScaleArc(20.0);
+    meter->setMaxScaleArc(300.0);
     meter->setMinimumSize(400, 400);
     needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
@@ -153,10 +152,11 @@ void Window::setupUi(QMainWindow *window) {
     auto *spacerbnt = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(spacerbnt, 1);
 
-    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
+    connect(btnStart, SIGNAL (clicked()), this, SLOT (clkBtnStart()));
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
 
+    //TODO: remove at the end
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
     connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
@@ -165,6 +165,7 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
+//TODO: make plots a bit nicer.
 /**
  * Sets up the page with two plots to display the data.
  *
@@ -388,7 +389,7 @@ void Window::retranslateUi(QMainWindow *window) {
                         "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready.");
-                        //"<br><br> <i>Picture missing</i><br>"
+    //"<br><br> <i>Picture missing</i><br>"
     lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
                        "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
                        "Make sure the valve is fully closed.<br>"
@@ -396,7 +397,7 @@ void Window::retranslateUi(QMainWindow *window) {
     lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
                           "Open the valve slightly to release pressure at about 3 mmHg per second."
                           "Wait calmly and try not to move. <br><br>");
-                          //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
+    //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
     lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
                           "Wait for the pressure to go down to 0 mmHg.<br><br>"
                           "You will see the results next.");
@@ -407,11 +408,11 @@ void Window::retranslateUi(QMainWindow *window) {
     btnStart->setText("Start");
     btnReset->setText("Reset");
     btnCancel->setText("Cancel");
-    lMAP->setText("MAP:");
+    lMAP->setText("<b><font color=\"red\">MAP:</font></b>");
     lMAPval->setText("- mmHg");
-    lSBP->setText("SBP:");
+    lSBP->setText("<font color=\"blue\">SBP:</font>");
     lSBPval->setText("- mmHg");
-    lCBP->setText("DBP:");
+    lCBP->setText("<font color=\"green\">DBP:</font>");
     lDBPval->setText("- mmHg");
     lheartRate->setText("Current heart rate:<br><b>--</b>");
     lheartRateAV->setText("Average heart rate:");
@@ -421,93 +422,109 @@ void Window::retranslateUi(QMainWindow *window) {
 
 
 void Window::timerEvent(QTimerEvent *) {
+    pltMtx.lock();
     pltOsc->replot();
     pltPre->replot();
-    meter->repaint();
-
-
-    switch (currentScreen) {
-        case Screen::startScreen:
-            lInstructions->setCurrentIndex(0);
-            break;
-        case Screen::inflateScreen:
-            lInstructions->setCurrentIndex(1);
-            break;
-        case Screen::deflateScreen:
-            lInstructions->setCurrentIndex(2);
-            break;
-        case Screen::emptyCuffScreen:
-            lInstructions->setCurrentIndex(3);
-            break;
-        case Screen::resultScreen:
-            lInstructions->setCurrentIndex(4);
-            break;
-    }
+    pltMtx.unlock();
 }
 
 void Window::eNewData(double pData, double oData) {
+    pltMtx.lock();
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
-    meter->setValue(pData); //TODO: maybe meter should be shown all the time?
+    pltMtx.unlock();
+
+    bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
+    assert(bOk);
 }
 
-void Window::eSwitchScreen(Screen eScreen) {
-
-    switch (eScreen) {
+void Window::eSwitchScreen(Screen eNewScreen) {
+    bool bOk = false;
+    switch (eNewScreen) {
         case Screen::startScreen:
-            btnCancel->hide();
+            bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 0));
+            assert(bOk);
             break;
         case Screen::inflateScreen:
-            btnCancel->show();
+            bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 1));
+            assert(bOk);
             break;
         case Screen::deflateScreen:
-            btnCancel->show();
-            if (valHeartRate != 0) {
-                //TODO only needs to be done if new heart rate is available.
-                lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
-            }
+            bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 2));
+            assert(bOk);
             break;
         case Screen::emptyCuffScreen:
-            btnCancel->show();
+            bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 3));
+            assert(bOk);
             break;
         case Screen::resultScreen:
-            btnCancel->hide();
-            if (valHeartRate != 0) {
-                //TODO only needs to be done if new heart rate is available.
-                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0) + " beats/min");
-            }
+            bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 4));
+            assert(bOk);
             break;
     }
-
-    currentScreen = eScreen;
+    currentScreen = eNewScreen;
 }
 
 void Window::eResults(double map, double sbp, double dbp) {
-    lMAPval->setText(QString::number(map) + " mmHg");
-    lSBPval->setText(QString::number(sbp) + " mmHg");
-    lDBPval->setText(QString::number(dbp) + " mmHg");
+    bool bOk = QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
+    assert(bOk);
+    bOk = QMetaObject::invokeMethod(lSBPval, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
+    assert(bOk);
+    bOk = QMetaObject::invokeMethod(lDBPval, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
+    assert(bOk);
 }
 
 void Window::eHeartRate(double heartRate) {
-    this->valHeartRate = heartRate;
+
+    bool bOk = QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, "Current heart rate:<br><b>" +
+                                             QString::number(heartRate, 'f', 0) + "</b>"));
+    assert(bOk);
+    bOk = QMetaObject::invokeMethod(lHRvalAV, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
+    assert(bOk);
 }
 
 void Window::eReady() {
-    btnStart->setDisabled(false);
+    // Instead of :
+    // btnStart->setDisabled(false);
+        // The QMetaObject::invokeMethod is used with a Qt::QueuedConnection.
+    // The button is set enabled whenever the UI thread is ready.setDisabled
+    bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
+                                      Q_ARG(bool, false));
+    // Checks that function call is valid during development. Do not put function inside assert,
+    // because it will be removed in release build!
+    assert(bOk);
 }
 
 void Window::clkBtnStart() {
-    eSwitchScreen(Screen::inflateScreen);
     process->startMeasurement();
 }
 
 void Window::clkBtnCancel() {
-    eSwitchScreen(Screen::startScreen);
-    process->stopMeasurement(); //TODO: make safe
+    process->stopMeasurement();
 }
 
 void Window::clkBtnReset() {
-    eSwitchScreen(Screen::startScreen);
+    process->stopMeasurement();
 }
 
 //TODO: remove those after debugging
