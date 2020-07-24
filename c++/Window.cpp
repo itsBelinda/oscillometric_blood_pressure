@@ -24,6 +24,7 @@ Window::Window(Processing *process, QWidget *parent) :
     currentScreen = Screen::startScreen;
     setupUi(this);
 
+    // TODO: read settings and potentially set them in Processing.
     // Generate timer event every 50ms to update the window
     (void) startTimer(50);
 }

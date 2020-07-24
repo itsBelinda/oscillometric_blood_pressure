@@ -30,17 +30,19 @@ class OBPDetection {
 //TODO: MAP, DBP, SBP as average over heart rate
 public:
     OBPDetection();
+
     ~OBPDetection();
 
     double getCurrentHeartRate();
     double getAverageHeartRate();
-    double getMAP();
-    double getSBP();
-    double getDBP();
-    bool getIsEnoughData();
-
+    [[nodiscard]] double getMAP() const;
+    [[nodiscard]] double getSBP() const;
+    [[nodiscard]] double getDBP() const;
+    [[nodiscard]] bool getIsEnoughData() const;
     bool processSample(double pressure, double oscillation);
+
     void reset();
+
 private:
     // vectors to store values for calculations
     std::vector<double> pData;
@@ -60,20 +62,38 @@ private:
     bool enoughData;
 
     // variables to store configurations
-    static double maxValidPulse;
-    static double minValidPulse;
-    double ratio_SBP = 0.57;    // from literature, might be changed in settings later
-    double ratio_DBP = 0.75;    // from literature, might be changed in settings later
+    double maxValidHR = 100.0;      //! The maximal valid heart rate
+    double minValidHR = 50.0;       //! The minimal valid heart rate
+    double ratio_SBP = 0.57;        //! from literature, might be changed in settings later
+    double ratio_DBP = 0.75;        //! from literature, might be changed in settings later
+    double prominence = 0.0005;     //! The min. prominence of one oscillation to count as a maximum
+    int minDataSize = 1200;         //! The min. size of oscillation data. Before this it will not be analysed.
+    int minPeakTime = 300;          //! The minimal time two peaks should be apart. If there are multiples, only the
+    //! larger one will be considered.
+    double samplingRate = 1000.0;   //! The sampling rate needed to calculate the heart rate from samples.
+    int minNbrPeaks = 10;           //! The number of oscillation peaks required to be able to perform the algorithm.
+    double cutoffHyst = 0.3;        //! The hysteresis below ratio_DBP the oscillations have to be in order to be
+    //! able to end the measurement. This is not from the total OMVE, but from the
+    //! maximal amplitude. (OMVE calculated afterwards).
 
-    // functions
+    //private functions:
     bool checkMaxima();
+
     bool isValidMaxima();
-    static bool isHeartRateValid(double heartRate);
+
+    bool isHeartRateValid(double heartRate);
+
     void findMinima();
+
     bool isEnoughData();
+
     void findOWME();
+
     void findMAP();
+
+    // Static functions:
     static double getRatio(double lowerBound, double upperBound, double value);
+
     static double getAverage(std::vector<double> avVector);
 
 

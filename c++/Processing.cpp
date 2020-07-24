@@ -5,15 +5,13 @@
 
 #include "Processing.h"
 
-#define DEFAULT_MINUTES 5
-#define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
 
 /**
  * The constructor of the Processing thread.
  *
  * Initialises internal objects and prepares the thread for running.
  */
-Processing::Processing() :
+Processing::Processing(double fcLP, double fcHP) :
         rawData(DEFAULT_DATA_SIZE),
         bRunning(false),
         bMeasuring(false) {
@@ -25,15 +23,22 @@ Processing::Processing() :
 
     sampling_rate = comedi->getSamplingRate();
 
-    // 5Hz mains LP filter
+    // LP filter, default value is 10 Hz, which also takes care of 50 Hz noise.
+    if (fcLP > 20.0 || fcLP < 5.0) {
+        PLOG_WARNING << "Processing running with low pass filter of: " << fcLP;
+    }
+
     iirLP = new Iir::Butterworth::LowPass<IIRORDER>;
     assert(iirLP != NULL);
-    iirLP->setup(sampling_rate, 10.0); //TODO: parametrise
+    iirLP->setup(sampling_rate, fcLP);
 
-    // .5Hz mains HP filter
+    // HP filter, default value is 0.5 Hz.
+    if (fcHP != 0.5) {
+        PLOG_WARNING << "Processing running with high pass filter of: " << fcHP;
+    }
     iirHP = new Iir::Butterworth::HighPass<IIRORDER>;
     assert(iirHP != NULL);
-    iirHP->setup(sampling_rate, 0.5); //TODO: parametrise
+    iirHP->setup(sampling_rate, fcHP);
 
     obpDetect = new OBPDetection();
     rawData.clear();
@@ -198,13 +203,13 @@ void Processing::processSample(double newSample) {
                     }
                     notifyHeartRate(obpDetect->getCurrentHeartRate());
                 }
-                if(ymmHg < 20){
+                if (ymmHg < 20) {
                     PLOG_WARNING << "Pressure too low to continue algorithm. Cancelled";
                     //TODO: notificataion ?
                     bMeasuring = false;
                     bMeasuring = false;
                 }
-                if(rawData.size() > DEFAULT_DATA_SIZE){
+                if (rawData.size() > DEFAULT_DATA_SIZE) {
                     PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
                     //TODO: notificataion ?
                     bMeasuring = false;
