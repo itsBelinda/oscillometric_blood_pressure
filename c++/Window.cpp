@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <qwt/qwt_dial_needle.h>
+#include <iostream>
 
 /**
  * The constructor of the Window Class.
@@ -116,11 +117,8 @@ void Window::setupUi(QMainWindow *window) {
     // Add splitter to main window.
     window->setCentralWidget(splitter);
 
-    // TODO: menubar working? just missing content?
-    menubar = new QMenuBar(window);
-    menubar->setObjectName(QString::fromUtf8("menubar"));
-    menubar->setGeometry(QRect(0, 0, 2081, 39));
-    window->setMenuBar(menubar);
+    window->setMenuBar(setupMenu(window));
+
     statusbar = new QStatusBar(window);
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     window->setStatusBar(statusbar);
@@ -156,6 +154,7 @@ void Window::setupUi(QMainWindow *window) {
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
 
+//    connect(actionExit,SIGNAL(on_actionExit_triggered()),this,SLOT(close()));
     //TODO: remove at the end
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
@@ -165,6 +164,27 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
+
+QMenuBar *Window::setupMenu(QWidget *parent) {
+    actionSettings = new QAction(parent);
+    actionSettings->setObjectName(QString::fromUtf8("actionSettings"));
+    actionInfo = new QAction(parent);
+    actionInfo->setObjectName(QString::fromUtf8("actionInfo"));
+    actionExit = new QAction(parent);
+    actionExit->setObjectName(QString::fromUtf8("actionExit"));
+
+    menubar = new QMenuBar(parent);
+    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menuMenu = new QMenu(menubar);
+    menuMenu->setObjectName(QString::fromUtf8("menuMenu"));
+
+    menubar->addAction(menuMenu->menuAction());
+    menuMenu->addAction(actionSettings);
+    menuMenu->addAction(actionInfo);
+    menuMenu->addSeparator();
+    menuMenu->addAction(actionExit);
+    return menubar;
+}
 //TODO: make plots a bit nicer.
 /**
  * Sets up the page with two plots to display the data.
@@ -381,7 +401,8 @@ QWidget *Window::setupResultPage(QWidget *parent) {
 
 
 void Window::retranslateUi(QMainWindow *window) {
-    window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
+    window->setWindowTitle(QApplication::translate("Oscillometric Blood Pressure Measurement", "OBP Measurement",
+                                                   nullptr));
 
     lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
                         "1. Put the cuff on your upper arm of your nondominant hand, making sure it is tight.<br>"
@@ -418,6 +439,11 @@ void Window::retranslateUi(QMainWindow *window) {
     lheartRateAV->setText("Average heart rate:");
     lHRvalAV->setText("- beats/min");
 
+    actionSettings->setText("Settings");
+    actionInfo->setText("Info");
+    actionExit->setText("Exit");
+    menuMenu->setTitle("Menu");
+
 }
 
 
@@ -445,35 +471,35 @@ void Window::eSwitchScreen(Screen eNewScreen) {
             bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 0));
+                                            Q_ARG(int, 0));
             assert(bOk);
             break;
         case Screen::inflateScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 1));
+                                            Q_ARG(int, 1));
             assert(bOk);
             break;
         case Screen::deflateScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 2));
+                                            Q_ARG(int, 2));
             assert(bOk);
             break;
         case Screen::emptyCuffScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 3));
+                                            Q_ARG(int, 3));
             assert(bOk);
             break;
         case Screen::resultScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 4));
+                                            Q_ARG(int, 4));
             assert(bOk);
             break;
     }
@@ -482,34 +508,34 @@ void Window::eSwitchScreen(Screen eNewScreen) {
 
 void Window::eResults(double map, double sbp, double dbp) {
     bool bOk = QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
+                                         Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
     assert(bOk);
     bOk = QMetaObject::invokeMethod(lSBPval, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
+                                    Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
     assert(bOk);
     bOk = QMetaObject::invokeMethod(lDBPval, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
+                                    Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
     assert(bOk);
 }
 
 void Window::eHeartRate(double heartRate) {
 
     bool bOk = QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, "Current heart rate:<br><b>" +
-                                             QString::number(heartRate, 'f', 0) + "</b>"));
+                                         Q_ARG(QString, "Current heart rate:<br><b>" +
+                                                        QString::number(heartRate, 'f', 0) + "</b>"));
     assert(bOk);
     bOk = QMetaObject::invokeMethod(lHRvalAV, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
+                                    Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
     assert(bOk);
 }
 
 void Window::eReady() {
     // Instead of :
     // btnStart->setDisabled(false);
-        // The QMetaObject::invokeMethod is used with a Qt::QueuedConnection.
+    // The QMetaObject::invokeMethod is used with a Qt::QueuedConnection.
     // The button is set enabled whenever the UI thread is ready.setDisabled
     bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
-                                      Q_ARG(bool, false));
+                                         Q_ARG(bool, false));
     // Checks that function call is valid during development. Do not put function inside assert,
     // because it will be removed in release build!
     assert(bOk);
@@ -547,4 +573,34 @@ void Window::clkBtn4() {
 
 void Window::clkBtn5() {
     eSwitchScreen(Screen::resultScreen);
+}
+
+/**
+ * This function is called when the menu entry "Info" is pressed.
+ *
+ * The name of this function (slot) ensures automatic connection with the menu entry
+ * actionInfo.
+ */
+void Window::on_actionInfo_triggered(){
+    
+}
+
+/**
+ * This function is called when the menu entry "Settings" is pressed.
+ *
+ * The name of this function (slot) ensures automatic connection with the menu entry
+ * actionSettings.
+ */
+void Window::on_actionSettings_triggered(){
+
+}
+
+/**
+ * This function is called when the menu entry "Exit" is pressed.
+ *
+ * The name of this function (slot) ensures automatic connection with the menu entry
+ * actionExit.
+ */
+void Window::on_actionExit_triggered(){
+    QApplication::quit();
 }

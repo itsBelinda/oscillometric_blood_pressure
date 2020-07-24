@@ -46,6 +46,7 @@ private:
 
     // Setting up the UI:
     void setupUi(QMainWindow *window);
+    QMenuBar*  setupMenu(QWidget *parent);
     QWidget * setupPlots(QWidget *parent);
     QWidget * setupStartPage(QWidget *parent);
     QWidget * setupInflatePage(QWidget *parent);
@@ -115,11 +116,18 @@ private:
     QFrame *line;
     QMenuBar *menubar;
     QStatusBar *statusbar;
+    QMenu *menuMenu;
+    QAction *actionSettings;
+    QAction *actionInfo;
+    QAction *actionExit;
 
 private slots:
     void clkBtnStart();
     void clkBtnCancel();
     void clkBtnReset();
+    void on_actionInfo_triggered();
+    void on_actionSettings_triggered();
+    void on_actionExit_triggered();
     void clkBtn1();
     void clkBtn2();
     void clkBtn3();
