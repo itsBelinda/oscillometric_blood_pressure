@@ -25,7 +25,7 @@ private:
     comedi_cmd comediCommand;
     comedi_t *dev;
     size_t readSize;
-    bool sigmaBoard;//TODO: warning, if not sigma board
+    bool sigmaBoard;
     lsampl_t maxdata;
     comedi_range *crange;
     double sampling_rate;

@@ -2,7 +2,6 @@
 #define OBP_PROCESSING_H
 
 #include <vector>
-
 #include <comedilib.h>
 #include <Iir.h>
 
@@ -11,9 +10,14 @@
 #include "datarecord.h"
 #include "ISubject.h"
 #include "ComediHandler.h"
+#include "OBPDetection.h"
 
 #define IIRORDER 4
 
+//! The Processing class handles the data acquisition and processing.
+/*!
+ * What happens here ...
+ */
 class Processing : public CppThread, public ISubject{
 
     enum class ProcState {
@@ -22,57 +26,36 @@ class Processing : public CppThread, public ISubject{
         Inflate, //possilbly: wait for smallest oscillatin
         Deflate,
         Calculate,
+        Restults,
     };
 
 public:
-    Processing();
+    explicit Processing(double fcLP = 10.0, double fcHP = 0.5);
     ~Processing() override;
 
     void stopThread();
 
     void startMeasurement();
     void stopMeasurement();
-    inline ProcState getCurrentState() const { return currentState; }
-
+    inline ProcState getCurrentState() const;
     void setAmbientVoltage(double voltage);
 
-    static int maxValidPulse;
-    static int minValidPulse;
-    static double maxPulseChange;
 private:
     void run() override;
-    void resetMeasurement();
     static QString getFilename();
     void processSample(double newSample);
-    double getmmHgValue(double voltageValue);
+    [[nodiscard]] double getmmHgValue(double voltageValue) const;
     bool checkAmbient();
-    bool checkMaxima(double newOscData);
-    void checkMinima();
-    bool isPastDBP();
-
-    bool isPulseValid( double pulse );
-    bool isValidMaxima();
-    std::vector<double> nData;
-    std::vector<double> pData;
     std::vector<double> rawData;
-    std::vector<double> oData;
-    unsigned long lastTimeMax;
-    double lastDataMax;
-    double currentPulse;
-    double avPulse;
-    //TODO: std::map?
-    std::vector<int> maxtime;
-    std::vector<int> mintime;
-    std::vector<double> maxAmp;
-    std::vector<double> minAmp;
 
     Iir::Butterworth::LowPass<IIRORDER> *iirLP;
     Iir::Butterworth::HighPass<IIRORDER> *iirHP;
 
     Datarecord *record;
     ComediHandler *comedi;
-    bool bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
-    bool bMeasuring;
+    OBPDetection *obpDetect;
+    std::atomic<bool> bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
+    std::atomic<bool> bMeasuring;
     ProcState currentState;
 
     /**
@@ -81,13 +64,11 @@ private:
     const double mmHg_per_kPa = 7.5006157584566; // literature
     const double kPa_per_V = 50; // data sheet
 
-    double sampling_rate = 1000.0;
+    double sampling_rate;
+
     double mmHgInflate = 180.0;
     double ambientVoltage = 0.65;
     double corrFactor = 2.5; // due to voltage divider
-
-    double ratio_SBP = 0.57;    // from literature, might be changed in settings later
-    double ratio_DBP = 0.75;    // from literature, might be changed in settings later
 
 };
 

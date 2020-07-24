@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
-set(CMAKE_CXX_STANDARD 11)
-
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(obp)
 
 set(CMAKE_AUTOMOC ON)
@@ -31,9 +31,9 @@ add_executable(obp
         Processing.cpp
         ComediHandler.cpp
         datarecord.cpp
+        OBPDetection.cpp
         IObserver.h
         ISubject.h
         common.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
-

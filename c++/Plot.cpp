@@ -1,6 +1,5 @@
 #include "Plot.h"
 
-//TODO: use static declaration
 int Plot::nextPenColour = (int) Qt::darkRed;
 
 /**
@@ -59,5 +58,4 @@ void Plot::setNewData(double yNew) {
     static int cnt = 0;
     memmove(yData, yData + 1, (dataLength - 1) * sizeof(yData[0]));
     yData[dataLength - 1] = yNew;
-    // TODO: data mutex to shift pointers of raw data instead of having two copies?
 }

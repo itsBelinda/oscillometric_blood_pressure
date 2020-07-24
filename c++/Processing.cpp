@@ -1,21 +1,18 @@
-
 #include <iostream>
 #include <unistd.h>
-#include <iomanip>
-
+#include <cmath>
 #include <QtCore/QDateTime>
 
 #include "Processing.h"
-#include "ComediHandler.h"
-
-#define DEFAULT_MINUTES 2
-#define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
 
 
-Processing::Processing() :
-        nData(DEFAULT_DATA_SIZE),
-        pData(DEFAULT_DATA_SIZE),
-        oData(DEFAULT_DATA_SIZE),
+/**
+ * The constructor of the Processing thread.
+ *
+ * Initialises internal objects and prepares the thread for running.
+ */
+Processing::Processing(double fcLP, double fcHP) :
+        rawData(DEFAULT_DATA_SIZE),
         bRunning(false),
         bMeasuring(false) {
 
@@ -24,46 +21,62 @@ Processing::Processing() :
     currentState = ProcState::Config;
     comedi = new ComediHandler();
 
-    sampling_rate = comedi->getSamplingRate(); //TODO: calculation seems to be wrong, setting manually for now
+    sampling_rate = comedi->getSamplingRate();
 
-    // 5Hz mains LP filter
+    // LP filter, default value is 10 Hz, which also takes care of 50 Hz noise.
+    if (fcLP > 20.0 || fcLP < 5.0) {
+        PLOG_WARNING << "Processing running with low pass filter of: " << fcLP;
+    }
+
     iirLP = new Iir::Butterworth::LowPass<IIRORDER>;
     assert(iirLP != NULL);
-    iirLP->setup(sampling_rate, 10.0); //TODO: parametrise
+    iirLP->setup(sampling_rate, fcLP);
 
-    // .5Hz mains HP filter
+    // HP filter, default value is 0.5 Hz.
+    if (fcHP != 0.5) {
+        PLOG_WARNING << "Processing running with high pass filter of: " << fcHP;
+    }
     iirHP = new Iir::Butterworth::HighPass<IIRORDER>;
     assert(iirHP != NULL);
-    iirHP->setup(sampling_rate, 0.5); //TODO: parametrise
+    iirHP->setup(sampling_rate, fcHP);
 
-    pData.clear();
-    oData.clear();
+    obpDetect = new OBPDetection();
+    rawData.clear();
 
     record = new Datarecord(sampling_rate);
+
 }
 
+/**
+ * The destructor of the Processing thread.
+ *
+ * Stops the measurement if not already done and stops the thread.
+ */
 Processing::~Processing() {
     stopMeasurement();
     stopThread();
+    delete iirHP;
+    delete iirLP;
+    delete comedi;
+    delete record;
+    delete obpDetect;
 }
 
 void Processing::setAmbientVoltage(double voltage) {
     ambientVoltage = voltage;
 }
 
+/**
+ * The main function of the thread.
+ */
 void Processing::run() {
-
-    std::cout << "run ..." << std::endl;
-
     bRunning = true;
 
     double i = 0.6;
     while (bRunning) {
-        if (comedi->getBufferContents() > 0) {
-            // TODO: move this into separate "algorithm class" that
-            // can process a single sample and make it testable?
-            processSample(comedi->getVoltageSample());
 
+        if (comedi->getBufferContents() > 0) {
+            processSample(comedi->getVoltageSample());
         } else {
             // If there was no data in the buffer, sleep for 1ms.
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -71,9 +84,10 @@ void Processing::run() {
     }
 }
 
-
+/**
+ * Stops the thread by stopping the data acquisition so the thread terminates and can be joined.
+ */
 void Processing::stopThread() {
-    // TODO: safely abort measurement
     bRunning = false;
 }
 
@@ -91,20 +105,15 @@ void Processing::startMeasurement() {
  * Stops the measurement and saves the data to a file.
  */
 void Processing::stopMeasurement() {
-    if (bMeasuring) {
-        bMeasuring = false;
-        // TODO: make dependant on user selection
-        record->saveAll(Processing::getFilename(), rawData);
-    }
+
+    bMeasuring = false;
+
 }
 
 /**
- * Stops the measurement, but without saving the data.
+ * Gets a file name (string) from the current time.
+ * @return The file name as a QString.
  */
-void Processing::resetMeasurement() {
-    bMeasuring = false;
-}
-
 QString Processing::getFilename() {
     QDateTime dateTime = QDateTime::currentDateTime();
     QString dateTimeString = dateTime.toString("yyyy-MM-dd_hh-mm-ss");
@@ -112,34 +121,36 @@ QString Processing::getFilename() {
     return dateTimeString;
 }
 
+/**
+ * Processing a single new sample in a state machine.
+ * @param newSample
+ */
 void Processing::processSample(double newSample) {
 
     /**
      * Every sample is filtered and sent to the Observers
      */
+    //TODO: change to work with getmmHgValue(newSample)
     double yLP = iirLP->filter(newSample);
     double yHP = iirHP->filter(yLP);
     double ymmHg = getmmHgValue(yLP);
 
     notifyNewData(ymmHg, yHP);
 
-
     switch (currentState) {
         /**
          * Configure the ambient pressure.
          */
         case ProcState::Config:
-            //TODO: here I am using the "raw" voltage data, i am miss-using the data buffer,
-            // this will not cause problems, as long as it is reset afterwards,
-            // detect ambient pressure,
+
             if (checkAmbient()) {
-                //enable Start button
                 currentState = ProcState::Idle;
+                //enable Start button
                 notifyReady();
-                pData.clear();
+                rawData.clear();
 
             } else {
-                pData.push_back(yLP);
+                rawData.push_back(yLP);
             }
 
             break;
@@ -150,241 +161,109 @@ void Processing::processSample(double newSample) {
         case ProcState::Idle:
 
             if (bMeasuring) {
+                notifyResults(0.0, 0.0, 0.0);
+                notifyHeartRate(0.0);
                 currentState = ProcState::Inflate;
-                //TODO: should be empty
-                nData.clear();
-                pData.clear();
-                oData.clear();
-                rawData.clear();
+                notifySwitchScreen(Screen::inflateScreen);
             }
-            //TODO: only enable start button if successfully detected
+
             break;
         case ProcState::Inflate:
-            pData.push_back(ymmHg);
-            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-//            oData.push_back(yHP) //TODO: no need to record this here.
-            /**
-             * Check if the pressure in the cuff is big enough yet.
-             * If so, change to the next state.
-             */
-            if (ymmHg > mmHgInflate) {
+            if (!bMeasuring) {
+                currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
+            } else {
+                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
 
-                notifySwitchScreen(Screen::deflateScreen);
-                // TODO: possibly add entry end exit functions for each state
-                // function: switch state: returns new state
-                // performs entry and exit operations (notifications)
-                // would that work with the state class being a friendly to Processing?
-                currentState = ProcState::Deflate;
+                // Check if pressure in cuff is large enough, so it can be switched to the next state.
+                if (ymmHg > mmHgInflate) {
+                    obpDetect->reset();
+                    notifySwitchScreen(Screen::deflateScreen);
+                    //TODO: possibly add entry end exit functions for each state
+                    // function: switch state: returns new state
+                    // performs entry and exit operations (notifications)
+                    // would that work with the state class being a friendly to Processing?
+                    currentState = ProcState::Deflate;
+                }
             }
+
             break;
         case ProcState::Deflate:
-            pData.push_back(ymmHg);
-            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-            oData.push_back(yHP);
-            /**
-             * THIS IS WHERE THE MAGIC HAPPENS:
-             * detect max/min in oscillations, possibly more (other algorithms)
-             */
-            if (checkMaxima(yHP)) {
-                checkMinima();
-                if (isPastDBP()) {
-                    currentState = ProcState::Calculate;
-                    notifySwitchScreen(Screen::emptyCuffScreen);
+            if (!bMeasuring) {
+                currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
+            } else {
+                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
 
+                if (obpDetect->processSample(getmmHgValue(yLP), yHP)) {//TODO: heart rate currently not displayed
+                    if (obpDetect->getIsEnoughData()) {
+                        notifyHeartRate(obpDetect->getAverageHeartRate());
+                        notifySwitchScreen(Screen::emptyCuffScreen);
+                        currentState = ProcState::Calculate;
+                    }
+                    notifyHeartRate(obpDetect->getCurrentHeartRate());
+                }
+                if (ymmHg < 20) {
+                    PLOG_WARNING << "Pressure too low to continue algorithm. Cancelled";
+                    //TODO: notificataion ?
+                    bMeasuring = false;
+                    bMeasuring = false;
+                }
+                if (rawData.size() > DEFAULT_DATA_SIZE) {
+                    PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
+                    //TODO: notificataion ?
+                    bMeasuring = false;
                 }
             }
             break;
         case ProcState::Calculate:
-
-            pData.push_back(ymmHg); //keep filling the values until zero is reached
-            rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-            if (ymmHg < 1) {
-                stopMeasurement();
-                notifySwitchScreen(Screen::resultScreen);
+            if (!bMeasuring) {
+                currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
+            } else {
+                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                if (ymmHg < 1) {
+                    notifyResults(obpDetect->getMAP(), obpDetect->getSBP(), obpDetect->getDBP());
+                    record->saveAll(Processing::getFilename(), rawData);
+                    notifySwitchScreen(Screen::resultScreen);
+                    currentState = ProcState::Restults;
+                }
             }
-
-            /**
-             * Some more magic here:
-             * reverse search of ratios in recorded data set since deflate
-             */
             break;
-
+        case ProcState::Restults:
+            if (!bMeasuring) {
+                currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
+            }
+            break;
     }
-
-
 }
 
-double Processing::getmmHgValue(double voltageValue) {
+/**
+ * Calculates the mmHg value from the given voltage input.
+ * @param voltageValue The voltage input.
+ * @return The corresponding value in mmHg.
+ */
+double Processing::getmmHgValue(double voltageValue) const {
     return ((voltageValue - ambientVoltage) * mmHg_per_kPa * kPa_per_V * corrFactor);
 }
 
 bool Processing::checkAmbient() {
     bool bAmbientValid = false;
 
-    if (pData.size() == AMBIENT_AV_TIME) {
-        double av = 1.0 * std::accumulate(pData.begin(), pData.end(), 0.0) / pData.size();
-        double max = *std::max_element(pData.begin(), pData.end());
-        auto min = *std::min_element(pData.begin(), pData.end());
+    if (rawData.size() == AMBIENT_AV_TIME) {
+        double av = 1.0 * std::accumulate(rawData.begin(), rawData.end(), 0.0) / rawData.size();
+        double max = *std::max_element(rawData.begin(), rawData.end());
+        auto min = *std::min_element(rawData.begin(), rawData.end());
 
         PLOG_VERBOSE << "min: " << min << " max: " << max << " av: " << av << std::endl;
         if (std::abs(av - max) < AMBIENT_DEVIATION) {
             setAmbientVoltage(av);
             bAmbientValid = true;
         } else {
-            pData.clear();
             rawData.clear();
-            oData.clear();
         }
     }
 
     return bAmbientValid;
 }
-
-/**
- * Checks a new sample if it is a local maxima and puts it in a vector to hold all local maxima,
- * together with a reference to the 'time' (sample number) it was recorded.
- * @param newOscData
- */
-bool Processing::checkMaxima(double newOscData) {
-    static int validPulseCnt = 0;
-    bool isValid = false;
-
-    if (oData.size() > 1200 && newOscData > 0.0005) { // ignores the first second or so
-
-        auto i = std::max_element((oData.end() - 3), oData.end());
-
-        // is result the middle entry?
-        if (std::distance(i, oData.end()) == 2) {
-            isValid = isValidMaxima();
-        }
-
-
-    }
-
-    return isValid;
-}
-
-void Processing::checkMinima() {
-    if(maxAmp.size() >= 2 ){
-        //TODO: easier?
-        // get sub vector of oData from second last to last max value
-        std::vector<double>::const_iterator firstMax = oData.begin() + *(maxtime.end()-2);
-        std::vector<double>::const_iterator lastMax = oData.begin() + maxtime.back();//*(maxtime.end()-1)
-        std::vector<double> newVec(firstMax, lastMax);
-
-        // find minimal value in between
-        auto iter = std::min_element(newVec.begin(),newVec.end());
-
-        auto dist = std::distance(oData.begin(), iter);
-//        auto iter = std::min_element(&oData[*(maxtime.end()-2)], &oData[maxtime.back()]);
-//
-//        auto dist = std::distance(oData[*(maxtime.end()-2)], iter);
-//        mintime.push_back(*(maxtime.end()-2) + dist );
-
-        if( mintime.size() == (maxtime.size()-1)){
-            minAmp.back() =  *iter ;
-            mintime.back() =  dist ;
-//            std::cout << *iter << " replaced\n";
-        }else{
-            minAmp.push_back( *iter );
-            mintime.push_back( dist );
-//            std::cout << *iter << " appended\n";
-        }
-        //check:
-//        if( oData[mintime.back()] == *iter ){
-//            std::cout << *iter << " the same\n";
-//        }
-//        else {
-//            std::cout << *iter << " iter " << oData[mintime.back()] << "\n";
-//
-//        }
-    }
-
-}
-
-bool Processing::isPastDBP() {
-    bool bIsPast = false;
-    if (maxAmp.size() > 10) {
-        auto iter = std::max_element(maxAmp.begin(), maxAmp.end());
-        double cutoff = (*iter) * (ratio_DBP - 0.2);
-        if (maxAmp.back() < cutoff) {
-            bIsPast = true;
-       }
-    }
-    return bIsPast;
-}
-
-int Processing::maxValidPulse{100};
-int Processing::minValidPulse{50};
-double Processing::maxPulseChange{0.15};
-
-bool Processing::isPulseValid(double pulse) {
-    bool isValid = false;
-
-    if (minValidPulse <= pulse && pulse <= maxValidPulse) {
-        isValid = true;
-    }
-
-    return isValid;
-}
-
-
-bool Processing::isValidMaxima() {
-    static int validPulseCnt = 0;
-    bool isValid = false;
-    const double testingSample = *(oData.end() - 1);
-    const auto testingTime = (oData.size() - 1);
-    // TODO: sanity test: maxTime and maxAmp are either +1/+0 in size afterwards, or size = 1
-    if (maxtime.empty()) {
-        // Accept any value as a first value, only start testing after the second one
-        maxtime.push_back(oData.size() - 1);
-        maxAmp.push_back(testingSample);
-    } else {
-        assert(!maxtime.empty());
-        assert(!maxAmp.empty());
-        //time since last max is <0.3s and the new sample is larger: replace the old value
-        if ((testingTime - maxtime.back()) < 300) {
-            if (maxAmp.back() < testingSample) {
-                maxAmp.back() = testingSample;
-                maxtime.back() = testingTime;
-//                std::cout << maxAmp.back() << " replaced\n";
-            } else {
-                // skip this maxima, it's too quick after the last one, but smaller
-                // no new maxima detected, finish function with old values.
-                if (validPulseCnt > 0) {
-                    validPulseCnt--;
-                }
-            }
-        } else {
-            maxAmp.push_back(testingSample);
-            maxtime.push_back(testingTime);
-        }
-
-        if (maxtime.size() > 1) {
-
-            double newPulse = newPulse = 60000.0 / (double) (maxtime.back() - (*(maxtime.end() - 2)));
-
-            if (isPulseValid(newPulse)) {
-                currentPulse = newPulse;
-                validPulseCnt++;
-                isValid = true;
-            } else {
-                PLOG_INFO << "invalid pulse after " << validPulseCnt << " valid ones" << std::endl;
-                validPulseCnt = 0;
-                maxAmp.clear();
-                maxtime.clear();
-                minAmp.clear();
-                mintime.clear();
-                maxtime.push_back(testingTime);
-                maxAmp.push_back(testingSample);
-                isValid = false;
-            }
-
-            if (validPulseCnt > 5) { //TODO: valid counting not needed anymore
-                isValid = true;
-            }
-        }
-    }
-    return isValid;
-}
-

@@ -16,12 +16,16 @@
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QFormLayout>
+#include <mutex>
 #include "IObserver.h"
 #include "Plot.h"
 #include "common.h"
 #include "Processing.h"
 
-
+//! The Window Class handles the user interface (UI).
+/*!
+ * The UI consists of ... 
+ */
 class Window : public QMainWindow, public IObserver{
 Q_OBJECT
 public:
@@ -30,13 +34,17 @@ public:
 
 
 protected:
-    void timerEvent(QTimerEvent *e);
+    void timerEvent(QTimerEvent *e) override;
 private:
+    // Callbacks from observable class, need to be implemented
+    // in a thread safe way:
     void eNewData(double pData, double oData) override;
-    void eSwitchScreen(Screen eScreen) override;
+    void eSwitchScreen(Screen eNewScreen) override;
     void eResults(double map, double sbp, double dbp) override;
+    void eHeartRate(double map) override;
     void eReady() override;
 
+    // Setting up the UI:
     void setupUi(QMainWindow *window);
     QWidget * setupPlots(QWidget *parent);
     QWidget * setupStartPage(QWidget *parent);
@@ -44,24 +52,32 @@ private:
     QWidget * setupDeflatePage(QWidget *parent);
     QWidget * setupEmptyCuffPage(QWidget *parent);
     QWidget * setupResultPage(QWidget *parent);
-
     void retranslateUi(QMainWindow *MainWindow);
 
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
-    int dataLength;// TODO: needed ?
-    Screen currentScreen;
+    int dataLength;
 
+    // Variables that are changed from outside the UI are made
+    // atomic, so access to them is thread safe.
+    std::atomic<Screen> currentScreen;
+
+    // mutex for thread save access to the plots:
+    std::mutex pltMtx;
+
+    // UI components:
     QSplitter *splitter;
+    QVBoxLayout *vlLeft;
     QStackedWidget *lInstructions;
     QWidget *lInstrStart;
     QWidget *lInstrPump;
     QWidget *lInstrRelease;
     QWidget *lInstrDeflate;
     QWidget *lInstrResult;
+    QWidget *lWidget;
     QWidget *rWidget;
     QVBoxLayout *vlStart;
-    QVBoxLayout *vlLeft;
+    QVBoxLayout *vlInflate;
     QVBoxLayout *vlRelease;
     QVBoxLayout *vlDeflate;
     QVBoxLayout *vlResult;
@@ -69,18 +85,23 @@ private:
     QVBoxLayout *vlRight;
     QSpacerItem *vSpace1;
     QSpacerItem *vSpace2;
-    QSpacerItem *vSpace3;
     QSpacerItem *vSpace4;
     QSpacerItem *vSpace5;
     QSpacerItem *vSpace6;
+    QLabel *lMeter;
     QLabel *lInfoStart;
     QLabel *lInfoPump;
     QLabel *lInfoRelease;
     QLabel *lInfoDeflate;
     QLabel *lInfoResult;
     QwtDial *meter;
+    QwtDialNeedle *needle;
     QPushButton *btnStart;
     QPushButton *btnReset;
+    QPushButton *btnCancel;
+    QLabel *lheartRate;
+    QLabel *lheartRateAV;
+    QLabel *lHRvalAV;
     QLabel *lMAP;
     QLabel *lMAPval;
     QLabel *lSBP;
@@ -97,14 +118,17 @@ private:
 
 private slots:
     void clkBtnStart();
+    void clkBtnCancel();
     void clkBtnReset();
     void clkBtn1();
     void clkBtn2();
     void clkBtn3();
     void clkBtn4();
     void clkBtn5();
-
+//private signal:
+//    void setMAPText(const QString &);
 };
+
 
 
 #endif //OBP_WINDOW_H

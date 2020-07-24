@@ -24,8 +24,6 @@ int main(int argc, char **argv) {
     PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);
 
-    // TODO: reason to not have process created inside window?
-    // needs reference anyway.
     Processing procThread;
 
     Window mainW(&procThread);
@@ -36,10 +34,6 @@ int main(int argc, char **argv) {
 
     return app.exec();
 
-//    std::vector<int> test = {1,2,3,4,3,4,5,6,7,8,6,7,8,9};
-//    auto it = std::max_element(&test[0],&test[5]);
-//    std::cout << *it;
-//    return 0;
 }
 
 

@@ -48,6 +48,13 @@ public:
                           observer->eResults(map, sbp, obp);
                       });
     }
+
+    virtual void notifyHeartRate(double heartRate) {
+        std::for_each(observerList.begin(), observerList.end(),
+                      [heartRate](IObserver *observer) {
+                          observer->eHeartRate(heartRate);
+                      });
+    }
 private:
     std::list<IObserver *> observerList;
 
