@@ -434,67 +434,86 @@ void Window::eNewData(double pData, double oData) {
     pltOsc->setNewData(oData);
     pltMtx.unlock();
 
-    QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
+    bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
+    assert(bOk);
 }
 
 void Window::eSwitchScreen(Screen eNewScreen) {
+    bool bOk = false;
     switch (eNewScreen) {
         case Screen::startScreen:
-            QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
-            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+            bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
+            assert(bOk);
+
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 0));
-            btnCancel->hide();
+            assert(bOk);
             break;
         case Screen::inflateScreen:
-            QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
-            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+            bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 1));
+            assert(bOk);
             break;
         case Screen::deflateScreen:
-            QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
-            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+            bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 2));
+            assert(bOk);
             break;
         case Screen::emptyCuffScreen:
             QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            assert(bOk);
             QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 3));
+            assert(bOk);
             break;
         case Screen::resultScreen:
-            QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
-            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+            bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
+            assert(bOk);
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 4));
+            assert(bOk);
             break;
     }
     currentScreen = eNewScreen;
 }
 
 void Window::eResults(double map, double sbp, double dbp) {
-    QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
+    bool bOk = QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
                               Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
-    QMetaObject::invokeMethod(lSBPval, "setText", Qt::QueuedConnection,
+    assert(bOk);
+    bOk = QMetaObject::invokeMethod(lSBPval, "setText", Qt::QueuedConnection,
                               Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
-    QMetaObject::invokeMethod(lDBPval, "setText", Qt::QueuedConnection,
+    assert(bOk);
+    bOk = QMetaObject::invokeMethod(lDBPval, "setText", Qt::QueuedConnection,
                               Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
+    assert(bOk);
 }
 
 void Window::eHeartRate(double heartRate) {
 
-    QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
+    bool bOk = QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
                               Q_ARG(QString, "Current heart rate:<br><b>" +
                                              QString::number(heartRate, 'f', 0) + "</b>"));
-
-    QMetaObject::invokeMethod(lHRvalAV, "setText", Qt::QueuedConnection,
+    assert(bOk);
+    bOk = QMetaObject::invokeMethod(lHRvalAV, "setText", Qt::QueuedConnection,
                               Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
+    assert(bOk);
 }
 
 void Window::eReady() {
     // Instead of :
     // btnStart->setDisabled(false);
-    // The invokeMethod is used with a Qt::QueuedConnection.
-    // The button is set enabled whenever the UI thread is ready.
-    QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
-                              Q_ARG(bool, false));
+        // The QMetaObject::invokeMethod is used with a Qt::QueuedConnection.
+    // The button is set enabled whenever the UI thread is ready.setDisabled
+    bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
+                                      Q_ARG(bool, false));
+    // Checks that function call is valid during development. Do not put function inside assert,
+    // because it will be removed in release build!
+    assert(bOk);
 }
 
 void Window::clkBtnStart() {
