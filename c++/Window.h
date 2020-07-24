@@ -60,9 +60,7 @@ private:
 
     // Variables that are changed from outside the UI are made
     // atomic, so access to them is thread safe.
-    std::atomic<double> valHeartRate;
     std::atomic<Screen> currentScreen;
-    std::atomic<bool> bUpdateUI;
 
     // mutex for thread save access to the plots:
     std::mutex pltMtx;
@@ -127,7 +125,8 @@ private slots:
     void clkBtn3();
     void clkBtn4();
     void clkBtn5();
-
+//private signal:
+//    void setMAPText(const QString &);
 };
 
 

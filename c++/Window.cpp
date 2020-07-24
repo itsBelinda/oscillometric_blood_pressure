@@ -20,7 +20,7 @@ Window::Window(Processing *process, QWidget *parent) :
         yHPData[i] = 0;
     }
 
-    valHeartRate = 0.0;
+    std::lock_guard<std::mutex> guard(pltMtx); //automatically releases mutex when control leaves scope.
     currentScreen = Screen::startScreen;
     setupUi(this);
 
@@ -153,10 +153,11 @@ void Window::setupUi(QMainWindow *window) {
     auto *spacerbnt = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(spacerbnt, 1);
 
-    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
+    connect(btnStart, SIGNAL (clicked()), this, SLOT (clkBtnStart()));
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
-//    QObject::connect(this, SIGNAL(setLabelText(const QString &)), label, SLOT(setText(const QString &), Qt::QueuedConnection);
+
+//    QObject::connect(this, SIGNAL(setMAPText(const QString &)), lMAPval, SLOT(setText(const QString &)), Qt::QueuedConnection);
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
     connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
@@ -421,86 +422,89 @@ void Window::retranslateUi(QMainWindow *window) {
 
 
 void Window::timerEvent(QTimerEvent *) {
-//    pltMtx.lock(); //TODO: Mutex seems to make it worse..
+    pltMtx.lock();
     pltOsc->replot();
     pltPre->replot();
-    meter->repaint();
-//    pltMtx.unlock();
-
-//    if (bUpdateUI) {
-    switch (currentScreen) {
-        case Screen::startScreen:
-            btnCancel->hide();
-            //btnStart->setDisabled(false);
-            lInstructions->setCurrentIndex(0);
-            break;
-        case Screen::inflateScreen:
-            btnCancel->show();
-            lInstructions->setCurrentIndex(1);
-            break;
-        case Screen::deflateScreen:
-            btnCancel->show();
-            if (valHeartRate != 0) {
-                lheartRate->setText("Current heart rate:<br><b>" + QString::number(valHeartRate, 'f', 0) + "</b>");
-            }
-            lInstructions->setCurrentIndex(2);
-            break;
-        case Screen::emptyCuffScreen:
-            btnCancel->show();
-            lInstructions->setCurrentIndex(3);
-            break;
-        case Screen::resultScreen:
-            if (valHeartRate != 0) {
-                lHRvalAV->setText(QString::number(valHeartRate, 'f', 0) + " beats/min");
-            }
-            btnCancel->hide();
-            lInstructions->setCurrentIndex(4);
-            break;
-    }
-//        bUpdateUI = false;
-//    }
+    pltMtx.unlock();
 }
 
 void Window::eNewData(double pData, double oData) {
-//    pltMtx.lock();
+    pltMtx.lock();
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
-    meter->setValue(pData);
-//    pltMtx.unlock();
+    pltMtx.unlock();
+
+    QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
 }
 
 void Window::eSwitchScreen(Screen eNewScreen) {
+    switch (eNewScreen) {
+        case Screen::startScreen:
+            QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 0));
+            btnCancel->hide();
+            break;
+        case Screen::inflateScreen:
+            QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 1));
+            break;
+        case Screen::deflateScreen:
+            QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 2));
+            break;
+        case Screen::emptyCuffScreen:
+            QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 3));
+            break;
+        case Screen::resultScreen:
+            QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+                                      Q_ARG(int, 4));
+            break;
+    }
     currentScreen = eNewScreen;
-    bUpdateUI = true;
 }
 
 void Window::eResults(double map, double sbp, double dbp) {
-    //TODO: thread safe because UI never accesses them ?
-    // necessary to only save the values and then update?
-    // as with the heart rateQString::number(valHeartRate, 'f', 0)
-    lMAPval->setText(QString::number(map, 'f', 0) + " mmHg");
-    lSBPval->setText(QString::number(sbp, 'f', 0) + " mmHg");
-    lDBPval->setText(QString::number(dbp, 'f', 0) + " mmHg");
+    QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
+    QMetaObject::invokeMethod(lSBPval, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
+    QMetaObject::invokeMethod(lDBPval, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
 }
 
 void Window::eHeartRate(double heartRate) {
-    valHeartRate = heartRate;
-    bUpdateUI = true;
+
+    QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, "Current heart rate:<br><b>" +
+                                             QString::number(heartRate, 'f', 0) + "</b>"));
+
+    QMetaObject::invokeMethod(lHRvalAV, "setText", Qt::QueuedConnection,
+                              Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
 }
 
 void Window::eReady() {
-    btnStart->setDisabled(false);
-    bUpdateUI = true; // first update will set the button enabled.
+    // Instead of :
+    // btnStart->setDisabled(false);
+    // The invokeMethod is used with a Qt::QueuedConnection.
+    // The button is set enabled whenever the UI thread is ready.
+    QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
+                              Q_ARG(bool, false));
 }
 
 void Window::clkBtnStart() {
-    eSwitchScreen(Screen::inflateScreen);
     process->startMeasurement();
+    eSwitchScreen(Screen::inflateScreen);
 }
 
 void Window::clkBtnCancel() {
-    eSwitchScreen(Screen::startScreen);
     process->stopMeasurement(); //TODO: make safe
+    eSwitchScreen(Screen::startScreen);
 }
 
 void Window::clkBtnReset() {
