@@ -26,7 +26,6 @@
  */
 class OBPDetection {
 //TODO: add configurable parameters in constructor
-//TODO: "reset"
 //TODO: change osc to use mmHg values
 //TODO: MAP, DBP, SBP as average over heart rate
 public:

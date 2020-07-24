@@ -5,7 +5,7 @@
 
 #include "Processing.h"
 
-#define DEFAULT_MINUTES 2
+#define DEFAULT_MINUTES 5
 #define DEFAULT_DATA_SIZE 1024*60*DEFAULT_MINUTES
 
 /**
@@ -65,18 +65,13 @@ void Processing::setAmbientVoltage(double voltage) {
  * The main function of the thread.
  */
 void Processing::run() {
-    //TODO: remove:
-    std::cout << "run ..." << std::endl;
-
     bRunning = true;
 
     double i = 0.6;
     while (bRunning) {
-        if (comedi->getBufferContents() > 0) {
-            //TODO: move this into separate "algorithm class" that
-            // can process a single sample and make it testable?
-            processSample(comedi->getVoltageSample());
 
+        if (comedi->getBufferContents() > 0) {
+            processSample(comedi->getVoltageSample());
         } else {
             // If there was no data in the buffer, sleep for 1ms.
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -105,7 +100,9 @@ void Processing::startMeasurement() {
  * Stops the measurement and saves the data to a file.
  */
 void Processing::stopMeasurement() {
+
     bMeasuring = false;
+
 }
 
 /**
@@ -140,9 +137,7 @@ void Processing::processSample(double newSample) {
          * Configure the ambient pressure.
          */
         case ProcState::Config:
-            //TODO: here I am using the "raw" voltage data, i am miss-using the data buffer,
-            // this will not cause problems, as long as it is reset afterwards,
-            // detect ambient pressure,
+
             if (checkAmbient()) {
                 currentState = ProcState::Idle;
                 //enable Start button
@@ -161,20 +156,21 @@ void Processing::processSample(double newSample) {
         case ProcState::Idle:
 
             if (bMeasuring) {
+                notifyResults(0.0, 0.0, 0.0);
+                notifyHeartRate(0.0);
                 currentState = ProcState::Inflate;
-                rawData.clear();
+                notifySwitchScreen(Screen::inflateScreen);
             }
 
             break;
         case ProcState::Inflate:
             if (!bMeasuring) {
                 currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
             } else {
                 rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
-                /**
-                 * Check if the pressure in the cuff is big enough yet.
-                 * If so, change to the next state.
-                 */
+
+                // Check if pressure in cuff is large enough, so it can be switched to the next state.
                 if (ymmHg > mmHgInflate) {
                     obpDetect->reset();
                     notifySwitchScreen(Screen::deflateScreen);
@@ -190,10 +186,8 @@ void Processing::processSample(double newSample) {
         case ProcState::Deflate:
             if (!bMeasuring) {
                 currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
             } else {
-                //TODO: should the start deflation time be saved? (in terms of raw data)
-                // This could avoid the need to store pData at all because we could just
-                // average over raw for a heart rate period
                 rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
 
                 if (obpDetect->processSample(getmmHgValue(yLP), yHP)) {//TODO: heart rate currently not displayed
@@ -204,20 +198,37 @@ void Processing::processSample(double newSample) {
                     }
                     notifyHeartRate(obpDetect->getCurrentHeartRate());
                 }
+                if(ymmHg < 20){
+                    PLOG_WARNING << "Pressure too low to continue algorithm. Cancelled";
+                    //TODO: notificataion ?
+                    bMeasuring = false;
+                    bMeasuring = false;
+                }
+                if(rawData.size() > DEFAULT_DATA_SIZE){
+                    PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
+                    //TODO: notificataion ?
+                    bMeasuring = false;
+                }
             }
             break;
         case ProcState::Calculate:
             if (!bMeasuring) {
                 currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
             } else {
                 rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
                 if (ymmHg < 1) {
                     notifyResults(obpDetect->getMAP(), obpDetect->getSBP(), obpDetect->getDBP());
                     record->saveAll(Processing::getFilename(), rawData);
-                    stopMeasurement();
                     notifySwitchScreen(Screen::resultScreen);
-                    currentState = ProcState::Idle;
+                    currentState = ProcState::Restults;
                 }
+            }
+            break;
+        case ProcState::Restults:
+            if (!bMeasuring) {
+                currentState = ProcState::Idle;
+                notifySwitchScreen(Screen::startScreen);
             }
             break;
     }

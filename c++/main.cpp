@@ -24,8 +24,6 @@ int main(int argc, char **argv) {
     PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);
 
-    // TODO: reason to not have process created inside window?
-    // needs reference anyway.
     Processing procThread;
 
     Window mainW(&procThread);

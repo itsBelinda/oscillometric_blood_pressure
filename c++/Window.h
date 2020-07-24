@@ -56,7 +56,7 @@ private:
 
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
-    int dataLength;// TODO: needed ?
+    int dataLength;
 
     // Variables that are changed from outside the UI are made
     // atomic, so access to them is thread safe.

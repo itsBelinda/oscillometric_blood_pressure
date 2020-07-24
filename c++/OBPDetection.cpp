@@ -84,8 +84,6 @@ bool OBPDetection::getIsEnoughData(){
  * @param oscillation The oscillation in arbitrary units for this sample.
  * @return True if the calculations are finished.
  */
- //TODO: check if better: true means: new values available
- // e.g.: new pulse
 bool OBPDetection::processSample(double pressure, double oscillation){
     bool newMax = false;
     pData.push_back(pressure);
@@ -415,6 +413,9 @@ double OBPDetection::getAverage(std::vector<double> avVector) {
     return av;
 }
 
+/**
+ * Resets all variables to start a new measurement.
+ */
 void OBPDetection::reset() {
     pData.clear();
     oData.clear();
@@ -426,7 +427,6 @@ void OBPDetection::reset() {
     mintime.clear();
     hrData.clear();
 
-    // variables to store results
     resMAP = 0.0;
     resSBP = 0.0;
     resDBP = 0.0;

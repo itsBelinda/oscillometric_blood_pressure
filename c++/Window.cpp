@@ -56,8 +56,6 @@ void Window::setupUi(QMainWindow *window) {
     window->setWindowIcon(icon);
     window->setTabShape(QTabWidget::Triangular);
 
-    //TODO: splitter more visible.
-    //TODO: minimum width for left and right side
     splitter = new QSplitter(window);
     splitter->setObjectName(QString::fromUtf8("splitter"));
     splitter->setOrientation(Qt::Horizontal);
@@ -157,7 +155,7 @@ void Window::setupUi(QMainWindow *window) {
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
 
-//    QObject::connect(this, SIGNAL(setMAPText(const QString &)), lMAPval, SLOT(setText(const QString &)), Qt::QueuedConnection);
+    //TODO: remove at the end
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
     connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
@@ -166,6 +164,7 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
+//TODO: make plots a bit nicer.
 /**
  * Sets up the page with two plots to display the data.
  *
@@ -444,7 +443,6 @@ void Window::eSwitchScreen(Screen eNewScreen) {
         case Screen::startScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
             assert(bOk);
-
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 0));
             assert(bOk);
@@ -464,9 +462,9 @@ void Window::eSwitchScreen(Screen eNewScreen) {
             assert(bOk);
             break;
         case Screen::emptyCuffScreen:
-            QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
+            bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
-            QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
+            bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
                                       Q_ARG(int, 3));
             assert(bOk);
             break;
@@ -518,16 +516,14 @@ void Window::eReady() {
 
 void Window::clkBtnStart() {
     process->startMeasurement();
-    eSwitchScreen(Screen::inflateScreen);
 }
 
 void Window::clkBtnCancel() {
-    process->stopMeasurement(); //TODO: make safe
-    eSwitchScreen(Screen::startScreen);
+    process->stopMeasurement();
 }
 
 void Window::clkBtnReset() {
-    eSwitchScreen(Screen::startScreen);
+    process->stopMeasurement();
 }
 
 //TODO: remove those after debugging

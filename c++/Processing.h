@@ -26,6 +26,7 @@ class Processing : public CppThread, public ISubject{
         Inflate, //possilbly: wait for smallest oscillatin
         Deflate,
         Calculate,
+        Restults,
     };
 
 public:
