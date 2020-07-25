@@ -84,6 +84,11 @@ void SettingsDialog::setupUi(QDialog *SettingsDialog) {
     btnReset->setObjectName(QString::fromUtf8("btnReset"));
     vlMain->addWidget(btnReset);
 
+    lDescription = new QLabel(SettingsDialog);
+    lDescription->setObjectName(QString::fromUtf8("lDescription"));
+    lDescription->setWordWrap(true);
+    vlMain->addWidget(lDescription);
+
     buttonBox = new QDialogButtonBox(SettingsDialog);
     buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
     buttonBox->setOrientation(Qt::Horizontal);
@@ -101,12 +106,15 @@ void SettingsDialog::setupUi(QDialog *SettingsDialog) {
 }
 
 void SettingsDialog::retranslateUi(QDialog *SettingsDialog) {
-    SettingsDialog->setWindowTitle("Dialog");
+    SettingsDialog->setWindowTitle("Application Settings");
     btnReset->setText("Reset Values");
     lRatioSBP->setText("SBP ratio:");
     lRatioDBP->setText("DBP ratio:");
     lMinNbrPeaks->setText("Min detected peaks:");
     lPumpUpValue->setText("Pump-up value (mmHg):");
+    lDescription->setText("The application is not guaranteed to work reliably if the values are changed.<br>"
+                          "<b>Changes take effect after restarting the application.</b><br>"
+                          "Resetting the values takes effect immediately.");
 }
 
 

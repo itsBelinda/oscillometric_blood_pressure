@@ -50,7 +50,7 @@ private:
     QSpinBox *sbPumpUpValue;
     QPushButton *btnReset;
     QDialogButtonBox *buttonBox;
-
+    QLabel *lDescription;
 
 
 };
