@@ -13,6 +13,7 @@
 
 #include "common.h"
 
+
 class SettingsDialog: public QDialog {
 Q_OBJECT
 public:

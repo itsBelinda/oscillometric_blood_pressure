@@ -340,7 +340,14 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     lInstrRelease->setLayout(vlRelease);
     return lInstrRelease;
 }
-
+/**
+ * Sets up the empty cup page with instructions.
+ *
+ * Instructs the user to deflate the cuff completely.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupEmptyCuffPage(QWidget *parent) {
     lInstrDeflate = new QWidget(parent);
 
@@ -354,7 +361,14 @@ QWidget *Window::setupEmptyCuffPage(QWidget *parent) {
     lInstrDeflate->setLayout(vlDeflate);
     return lInstrDeflate;
 }
-
+/**
+ * Sets up the results page.
+ *
+ * Displays the calculated results.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupResultPage(QWidget *parent) {
     lInstrResult = new QWidget(parent);
 
@@ -404,14 +418,24 @@ QWidget *Window::setupResultPage(QWidget *parent) {
 
     return lInstrResult;
 }
-
+/**
+ * Sets up the dialog for the setting.
+ *
+ * The user can adjust parameters, they will be saved when the application is closed.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupSettingsDialog(QWidget *parent) {
 
     settingsDialog = new SettingsDialog(parent);
     loadSettings();
     return settingsDialog;
 }
-
+/**
+ * Sets all the text in the main window.
+ * @param window A pointer to the main window.
+ */
 void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle("Oscillometric Blood Pressure Measurement");
 
@@ -457,7 +481,9 @@ void Window::retranslateUi(QMainWindow *window) {
 
 }
 
-
+/**
+ * Handles the timer event to update the UI.
+ */
 void Window::timerEvent(QTimerEvent *) {
     pltMtx.lock();
     pltOsc->replot();
@@ -465,6 +491,11 @@ void Window::timerEvent(QTimerEvent *) {
     pltMtx.unlock();
 }
 
+/**
+ * Handles notifications about a new data pair.
+ * @param pData The newly available pressure data.
+ * @param oData The newly available oscillation data.
+ */
 void Window::eNewData(double pData, double oData) {
     pltMtx.lock();
     pltPre->setNewData(pData);
@@ -474,7 +505,10 @@ void Window::eNewData(double pData, double oData) {
     bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
     assert(bOk);
 }
-
+/**
+ * Handles notifications to switch the displayed screen.
+ * @param eNewScreen The new screen to display.
+ */
 void Window::eSwitchScreen(Screen eNewScreen) {
     bool bOk = false;
     switch (eNewScreen) {
@@ -517,6 +551,12 @@ void Window::eSwitchScreen(Screen eNewScreen) {
     currentScreen = eNewScreen;
 }
 
+/**
+ * Handles notifications for the results.
+ * @param map The determined value for mean arterial pressure.
+ * @param sbp The determined value for systolic blood pressure.
+ * @param dbp The determined value for diastolic blood pressure.
+ */
 void Window::eResults(double map, double sbp, double dbp) {
     bool bOk = QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
                                          Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
@@ -529,6 +569,10 @@ void Window::eResults(double map, double sbp, double dbp) {
     assert(bOk);
 }
 
+/**
+ * Handles notificaions about heart rate and displays them in the appropriate location in the UI.
+ * @param heartRate The latest heart rate value. Can either be a current or an average heart rate value.
+ */
 void Window::eHeartRate(double heartRate) {
 
     bool bOk = QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
@@ -540,6 +584,9 @@ void Window::eHeartRate(double heartRate) {
     assert(bOk);
 }
 
+/**
+ * Handles the notification that the observed class is ready.
+ */
 void Window::eReady() {
     // Instead of :
     // btnStart->setDisabled(false);
@@ -617,24 +664,39 @@ void Window::on_actionExit_triggered() {
     QApplication::quit();
 }
 
-
-
+/**
+ * loads the settings from the settings file if there is one, otherwise default values are displayed.
+ */
 void Window::loadSettings() {
-    //QSettings settings("TestQSettings.ini", QSettings::IniFormat); for a file
-    QSettings settings;
-    //std::cout << settings.fileName().toStdString();
-    //TODO: getDefault from process
-    settingsDialog->setRatioSBP(settings.value("ratioSBP", 0.5).toDouble());
-    settingsDialog->setRatioDBP(settings.value("ratioDBP", 0.5).toDouble());
-    settingsDialog->setMinNbrPeaks(settings.value("minNbrPeaks", 10).toInt());
-    settingsDialog->setPumpUpValue(settings.value("pumpUpValue", 180).toInt());
+    // For every value: get the values from settings and get the default value from Processing.
+    // Then set both the value in the settings dialog and in Processing with what was stored in the settings.
+    // Changing the values in Processing only works at startup, before the process is running.
 
-    
+    int iVal;
+    double dVal;
+    QSettings settings; //Saves setting platform independent.
+    dVal = settings.value("ratioSBP", process->getRatioSBP()).toDouble();
+    settingsDialog->setRatioSBP(dVal);
+    process->setRatioSBP(dVal);
+
+    dVal = settings.value("ratioDBP", process->getRatioDBP()).toDouble();
+    settingsDialog->setRatioDBP(dVal);
+    process->setRatioDBP(dVal);
+
+    iVal = settings.value("minNbrPeaks", process->getMinNbrPeaks()).toInt();
+    settingsDialog->setMinNbrPeaks(iVal);
+    process->setMinNbrPeaks(iVal);
+
+    iVal = settings.value("pumpUpValue", process->getPumpUpValue()).toInt();
+    settingsDialog->setPumpUpValue(iVal);
+    process->setPumpUpValue(iVal);
+
 }
-
+/**
+ * Does only update the values in the settings file. They will not be applied until the
+ * application is restarted.
+ */
 void Window::updateValues() {
-
-    std::cout << "update" << std::endl;
     QSettings settings;
     settings.setValue("ratioSBP", settingsDialog->getRatioSBP());
     settings.setValue("ratioDBP", settingsDialog->getRatioDBP());
@@ -642,15 +704,17 @@ void Window::updateValues() {
     settings.setValue("pumpUpValue", settingsDialog->getPumpUpValue());
 }
 
-
-
-void Window::resetValuesPerform(){
-    //TODO: getter Values from process
-    std::cout << "reset perform" << std::endl;
-//    process->restoreDefaultConfig();
+/**
+ * Resets all values both in the application and in the settings file.
+ * Changes take effect immediately.
+ */
+void Window::resetValuesPerform() {
+    process->resetConfigValues();
     QSettings settings;
-//    settings.setValue("ratioSBP", process->getRatioSBP());
-//    settings.setValue("ratioDBP", process->getRatioDBP());
-//    settings.setValue("minNbrPeaks", process->getMinNbrPeaks());
-//    settings.setValue("pumpUpValue", process->getPumpUpValue());
+    settings.setValue("ratioSBP", process->getRatioSBP());
+    settings.setValue("ratioDBP", process->getRatioDBP());
+    settings.setValue("minNbrPeaks", process->getMinNbrPeaks());
+    settings.setValue("pumpUpValue", process->getPumpUpValue());
+    // Reload the values from settings also writes them to the settings dialog:
+    loadSettings();
 }

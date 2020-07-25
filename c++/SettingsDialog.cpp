@@ -67,6 +67,7 @@ void SettingsDialog::setupUi(QDialog *SettingsDialog) {
     sbPumpUpValue = new QSpinBox(SettingsDialog);
     sbPumpUpValue->setObjectName(QString::fromUtf8("sbPumpUpValue"));
     sbPumpUpValue->setRange(PUMP_UP_VALUE_MIN, PUMP_UP_VALUE_MAX);
+    sbPumpUpValue->setSingleStep(10);
 
     formL->setWidget(0, QFormLayout::LabelRole, lRatioSBP);
     formL->setWidget(0, QFormLayout::FieldRole, dsbRatioSBP);

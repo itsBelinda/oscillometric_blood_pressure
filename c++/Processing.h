@@ -12,6 +12,8 @@
 #include "ComediHandler.h"
 #include "OBPDetection.h"
 
+// Class dependant configuration values:
+#define MAX_PUMPUP 250
 #define IIRORDER 4
 
 //! The Processing class handles the data acquisition and processing.
@@ -40,6 +42,17 @@ public:
     inline ProcState getCurrentState() const;
     void setAmbientVoltage(double voltage);
 
+    void setRatioSBP(double val);
+    double getRatioSBP();
+    void setRatioDBP(double val);
+    double getRatioDBP();
+    void setMinNbrPeaks(int val);
+    int getMinNbrPeaks();
+    void setPumpUpValue(int val);
+    int getPumpUpValue();
+    void resetConfigValues();
+
+
 private:
     void run() override;
     static QString getFilename();
@@ -65,9 +78,8 @@ private:
     const double kPa_per_V = 50; // data sheet
 
     double sampling_rate;
-
-    double mmHgInflate = 180.0;
-    double ambientVoltage = 0.65;
+    std::atomic<double> mmHgInflate = 180.0;
+    double ambientVoltage;
     double corrFactor = 2.5; // due to voltage divider
 
 };

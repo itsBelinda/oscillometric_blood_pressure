@@ -3,15 +3,15 @@
 #include <numeric>
 #include "OBPDetection.h"
 
-
 /**
  * Constructor of the OBPDetection class.
  *
  */
-OBPDetection::OBPDetection() :
+OBPDetection::OBPDetection(double sampling_rate) :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
-        enoughData(false) {
+        enoughData(false),
+        samplingRate(sampling_rate){
     reset();
 }
 
@@ -20,6 +20,45 @@ OBPDetection::OBPDetection() :
  */
 OBPDetection::~OBPDetection() {
 
+}
+
+
+double OBPDetection::getRatioSBP() {
+    return ratio_SBP;
+}
+
+void OBPDetection::setRatioSBP(double val) {
+    if (val > MIN_RATIO && val < MAX_RATIO) {
+        ratio_SBP = val;
+    }
+}
+
+double OBPDetection::getRatioDBP() {
+    return ratio_DBP;
+}
+
+void OBPDetection::setRatioDBP(double val) {
+    if (val > MIN_RATIO && val < MAX_RATIO) {
+        ratio_DBP = val;
+    }
+}
+
+int OBPDetection::getMinNbrPeaks() {
+    return minNbrPeaks;
+}
+
+void OBPDetection::setMinNbrPeaks(int val) {
+    if (val > MIN_PEAKS ) {
+        minNbrPeaks = val;
+    }
+}
+/**
+ * Resets the configuration values to their default.
+ */
+void OBPDetection::resetConfigValues(){
+    ratio_SBP = 0.57;
+    ratio_DBP = 0.70;
+    minNbrPeaks = 10;
 }
 
 /**
