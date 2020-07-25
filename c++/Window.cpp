@@ -1,6 +1,7 @@
 #include "Window.h"
 #include <qwt/qwt_dial_needle.h>
 #include <iostream>
+#include <QtCore/QSettings>
 
 /**
  * The constructor of the Window Class.
@@ -123,6 +124,9 @@ void Window::setupUi(QMainWindow *window) {
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     window->setStatusBar(statusbar);
 
+    // Settings Dialog
+    setupSettingsDialog(window);
+
     // Set all text fields in one place.
     retranslateUi(window);
 
@@ -150,11 +154,13 @@ void Window::setupUi(QMainWindow *window) {
     auto *spacerbnt = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(spacerbnt, 1);
 
-    connect(btnStart, SIGNAL (clicked()), this, SLOT (clkBtnStart()));
+    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
 
-//    connect(actionExit,SIGNAL(on_actionExit_triggered()),this,SLOT(close()));
+    connect(settingsDialog, SIGNAL(accepted()), this, SLOT(updateValues()));
+    connect(settingsDialog, SIGNAL(resetValues()), this, SLOT(resetValuesPerform()));
+
     //TODO: remove at the end
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
@@ -399,10 +405,15 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     return lInstrResult;
 }
 
+QWidget *Window::setupSettingsDialog(QWidget *parent) {
+
+    settingsDialog = new SettingsDialog(parent);
+    loadSettings();
+    return settingsDialog;
+}
 
 void Window::retranslateUi(QMainWindow *window) {
-    window->setWindowTitle(QApplication::translate("Oscillometric Blood Pressure Measurement", "OBP Measurement",
-                                                   nullptr));
+    window->setWindowTitle("Oscillometric Blood Pressure Measurement");
 
     lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
                         "1. Put the cuff on your upper arm of your nondominant hand, making sure it is tight.<br>"
@@ -581,8 +592,8 @@ void Window::clkBtn5() {
  * The name of this function (slot) ensures automatic connection with the menu entry
  * actionInfo.
  */
-void Window::on_actionInfo_triggered(){
-    
+void Window::on_actionInfo_triggered() {
+
 }
 
 /**
@@ -591,8 +602,9 @@ void Window::on_actionInfo_triggered(){
  * The name of this function (slot) ensures automatic connection with the menu entry
  * actionSettings.
  */
-void Window::on_actionSettings_triggered(){
-
+void Window::on_actionSettings_triggered() {
+    settingsDialog->setModal(true);
+    settingsDialog->show();
 }
 
 /**
@@ -601,6 +613,44 @@ void Window::on_actionSettings_triggered(){
  * The name of this function (slot) ensures automatic connection with the menu entry
  * actionExit.
  */
-void Window::on_actionExit_triggered(){
+void Window::on_actionExit_triggered() {
     QApplication::quit();
+}
+
+
+
+void Window::loadSettings() {
+    //QSettings settings("TestQSettings.ini", QSettings::IniFormat); for a file
+    QSettings settings;
+    //std::cout << settings.fileName().toStdString();
+    //TODO: getDefault from process
+    settingsDialog->setRatioSBP(settings.value("ratioSBP", 0.5).toDouble());
+    settingsDialog->setRatioDBP(settings.value("ratioDBP", 0.5).toDouble());
+    settingsDialog->setMinNbrPeaks(settings.value("minNbrPeaks", 10).toInt());
+    settingsDialog->setPumpUpValue(settings.value("pumpUpValue", 180).toInt());
+
+    
+}
+
+void Window::updateValues() {
+
+    std::cout << "update" << std::endl;
+    QSettings settings;
+    settings.setValue("ratioSBP", settingsDialog->getRatioSBP());
+    settings.setValue("ratioDBP", settingsDialog->getRatioDBP());
+    settings.setValue("minNbrPeaks", settingsDialog->getMinNbrPeaks());
+    settings.setValue("pumpUpValue", settingsDialog->getPumpUpValue());
+}
+
+
+
+void Window::resetValuesPerform(){
+    //TODO: getter Values from process
+    std::cout << "reset perform" << std::endl;
+//    process->restoreDefaultConfig();
+    QSettings settings;
+//    settings.setValue("ratioSBP", process->getRatioSBP());
+//    settings.setValue("ratioDBP", process->getRatioDBP());
+//    settings.setValue("minNbrPeaks", process->getMinNbrPeaks());
+//    settings.setValue("pumpUpValue", process->getPumpUpValue());
 }

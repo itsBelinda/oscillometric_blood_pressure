@@ -17,10 +17,11 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QFormLayout>
 #include <mutex>
+#include "common.h"
 #include "IObserver.h"
 #include "Plot.h"
-#include "common.h"
 #include "Processing.h"
+#include "SettingsDialog.h"
 
 //! The Window Class handles the user interface (UI).
 /*!
@@ -53,8 +54,11 @@ private:
     QWidget * setupDeflatePage(QWidget *parent);
     QWidget * setupEmptyCuffPage(QWidget *parent);
     QWidget * setupResultPage(QWidget *parent);
+    QWidget * setupSettingsDialog(QWidget *parent);
     void retranslateUi(QMainWindow *MainWindow);
 
+    // Settings:
+    void loadSettings();
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
@@ -120,6 +124,8 @@ private:
     QAction *actionSettings;
     QAction *actionInfo;
     QAction *actionExit;
+    SettingsDialog *settingsDialog;
+
 
 private slots:
     void clkBtnStart();
@@ -133,6 +139,8 @@ private slots:
     void clkBtn3();
     void clkBtn4();
     void clkBtn5();
+    void updateValues();
+    void resetValuesPerform();
 //private signal:
 //    void setMAPText(const QString &);
 };
