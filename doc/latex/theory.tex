@@ -1,6 +1,72 @@
-\chapter{Theory}\label{cp:theory} %TODO maybe call this chapter background
-This chapter discusses the findings of researching existing and proposed algorithms for determining systolic and diastolic blood pressure through the oscillometric method.
+\chapter{Background}\label{cp:theory} %TODO maybe call this chapter
+This chapter discusses the findings of researching existing and proposed algorithms for determining systolic and diastolic blood pressure through the oscillometric method. This report focusses on relatively simple algorithms that can be implemented in a real-time application, which is the goal of this project.
+%TODO: do I inlcude python code showing why certain algorithms do not work or do I leave that be?
 
-The method was described and tested by Geddes et al. in 1982 \cite{Geddes1982}. The mean arterial pressure (MAP) is generally described as the pressure at which oscillation amplitudes are maximal. Geddes is determining ratios of the MAP to find the systolic and diastolic blood pressure. He defines the ratio for the systolic pressure to be 0.5 and the ratio for the diastolic pulse as 0.8. These ratios were found in an experimental way and Geddes acknowledges that the systolic pressure is overestimated and the ratio for the diastolic pulse is not constant for a range of different diastolic pressures.
+A brief section at the end of this chapter explores algorithms beyond the scope of this project that have been proposed in recent literature.
+\section{Blood Pressure}
+Blood pressure is an important bio-medical measurement and often used for  diagnostics in cardiovascular diseases. Most commonly, systolic and diastolic blood pressure are mentioned in pairs, but the general public knows little about the meaning of them.
+
+The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (OBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and OBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heart beat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the yellow cross-hatched area. \cite{Boron2012}
+
+\begin{figure}
+\centering
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
+\caption{Blood pressure characteristic values. Source: \cite{Boron2012}}
+\label{fig:BP}
+\end{figure}
+
+\subsection{Measuring Blood Pressure}
+Blood pressure in humans can be measured with invasive and non-invasive methods. The most accurate methods are invasive, but require professional expertise, because a needle has to be injected into the vessel. Subsequentially, non-invasive methods are more common because they can be used by everyone. With automated methods, taking blood pressure at home has become convenient and easy. However, the inaccuracies of these measurements are often ignored.
+
+
+describe shortly the old methods
+
+mention:
+invasive
+noninvasive
+automated noninvasive
+
+
+mmHg is no longer a SI unit since 2019
+
+palpation / ausculatory method
+
+
+\section{Automatic Blood Pressure Measurement}
+Most modern automatic blood pressure monitors use the oscillometric method to detmine blood pressure. devices used at home and in professional environment
+why is there a need for this.
+limitations:
+measurments take about a minute -> bp varies naturally in this time.
+
+then go into oscillatory method, describe why it was used in the first place
+
+a lot of $new$ algorithms can be brought back to this method, they use NN or models to improve the ratios, but in the end, it is the same.
+
+\subsection{MAA}
+\subsection{Derrivative algorighm}
+then go into the different algorithms that were proposed.
+
+
+MAA (fixed ratio)
+Derrivative
+pulse morphology
+model based
+NN
+PTT
+
+mention artifact remvoal:
+what artifacts: high frequency noise, movement, muscle contractions
+ --> how to make sure only artifacts and not information is remvoed?
+
+
+Determing blood pressure by using bandpass filterd pressure data (oscillations) was described and tested by Geddes et al. in 1982 \cite{Geddes1982}. The mean arterial pressure (MAP) is generally described as the pressure at which oscillation amplitudes are maximal. Geddes is determining ratios of the MAP to find the systolic and diastolic blood pressure. He defines the ratio for the systolic pressure to be 0.5 and the ratio for the diastolic pulse as 0.8. These ratios were found in an experimental way and Geddes acknowledges that the systolic pressure is overestimated and the ratio for the diastolic pulse is not constant for a range of different diastolic pressures.
 
 Later studies tried to find accurate ratios, mostly experimentally. Mathematical models confirmed that a generalised ratio cannot be found. Parameters like the age of the subject and in this regard, the arterial stiffness influence the ratios. \cite{Babbs2012}
+
+Diastolic pressure highly dependant on arterial stiffness. \cite{Babbs2012}
+
+
+
+- algorithms are usually adjusted to match readings of the auscultatory method, but that has its own shortcommings and might introduce further errors
+
+\subsection{Other Algorithms}

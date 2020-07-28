@@ -60,6 +60,7 @@ private:
 
     /**
      * Important data acquisition values
+     * 7.5006157584566 wiki: 7.5006157584
      */
     const double mmHg_per_kPa = 7.5006157584566; // literature
     const double kPa_per_V = 50; // data sheet
@@ -69,7 +70,6 @@ private:
     double mmHgInflate = 180.0;
     double ambientVoltage = 0.65;
     double corrFactor = 2.5; // due to voltage divider
-
 };
 
 
