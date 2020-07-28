@@ -33,6 +33,6 @@ add_executable(obp
         OBPDetection.cpp
         IObserver.h
         ISubject.h
-        common.h)
+        common.h SettingsDialog.cpp SettingsDialog.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})

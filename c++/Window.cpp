@@ -1,5 +1,7 @@
 #include "Window.h"
 #include <qwt/qwt_dial_needle.h>
+#include <iostream>
+#include <QtCore/QSettings>
 
 /**
  * The constructor of the Window Class.
@@ -116,14 +118,14 @@ void Window::setupUi(QMainWindow *window) {
     // Add splitter to main window.
     window->setCentralWidget(splitter);
 
-    // TODO: menubar working? just missing content?
-    menubar = new QMenuBar(window);
-    menubar->setObjectName(QString::fromUtf8("menubar"));
-    menubar->setGeometry(QRect(0, 0, 2081, 39));
-    window->setMenuBar(menubar);
+    window->setMenuBar(setupMenu(window));
+
     statusbar = new QStatusBar(window);
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     window->setStatusBar(statusbar);
+
+    // Settings Dialog
+    setupSettingsDialog(window);
 
     // Set all text fields in one place.
     retranslateUi(window);
@@ -152,9 +154,12 @@ void Window::setupUi(QMainWindow *window) {
     auto *spacerbnt = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(spacerbnt, 1);
 
-    connect(btnStart, SIGNAL (clicked()), this, SLOT (clkBtnStart()));
+    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
     connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
     connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
+
+    connect(settingsDialog, SIGNAL(accepted()), this, SLOT(updateValues()));
+    connect(settingsDialog, SIGNAL(resetValues()), this, SLOT(resetValuesPerform()));
 
     //TODO: remove at the end
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
@@ -165,6 +170,27 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
+
+QMenuBar *Window::setupMenu(QWidget *parent) {
+    actionSettings = new QAction(parent);
+    actionSettings->setObjectName(QString::fromUtf8("actionSettings"));
+    actionInfo = new QAction(parent);
+    actionInfo->setObjectName(QString::fromUtf8("actionInfo"));
+    actionExit = new QAction(parent);
+    actionExit->setObjectName(QString::fromUtf8("actionExit"));
+
+    menubar = new QMenuBar(parent);
+    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menuMenu = new QMenu(menubar);
+    menuMenu->setObjectName(QString::fromUtf8("menuMenu"));
+
+    menubar->addAction(menuMenu->menuAction());
+    menuMenu->addAction(actionSettings);
+    menuMenu->addAction(actionInfo);
+    menuMenu->addSeparator();
+    menuMenu->addAction(actionExit);
+    return menubar;
+}
 //TODO: make plots a bit nicer.
 /**
  * Sets up the page with two plots to display the data.
@@ -314,7 +340,14 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     lInstrRelease->setLayout(vlRelease);
     return lInstrRelease;
 }
-
+/**
+ * Sets up the empty cup page with instructions.
+ *
+ * Instructs the user to deflate the cuff completely.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupEmptyCuffPage(QWidget *parent) {
     lInstrDeflate = new QWidget(parent);
 
@@ -328,7 +361,14 @@ QWidget *Window::setupEmptyCuffPage(QWidget *parent) {
     lInstrDeflate->setLayout(vlDeflate);
     return lInstrDeflate;
 }
-
+/**
+ * Sets up the results page.
+ *
+ * Displays the calculated results.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
 QWidget *Window::setupResultPage(QWidget *parent) {
     lInstrResult = new QWidget(parent);
 
@@ -378,10 +418,26 @@ QWidget *Window::setupResultPage(QWidget *parent) {
 
     return lInstrResult;
 }
+/**
+ * Sets up the dialog for the setting.
+ *
+ * The user can adjust parameters, they will be saved when the application is closed.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
+QWidget *Window::setupSettingsDialog(QWidget *parent) {
 
-
+    settingsDialog = new SettingsDialog(parent);
+    loadSettings();
+    return settingsDialog;
+}
+/**
+ * Sets all the text in the main window.
+ * @param window A pointer to the main window.
+ */
 void Window::retranslateUi(QMainWindow *window) {
-    window->setWindowTitle(QApplication::translate("TestWindow", "TestWindow", nullptr));
+    window->setWindowTitle("Oscillometric Blood Pressure Measurement");
 
     lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
                         "1. Put the cuff on your upper arm of your nondominant hand, making sure it is tight.<br>"
@@ -418,9 +474,16 @@ void Window::retranslateUi(QMainWindow *window) {
     lheartRateAV->setText("Average heart rate:");
     lHRvalAV->setText("- beats/min");
 
+    actionSettings->setText("Settings");
+    actionInfo->setText("Info");
+    actionExit->setText("Exit");
+    menuMenu->setTitle("Menu");
+
 }
 
-
+/**
+ * Handles the timer event to update the UI.
+ */
 void Window::timerEvent(QTimerEvent *) {
     pltMtx.lock();
     pltOsc->replot();
@@ -428,6 +491,11 @@ void Window::timerEvent(QTimerEvent *) {
     pltMtx.unlock();
 }
 
+/**
+ * Handles notifications about a new data pair.
+ * @param pData The newly available pressure data.
+ * @param oData The newly available oscillation data.
+ */
 void Window::eNewData(double pData, double oData) {
     pltMtx.lock();
     pltPre->setNewData(pData);
@@ -437,7 +505,10 @@ void Window::eNewData(double pData, double oData) {
     bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
     assert(bOk);
 }
-
+/**
+ * Handles notifications to switch the displayed screen.
+ * @param eNewScreen The new screen to display.
+ */
 void Window::eSwitchScreen(Screen eNewScreen) {
     bool bOk = false;
     switch (eNewScreen) {
@@ -445,71 +516,84 @@ void Window::eSwitchScreen(Screen eNewScreen) {
             bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 0));
+                                            Q_ARG(int, 0));
             assert(bOk);
             break;
         case Screen::inflateScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 1));
+                                            Q_ARG(int, 1));
             assert(bOk);
             break;
         case Screen::deflateScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 2));
+                                            Q_ARG(int, 2));
             assert(bOk);
             break;
         case Screen::emptyCuffScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "show", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 3));
+                                            Q_ARG(int, 3));
             assert(bOk);
             break;
         case Screen::resultScreen:
             bOk = QMetaObject::invokeMethod(btnCancel, "hide", Qt::QueuedConnection);
             assert(bOk);
             bOk = QMetaObject::invokeMethod(lInstructions, "setCurrentIndex", Qt::AutoConnection,
-                                      Q_ARG(int, 4));
+                                            Q_ARG(int, 4));
             assert(bOk);
             break;
     }
     currentScreen = eNewScreen;
 }
 
+/**
+ * Handles notifications for the results.
+ * @param map The determined value for mean arterial pressure.
+ * @param sbp The determined value for systolic blood pressure.
+ * @param dbp The determined value for diastolic blood pressure.
+ */
 void Window::eResults(double map, double sbp, double dbp) {
     bool bOk = QMetaObject::invokeMethod(lMAPval, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
+                                         Q_ARG(QString, (QString::number(map, 'f', 0) + " mmHg")));
     assert(bOk);
     bOk = QMetaObject::invokeMethod(lSBPval, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
+                                    Q_ARG(QString, QString::number(sbp, 'f', 0) + " mmHg"));
     assert(bOk);
     bOk = QMetaObject::invokeMethod(lDBPval, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
+                                    Q_ARG(QString, QString::number(dbp, 'f', 0) + " mmHg"));
     assert(bOk);
 }
 
+/**
+ * Handles notificaions about heart rate and displays them in the appropriate location in the UI.
+ * @param heartRate The latest heart rate value. Can either be a current or an average heart rate value.
+ */
 void Window::eHeartRate(double heartRate) {
 
     bool bOk = QMetaObject::invokeMethod(lheartRate, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, "Current heart rate:<br><b>" +
-                                             QString::number(heartRate, 'f', 0) + "</b>"));
+                                         Q_ARG(QString, "Current heart rate:<br><b>" +
+                                                        QString::number(heartRate, 'f', 0) + "</b>"));
     assert(bOk);
     bOk = QMetaObject::invokeMethod(lHRvalAV, "setText", Qt::QueuedConnection,
-                              Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
+                                    Q_ARG(QString, QString::number(heartRate, 'f', 0) + " beats/min"));
     assert(bOk);
 }
 
+/**
+ * Handles the notification that the observed class is ready.
+ */
 void Window::eReady() {
     // Instead of :
     // btnStart->setDisabled(false);
-        // The QMetaObject::invokeMethod is used with a Qt::QueuedConnection.
+    // The QMetaObject::invokeMethod is used with a Qt::QueuedConnection.
     // The button is set enabled whenever the UI thread is ready.setDisabled
     bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
-                                      Q_ARG(bool, false));
+                                         Q_ARG(bool, false));
     // Checks that function call is valid during development. Do not put function inside assert,
     // because it will be removed in release build!
     assert(bOk);
@@ -547,4 +631,90 @@ void Window::clkBtn4() {
 
 void Window::clkBtn5() {
     eSwitchScreen(Screen::resultScreen);
+}
+
+/**
+ * This function is called when the menu entry "Info" is pressed.
+ *
+ * The name of this function (slot) ensures automatic connection with the menu entry
+ * actionInfo.
+ */
+void Window::on_actionInfo_triggered() {
+
+}
+
+/**
+ * This function is called when the menu entry "Settings" is pressed.
+ *
+ * The name of this function (slot) ensures automatic connection with the menu entry
+ * actionSettings.
+ */
+void Window::on_actionSettings_triggered() {
+    settingsDialog->setModal(true);
+    settingsDialog->show();
+}
+
+/**
+ * This function is called when the menu entry "Exit" is pressed.
+ *
+ * The name of this function (slot) ensures automatic connection with the menu entry
+ * actionExit.
+ */
+void Window::on_actionExit_triggered() {
+    QApplication::quit();
+}
+
+/**
+ * loads the settings from the settings file if there is one, otherwise default values are displayed.
+ */
+void Window::loadSettings() {
+    // For every value: get the values from settings and get the default value from Processing.
+    // Then set both the value in the settings dialog and in Processing with what was stored in the settings.
+    // Changing the values in Processing only works at startup, before the process is running.
+
+    int iVal;
+    double dVal;
+    QSettings settings; //Saves setting platform independent.
+    dVal = settings.value("ratioSBP", process->getRatioSBP()).toDouble();
+    settingsDialog->setRatioSBP(dVal);
+    process->setRatioSBP(dVal);
+
+    dVal = settings.value("ratioDBP", process->getRatioDBP()).toDouble();
+    settingsDialog->setRatioDBP(dVal);
+    process->setRatioDBP(dVal);
+
+    iVal = settings.value("minNbrPeaks", process->getMinNbrPeaks()).toInt();
+    settingsDialog->setMinNbrPeaks(iVal);
+    process->setMinNbrPeaks(iVal);
+
+    iVal = settings.value("pumpUpValue", process->getPumpUpValue()).toInt();
+    settingsDialog->setPumpUpValue(iVal);
+    process->setPumpUpValue(iVal);
+
+}
+/**
+ * Does only update the values in the settings file. They will not be applied until the
+ * application is restarted.
+ */
+void Window::updateValues() {
+    QSettings settings;
+    settings.setValue("ratioSBP", settingsDialog->getRatioSBP());
+    settings.setValue("ratioDBP", settingsDialog->getRatioDBP());
+    settings.setValue("minNbrPeaks", settingsDialog->getMinNbrPeaks());
+    settings.setValue("pumpUpValue", settingsDialog->getPumpUpValue());
+}
+
+/**
+ * Resets all values both in the application and in the settings file.
+ * Changes take effect immediately.
+ */
+void Window::resetValuesPerform() {
+    process->resetConfigValues();
+    QSettings settings;
+    settings.setValue("ratioSBP", process->getRatioSBP());
+    settings.setValue("ratioDBP", process->getRatioDBP());
+    settings.setValue("minNbrPeaks", process->getMinNbrPeaks());
+    settings.setValue("pumpUpValue", process->getPumpUpValue());
+    // Reload the values from settings also writes them to the settings dialog:
+    loadSettings();
 }

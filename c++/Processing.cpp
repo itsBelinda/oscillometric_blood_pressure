@@ -40,7 +40,7 @@ Processing::Processing(double fcLP, double fcHP) :
     assert(iirHP != NULL);
     iirHP->setup(sampling_rate, fcHP);
 
-    obpDetect = new OBPDetection();
+    obpDetect = new OBPDetection(sampling_rate);
     rawData.clear();
 
     record = new Datarecord(sampling_rate);
@@ -65,6 +65,46 @@ Processing::~Processing() {
 void Processing::setAmbientVoltage(double voltage) {
     ambientVoltage = voltage;
 }
+
+
+void Processing::setRatioSBP(double val){
+    if(!bRunning) {
+        obpDetect->setRatioSBP(val);
+    }
+}
+double Processing::getRatioSBP(){
+    return obpDetect->getRatioSBP();
+}
+void Processing::setRatioDBP(double val){
+    if(!bRunning) {
+        obpDetect->setRatioDBP(val);
+    }
+}
+double Processing::getRatioDBP(){
+    return obpDetect->getRatioDBP();
+}
+void Processing::setMinNbrPeaks(int val){
+    if(!bRunning) {
+        obpDetect->setMinNbrPeaks(val);
+    }
+}
+int Processing::getMinNbrPeaks(){
+    return obpDetect->getMinNbrPeaks();
+}
+void Processing::setPumpUpValue(int val){
+    if(!bRunning && val < MAX_PUMPUP){
+        mmHgInflate = (double) val;
+    }
+}
+int Processing::getPumpUpValue(){
+    return mmHgInflate;
+}
+void Processing::resetConfigValues(){
+    bMeasuring = false;
+    mmHgInflate = 180.0;
+    obpDetect->resetConfigValues();
+}
+
 
 /**
  * The main function of the thread.
@@ -137,6 +177,10 @@ void Processing::processSample(double newSample) {
 
     notifyNewData(ymmHg, yHP);
 
+    if (rawData.size() > DEFAULT_DATA_SIZE) {
+        PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
+        bMeasuring = false; // Setting bMeasuring false will ensure return to Idle state.
+    }
     switch (currentState) {
         /**
          * Configure the ambient pressure.
@@ -205,12 +249,6 @@ void Processing::processSample(double newSample) {
                 }
                 if (ymmHg < 20) {
                     PLOG_WARNING << "Pressure too low to continue algorithm. Cancelled";
-                    //TODO: notificataion ?
-                    bMeasuring = false;
-                    bMeasuring = false;
-                }
-                if (rawData.size() > DEFAULT_DATA_SIZE) {
-                    PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
                     //TODO: notificataion ?
                     bMeasuring = false;
                 }
