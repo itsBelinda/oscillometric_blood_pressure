@@ -15,9 +15,35 @@ The heart is a pump that has two phases. When the ventricle is relaxed, the hear
 \label{fig:BP}
 \end{figure}
 
-\subsection{Measuring Blood Pressure}
-Blood pressure in humans can be measured with invasive and non-invasive methods. The most accurate methods are invasive, but require professional expertise, because a needle has to be injected into the vessel. Subsequentially, non-invasive methods are more common because they can be used by everyone. With automated methods, taking blood pressure at home has become convenient and easy. However, the inaccuracies of these measurements are often ignored.
+\paragraph{}
 
+Blood pressure can be measured with invasive and non-invasive methods. The most accurate methods are invasive, but require professional expertise because a catheter has to be injected into the vessel. Subsequentially, non-invasive methods are more common because they can be used by everyone. With automated methods, taking blood pressure at home has become convenient and easy. However, the inaccuracies of these measurements are often ignored or unknown.
+
+\subsection{Manual Blood Pressure Measurement}
+The manual method of measuring blood pressure relies on a sphygmomanometer and listening to the heart or Korokoff sounds (named after their discoverer) with a stethoscope. This is called the \emph{auscultatory method}. \emph{Palpation} is another method where the pulse is felt at the writst.
+
+The sphygmomanometer is shown in figure \ref{fig:sphy}. It consists of a inflatable cuff that is connected to a rubber pump and a scale that indicates the pressure in the cuff. The pump is equipped with a valve that can be opened to release the air.
+
+
+\paragraph{Measuring Blood Pressure in a Patient}
+It is imporatant that the cuff size is appropriate for the patient's arm. The rubber bladder inside the cuff should cover more than \SI{80}{\%} but less than \SI{100}{\%} of the arm's circumfence.
+
+The cuff is completely deflated and tightly fit around the upper arm of the patient. The center of the bladder should be over the brachial artery. The stethoscope is to be placed over the artery between the cuff and the patient's elbow and should not touch the cuff. This could influence the reading because it puts additional pressure on the artery and can interfere with hearing the sounds.\cite{NHS2019}\cite{Reeves1995}
+
+The valve at the pump is completely closed and the cuff is inflated to a pressure of about \SI{30}{\mmHg} above the expected systolic pressure. Then, the valve is slightly opened to slowly deflate the cuff at a rate of approximately \SI{3}{\mmHg/\second}. Systolic pressure is read when a pulse is first heard while deflation is continued. Distolic pressure is read when the sound disappear completely. After making sure that no further sounds can be heard, by deflating for at least another \SI{10}{\mmHg}, the valve is opened completely to rapildly empty the cuff.   \cite{NHS2019}\cite{Reeves1995}
+
+
+mmHg is no longer a SI unit since 2019
+
+palpation / ausculatory method
+aucu: underestimates systolic and overestimates diastolic
+
+\begin{figure}
+\centering
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
+\caption{Picture of a sphygmomanometer showing the cuff, inflation pump and mercury meter.}
+\label{fig:sphy}
+\end{figure}
 
 describe shortly the old methods
 
@@ -26,11 +52,8 @@ invasive
 noninvasive
 automated noninvasive
 
-
-mmHg is no longer a SI unit since 2019
-
-palpation / ausculatory method
-
+ \cite{Chandrasekhar2019}
+fixed rato: overestimates systolic and underestimates diastolic
 
 \section{Automatic Blood Pressure Measurement}
 Most modern automatic blood pressure monitors use the oscillometric method to detmine blood pressure. devices used at home and in professional environment
@@ -69,4 +92,13 @@ Diastolic pressure highly dependant on arterial stiffness. \cite{Babbs2012}
 
 - algorithms are usually adjusted to match readings of the auscultatory method, but that has its own shortcommings and might introduce further errors
 
+\subsection{General Problems}
+most algorithms expect perfect data to be 'perfect'
+
+natural variablility of blood pressure during measurement
+
+
 \subsection{Other Algorithms}
+
+wrist devices: not good because of height of wrist relative to the heart
+
