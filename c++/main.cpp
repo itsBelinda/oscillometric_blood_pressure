@@ -23,6 +23,8 @@ int main(int argc, char **argv) {
 
     PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);
+    app.setOrganizationName("UofG");
+    app.setApplicationName("Oscillometric Blood Pressure Measurement");
 
     Processing procThread;
 

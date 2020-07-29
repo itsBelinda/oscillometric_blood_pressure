@@ -1,19 +1,28 @@
-\chapter[sw]{Software}
+\chapter{Software}\label{cp:sw}
 
-This chapter contains a description of the developed software. It provides a brief overview of the important architecture and algorithm implementations. The projects GitHub page provides the full source code, setup instructions and doxygen documentation.\cite{Belinda2020} %TODO: possibly attach the whole doxygen documentation (latex format) in attachments"
-The project is licensed under the GNU General Public License v2.0. 
+This chapter contains a description of the developed software. It provides a brief overview of the important architecture and algorithm implementations. The projects GitHub page provides the full source code, setup instructions and Doxygen documentation.\cite{Belinda2020} %TODO: possibly attach the whole Doxygen documentation (latex format) in attachments"
+The project is licensed under the GNU General Public License v2.0.
 
 \section{Overview}
-The application is split into user interface and data processing. Each part runs in their own thread and they are kept separated from each other. The data processing class is called $Processing$ and the user interface class $Window$. 
+The application is split into user interface (UI) and data processing. Each part runs in their own thread and they are kept separated from each other. The data processing class is called $Processing$ and the user interface class $Window$. 
 
-Communication between the classes is done with callbacks in an Observer pattern from the processing to the window class. The processing class is an observerable subject that the window class registers to. The window has a reference to the procesing class to pass pn user input.
+Communication between the classes is done with callbacks in an Observer pattern from the processing to the window class. The processing class is an observable subject that the window class registers to. The window has a reference to the processing class to pass on user input.
 
-The user interface is built with Qt, an open-source widget toolkit for creating graphical user interfaces. Addtitionally, the subset Qt Widgets for Technical Applications (Qwt) is used to display plots of the acquired data. 
+The user interface is built with Qt, an open-source widget toolkit for creating graphical user interfaces. Additionally, the subset Qt Widgets for Technical Applications (Qwt) is used to display plots of the acquired data.
 
-The processing class handles data acquisition and processing, sending notifications to the observer with instructions on what action to perform or what values to update. 
+The processing class handles data acquisition and processing, sending notifications to the observer with instructions on what action to perform or what values to update.
+
+
+\subsection{Compilation}
+The project is set up as a CMake project. Usually, Qt projects are set up using qmake (a .pro file), but CMake is supported as well. This application chose CMake because it is more powerful and allows integration with other tools, e.g. for continuous integration. %TODO potentially include information about Travis CI (if set up)
+
+CMake ensures all required dependencies are installed as defined in the file CMakeList.txt and automatically generates a Makefile. This Makefile is used to build the project, linking all defined librairies.
+For example, this application requires the C++20 standard for the implemented algorithm. CMake generates an error when trying to build the application with a compiler that does not support the C++20 standard.
+
+
 
 \subsection{Class Diagram}
-The \myref{fig:CD} shows a simplified class diagram of the application. Following is a more in dept discussion of its elements.
+The \myref{fig:CD} shows a simplified class diagram of the application. Following is a more in depth discussion of its elements.
 
 \begin{figure}
 \centering
@@ -22,14 +31,9 @@ The \myref{fig:CD} shows a simplified class diagram of the application. Followin
 \label{fig:CD}
 \end{figure}
 
-\subsection{Compilation}
-The project is set up as a CMake projcet. Ususally, Qt projects are set up using their .pro file, but CMake is supported as well. This application chose CMake because it is more powerfull and allows integration with other tools, e.g. for continuous integration. %TODO potentially include information about Travis CI (if set up)
-
-CMake ensures all required dependencies are installed as defined in the file CMakeList.txt and automatically generates a Makefile. This Makefile can be used to build the project, linking all defined librairies. 
-For example, this application requires the C++20 standard for the implemented algorithm. CMake generates an error when trying to build the application with a compiler that does not support the C++20 standard.
 
 \section{User Interface}
-The user interface is shown in \myref{fig:UI}. It is split up into two parts. The left side accepts user input and gives instructions to the user what they have to do to take their own blood pressure. The right side shows the data that is being acquired in real time. There are two plots. The upper plot shows low pass filtered pressure data and the lower shows the data band paass filtered. This is the oscillogram that is the main input for the algorithm to determine the user's blood pressure. 
+The user interface is shown in figure \myref{fig:UI}. It is split up into two parts. The left side accepts user input and gives instructions to the user what they have to do to take their own blood pressure. The right side shows the data that is being acquired in real time. There are two plots. The upper plot shows pressure data filtered with a low pass filter of \SI{10}{\Hz}, the lower plot shows the data band pass filtered at \SI{0.5}{\Hz} and \SI{10}{\Hz}. This is the oscillogram that is the main input for the algorithm to determine the user's blood pressure.
 
 
 
@@ -40,8 +44,8 @@ The user interface is shown in \myref{fig:UI}. It is split up into two parts. Th
 \label{fig:UI}
 \end{figure}
 
-As mentioned above, the graphical user interface is built with Qt. 
-The QtDesigner was used to design a first draft of the UI, but because this does not allow integration into applications that are built outside of the Qt development environment, the whole ui was completely built in C++ code from this draft. 
+As mentioned above, the graphical user interface is built with Qt.
+The QtDesigner was used to design a first draft of the UI, but because this does not allow integration into applications that are built outside of the Qt development environment, the whole UI was completely built in C++ code from this draft.
 
 
 concept
@@ -53,7 +57,7 @@ thread safety
 settings
 
 \subsection{Menu}
-A menubar provides access to an information pane as well as a settings pane. Both open up as new windows and disable user input on the main window. Data acquisition is kept running and is displayed in the plots. 
+A menubar provides access to an information pane as well as a settings pane. Both open up as new windows and disable user input on the main window. Data acquisition is kept running and is displayed in the plots.
 
 \subsubsection{Information}
 Version nbr, links
@@ -63,10 +67,15 @@ Explain settings
 
 
 \section{Data Processing}
-In the Processing class, the data is acquired and processed. The acquisition is handled by the ComediHandler handles data acquisition a	
+In the Processing class, the data is acquired and processed. The acquisition is handled by the ComediHandler handles data acquisition a
 
 \section{Third Party Software}
-Qt
-CppThread A wrapper to the std::thread class written by Bernd Porr to make ...
-iir filter An implementation of infintie impulse response (IIR) filters written in C++ by Bernd Porr.
-plog 
+
+\begin{itemize}
+\item Qt %TODO ref
+\item CppThread a wrapper to the std::thread class written by Bernd Porr to avoid static methods. %TODO ref
+\item \emph{iir1} An implementation of infinite impulse response (IIR) filters for sample-by-sample, real time processing written in C++ by Bernd Porr. Provided as a librairy.%TODO ref
+\item \emph{plog} Portable, simple and extensible C++ logging library. %TODO ref
+\end{itemize}
+
+d	

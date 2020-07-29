@@ -17,10 +17,11 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QFormLayout>
 #include <mutex>
+#include "common.h"
 #include "IObserver.h"
 #include "Plot.h"
-#include "common.h"
 #include "Processing.h"
+#include "SettingsDialog.h"
 
 //! The Window Class handles the user interface (UI).
 /*!
@@ -46,14 +47,18 @@ private:
 
     // Setting up the UI:
     void setupUi(QMainWindow *window);
+    QMenuBar*  setupMenu(QWidget *parent);
     QWidget * setupPlots(QWidget *parent);
     QWidget * setupStartPage(QWidget *parent);
     QWidget * setupInflatePage(QWidget *parent);
     QWidget * setupDeflatePage(QWidget *parent);
     QWidget * setupEmptyCuffPage(QWidget *parent);
     QWidget * setupResultPage(QWidget *parent);
+    QWidget * setupSettingsDialog(QWidget *parent);
     void retranslateUi(QMainWindow *MainWindow);
 
+    // Settings:
+    void loadSettings();
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
@@ -115,16 +120,27 @@ private:
     QFrame *line;
     QMenuBar *menubar;
     QStatusBar *statusbar;
+    QMenu *menuMenu;
+    QAction *actionSettings;
+    QAction *actionInfo;
+    QAction *actionExit;
+    SettingsDialog *settingsDialog;
+
 
 private slots:
     void clkBtnStart();
     void clkBtnCancel();
     void clkBtnReset();
+    void on_actionInfo_triggered();
+    void on_actionSettings_triggered();
+    void on_actionExit_triggered();
     void clkBtn1();
     void clkBtn2();
     void clkBtn3();
     void clkBtn4();
     void clkBtn5();
+    void updateValues();
+    void resetValuesPerform();
 //private signal:
 //    void setMAPText(const QString &);
 };

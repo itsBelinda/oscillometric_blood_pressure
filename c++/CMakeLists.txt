@@ -11,7 +11,6 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-
 # required packages
 find_package(Qt5 COMPONENTS Widgets PrintSupport REQUIRED)
 find_package(Threads)
@@ -34,6 +33,6 @@ add_executable(obp
         OBPDetection.cpp
         IObserver.h
         ISubject.h
-        common.h)
+        common.h SettingsDialog.cpp SettingsDialog.h)
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})

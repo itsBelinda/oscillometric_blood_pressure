@@ -17,7 +17,16 @@
 #define AMBIENT_DEVIATION   0.05        //!< Allowed deviation for average value in V
 #define DEFAULT_MINUTES     5           //!< Maximum allowed minutes for
 #define DEFAULT_DATA_SIZE   SAMPLING_RATE*60*DEFAULT_MINUTES
-                                        //!< Maximum allowed dats size
+                                        //!< Maximum allowed data size
+/**
+ * Limits for the configuraable variables in Processing and OBPDetection
+ */
+#define RATIO_MIN           0.3         //!< The minimal value for the SBP and DBP ratios.
+#define RATIO_MAX           0.9         //!< The maximal value for the SBP and DBP ratios.
+#define NBR_PEAKS_MIN       9           //!<
+#define NBR_PEAKS_MAX       25          //!<
+#define PUMP_UP_VALUE_MIN   120         //!<
+#define PUMP_UP_VALUE_MAX   230         //!<
 
 /**
  * Enum to describe the current state of the UI.
