@@ -282,7 +282,7 @@ void Processing::processSample(double newSample) {
  * @return The corresponding value in mmHg.
  */
 double Processing::getmmHgValue(double voltageValue) const {
-    return ((voltageValue - ambientVoltage) * mmHg_per_kPa * kPa_per_V * corrFactor);
+    return ((voltageValue - ambientVoltage) * kPa_per_V * corrFactor) / kPa_per_mmHg ;
 }
 
 bool Processing::checkAmbient() {

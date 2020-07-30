@@ -389,6 +389,7 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     flResults->setObjectName(QString::fromUtf8("flResults"));
     lMAP = new QLabel(parent);
     lMAP->setObjectName(QString::fromUtf8("lMAP"));
+    lMAP->setAlignment(Qt::AlignRight);
     lMAPval = new QLabel(parent);
     lMAPval->setObjectName(QString::fromUtf8("lMAPval"));
     lSBP = new QLabel(parent);
@@ -475,7 +476,7 @@ void Window::retranslateUi(QMainWindow *window) {
     lCBP->setText("<font color=\"green\">DBP:</font>");
     lDBPval->setText("- mmHg");
     lheartRate->setText("Current heart rate:<br><b>--</b>");
-    lheartRateAV->setText("Average heart rate:");
+    lheartRateAV->setText("Heart rate:");
     lHRvalAV->setText("- beats/min");
 
     actionSettings->setText("Settings");
@@ -599,7 +600,7 @@ void Window::eReady() {
     bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
                                          Q_ARG(bool, false));
     // Checks that function call is valid during development. Do not put function inside assert,
-    // because it will be removed in release build!
+    // because it will be removed in the release build!
     assert(bOk);
 }
 

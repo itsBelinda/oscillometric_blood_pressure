@@ -72,9 +72,11 @@ private:
     ProcState currentState;
 
     /**
-     * Important data acquisition values
+     * Important data acquisition values SI: 1mmHg = 133.322 Pa
+     * 7.5006157584566 wiki: 7.5006157584
      */
     const double mmHg_per_kPa = 7.5006157584566; // literature
+    const double kPa_per_mmHg = 0.133322;
     const double kPa_per_V = 50; // data sheet
 
     double sampling_rate;
