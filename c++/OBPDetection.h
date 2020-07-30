@@ -103,6 +103,7 @@ private:
     bool isEnoughData();
     void findOWME();
     void findMAP();
+    double getPressureAt(int time);
 
     // Static functions:
     static double getRatio(double lowerBound, double upperBound, double value);

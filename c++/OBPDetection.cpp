@@ -206,10 +206,10 @@ bool OBPDetection::isValidMaxima() {
         }
 
         if (maxtime.size() > 1) {
-            double newPulse = newPulse = (60.0 * samplingRate) / (double) (maxtime.back() - (*(maxtime.end() - 2)));
+            double newHR = (60.0 * samplingRate) / (double) (maxtime.back() - (*(maxtime.end() - 2)));
 
-            if (isHeartRateValid(newPulse)) {
-                hrData.push_back(newPulse);
+            if (isHeartRateValid(newHR)) {
+                hrData.push_back(newHR);
                 validPulseCnt++;
                 isValid = true;
             } else {
@@ -246,21 +246,16 @@ bool OBPDetection::isHeartRateValid(double heartRate) {
 void OBPDetection::findMinima() {
 
     if (maxAmp.size() >= 2) {
-        //TODO: easier?
-        // get sub vector of oData from second last to last max value
+        // get sub-vector of oData from second last to last max value
         auto firstMax = oData.begin() + *(maxtime.end() - 2);
         auto lastMax = oData.begin() + maxtime.back();
-        std::vector<double> newVec(firstMax, lastMax);
-
         // find minimal value in between
-        auto iter = std::min_element(newVec.begin(), newVec.end());
-        auto iter2 = std::min_element(firstMax, lastMax);
+        auto iter = std::min_element(firstMax, lastMax);
+        // find distance from first max value to calculate time of minima
+        // min time = first max time + dist
+        auto dist = std::distance(firstMax, iter);
 
-        if (iter == iter2) {
-            std::cout << "same "; //TODO: why is this not the same?
-        }
-        auto dist = std::distance(newVec.begin(), iter);
-
+        // Check if the last maxima value was replaced. If yes, replace last minima value
         if (mintime.size() == (maxtime.size() - 1)) {
             minAmp.back() = *iter;
             mintime.back() = dist + *(maxtime.end() - 2);
@@ -351,7 +346,8 @@ void OBPDetection::findMAP() {
 
 //    std::cout << "maxOMVE: " << *maxOMVE << std::endl;
 
-    resMAP = pData[time]; //TODO MAP: get it from average heart rate
+    resMAP = getPressureAt(time);
+
 //    PLOG_DEBUG << "MAP pressure p: " << pData[time] << " time: " << time
 //               << "\n pData.size(): " << pData.size() << " oData.size(): " << oData.size();
 //      TODO: done for testing. Keeping as comment for now, might be useful for report
@@ -387,7 +383,7 @@ void OBPDetection::findMAP() {
     }
 
     int lerpSBPtime = (int) std::lerp(lbTime, ubTime, getRatio(lbSBP, ubSBP, sbpSearch));
-    resSBP = pData[lerpSBPtime];
+    resSBP = getPressureAt(lerpSBPtime);
 
     double dbpSearch = ratio_DBP * maxVAL;
     for (auto omveDBP = maxOMVE; omveDBP != omveData.end(); ++omveDBP) {
@@ -407,9 +403,24 @@ void OBPDetection::findMAP() {
     // The interpolation is done from the "upper bound" time (earlier in time) to the
     // "lower bound" time (later in time).
     int lerpDBPtime = (int) std::lerp(ubTime, lbTime, 1.0 - getRatio(lbSBP, ubSBP, dbpSearch));
-    resDBP = pData[lerpDBPtime];
+    resDBP = getPressureAt(lerpDBPtime);
 
 }
+//auto firstMax = oData.begin() + *(maxtime.end() - 2);
+//auto lastMax = oData.begin() + maxtime.back();
+//std::vector<double> newVec(firstMax, lastMax);
+
+double OBPDetection::getPressureAt(int time){
+    //
+    int hrSamplesHalf = (1000 * (int) getAverage(hrData)) / 120;
+
+    auto firstP = &pData[time-hrSamplesHalf];//oData.begin() + *(maxtime.end() - 2);
+    auto lastP  = &pData[time+hrSamplesHalf];//= oData.begin() + maxtime.back();
+    std::vector<double> newVec(firstP, lastP);
+    return getAverage(newVec);
+}
+
+
 
 /**
  * Helper function that gets the ratio from a value that is in between two others
