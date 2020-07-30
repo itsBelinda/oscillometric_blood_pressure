@@ -406,18 +406,30 @@ void OBPDetection::findMAP() {
     resDBP = getPressureAt(lerpDBPtime);
 
 }
-//auto firstMax = oData.begin() + *(maxtime.end() - 2);
-//auto lastMax = oData.begin() + maxtime.back();
-//std::vector<double> newVec(firstMax, lastMax);
 
+/**
+ * Get a pressure value at a specific time. Considers
+ * @param time
+ * @return
+ */
 double OBPDetection::getPressureAt(int time){
-    //
+    double average;
     int hrSamplesHalf = (1000 * (int) getAverage(hrData)) / 120;
 
-    auto firstP = &pData[time-hrSamplesHalf];//oData.begin() + *(maxtime.end() - 2);
-    auto lastP  = &pData[time+hrSamplesHalf];//= oData.begin() + maxtime.back();
-    std::vector<double> newVec(firstP, lastP);
-    return getAverage(newVec);
+    assert(!pData.empty());
+
+    if( pData.size() > time+hrSamplesHalf) {
+        auto firstP = &pData[time-hrSamplesHalf];
+        auto lastP  = &pData[time + hrSamplesHalf];
+        std::vector<double> newVec(firstP, lastP);
+        average = getAverage(newVec);
+    }
+    else{
+        PLOG_WARNING << "Trying to get pressure at time " << time << " with hrSamplesHalf: " << hrSamplesHalf <<
+                "and pData.size(): " << pData.size();
+        average = pData[time];
+    }
+    return average;
 }
 
 
