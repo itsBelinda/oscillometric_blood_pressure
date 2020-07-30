@@ -268,16 +268,15 @@ void OBPDetection::findMinima() {
 }
 
 /**
- * Checks, if enough data has been received to
+ * Checks, if enough data has been received to calculate the blood pressure.
  * @return
  */
 bool OBPDetection::isEnoughData() {
     bool bIsEnough = false;
     if (maxAmp.size() > minNbrPeaks) {
-        std::max(maxAmp.begin(), maxAmp.end());
-        auto iter = std::max_element(maxAmp.begin(), maxAmp.end());
-        double cutoff = (*iter) * (ratio_DBP - cutoffHyst);
-        if (maxAmp.back() < cutoff) {
+        auto maxEl = std::max_element(maxAmp.begin(), maxAmp.end());
+        double cutoff = (*maxEl) * (ratio_DBP - cutoffHyst);
+        if (*maxEl > 1.5 && maxAmp.back() < cutoff) {
             bIsEnough = true;
         }
     }

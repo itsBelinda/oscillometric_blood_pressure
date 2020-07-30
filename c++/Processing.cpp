@@ -67,39 +67,47 @@ void Processing::setAmbientVoltage(double voltage) {
 }
 
 
-void Processing::setRatioSBP(double val){
-    if(!bRunning) {
+void Processing::setRatioSBP(double val) {
+    if (!bRunning) {
         obpDetect->setRatioSBP(val);
     }
 }
-double Processing::getRatioSBP(){
+
+double Processing::getRatioSBP() {
     return obpDetect->getRatioSBP();
 }
-void Processing::setRatioDBP(double val){
-    if(!bRunning) {
+
+void Processing::setRatioDBP(double val) {
+    if (!bRunning) {
         obpDetect->setRatioDBP(val);
     }
 }
-double Processing::getRatioDBP(){
+
+double Processing::getRatioDBP() {
     return obpDetect->getRatioDBP();
 }
-void Processing::setMinNbrPeaks(int val){
-    if(!bRunning) {
+
+void Processing::setMinNbrPeaks(int val) {
+    if (!bRunning) {
         obpDetect->setMinNbrPeaks(val);
     }
 }
-int Processing::getMinNbrPeaks(){
+
+int Processing::getMinNbrPeaks() {
     return obpDetect->getMinNbrPeaks();
 }
-void Processing::setPumpUpValue(int val){
-    if(!bRunning && val < MAX_PUMPUP){
+
+void Processing::setPumpUpValue(int val) {
+    if (!bRunning && val < MAX_PUMPUP) {
         mmHgInflate = (double) val;
     }
 }
-int Processing::getPumpUpValue(){
+
+int Processing::getPumpUpValue() {
     return mmHgInflate;
 }
-void Processing::resetConfigValues(){
+
+void Processing::resetConfigValues() {
     bMeasuring = false;
     mmHgInflate = 180.0;
     obpDetect->resetConfigValues();
@@ -169,13 +177,17 @@ void Processing::processSample(double newSample) {
 
     /**
      * Every sample is filtered and sent to the Observers
+     * after configuration is done
      */
-    double ymmHg = getmmHgValue(newSample);
-    double yLP = iirLP->filter(ymmHg);
-    double yHP = iirHP->filter(yLP);
-
-    notifyNewData(yLP, yHP);
-
+    double ymmHg = 0.0;
+    double yLP = 0.0;
+    double yHP = 0.0;
+    if (currentState != ProcState::Config) {
+        ymmHg = getmmHgValue(newSample);
+        yLP = iirLP->filter(ymmHg);
+        yHP = iirHP->filter(yLP);
+        notifyNewData(yLP, yHP);
+    }
     if (rawData.size() > DEFAULT_DATA_SIZE) {
         PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
         bMeasuring = false; // Setting bMeasuring false will ensure return to Idle state.
@@ -282,7 +294,7 @@ void Processing::processSample(double newSample) {
  * @return The corresponding value in mmHg.
  */
 double Processing::getmmHgValue(double voltageValue) const {
-    return ((voltageValue - ambientVoltage) * kPa_per_V * corrFactor) / kPa_per_mmHg ;
+    return ((voltageValue - ambientVoltage) * kPa_per_V * corrFactor) / kPa_per_mmHg;
 }
 
 bool Processing::checkAmbient() {

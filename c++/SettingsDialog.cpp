@@ -119,6 +119,5 @@ void SettingsDialog::retranslateUi(QDialog *SettingsDialog) {
 
 
 void SettingsDialog::resetClicked(){
-    std::cout << "reset clicked" << std::endl;
     emit resetValues();
 }

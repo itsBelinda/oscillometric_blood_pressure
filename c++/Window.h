@@ -111,7 +111,7 @@ private:
     QLabel *lMAPval;
     QLabel *lSBP;
     QLabel *lSBPval;
-    QLabel *lCBP;
+    QLabel *lDBP;
     QLabel *lDBPval;
     QLabel *lTitlePlotRaw;
     QLabel *lTitlePlotOsc;

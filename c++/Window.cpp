@@ -384,37 +384,50 @@ QWidget *Window::setupResultPage(QWidget *parent) {
 
     btnReset = new QPushButton(parent);
     btnReset->setObjectName(QString::fromUtf8("btnReset"));
+    QFont f;
+    f.setBold(true);
+    f.setPointSize(14);
 
     flResults = new QFormLayout();
     flResults->setObjectName(QString::fromUtf8("flResults"));
     lMAP = new QLabel(parent);
+    lMAP->setFont(f);
     lMAP->setObjectName(QString::fromUtf8("lMAP"));
-    lMAP->setAlignment(Qt::AlignRight);
     lMAPval = new QLabel(parent);
     lMAPval->setObjectName(QString::fromUtf8("lMAPval"));
+    lMAPval->setFont(f);
+    f.setPointSize(12);
     lSBP = new QLabel(parent);
     lSBP->setObjectName(QString::fromUtf8("lSBP"));
+    lSBP->setFont(f);
     lSBPval = new QLabel(parent);
     lSBPval->setObjectName(QString::fromUtf8("lSBPval"));
-    lCBP = new QLabel(parent);
-    lCBP->setObjectName(QString::fromUtf8("lCBP"));
+    lSBPval->setFont(f);
+    lDBP = new QLabel(parent);
+    lDBP->setObjectName(QString::fromUtf8("lDBP"));
+    lDBP->setFont(f);
     lDBPval = new QLabel(parent);
     lDBPval->setObjectName(QString::fromUtf8("lDBPval"));
+    lDBPval->setFont(f);
     lheartRateAV = new QLabel(parent);
     lheartRateAV->setObjectName(QString::fromUtf8("lheartRateAV"));
-    lheartRateAV->setMinimumWidth(250);
+    f.setBold(false);
+    lheartRateAV->setFont(f);
+    lheartRateAV->setMinimumWidth(150);
     lHRvalAV = new QLabel(parent);
     lHRvalAV->setObjectName(QString::fromUtf8("lHRvalAV"));
+    lHRvalAV->setFont(f);
     lHRvalAV->setMinimumWidth(150);
 
     flResults->setWidget(0, QFormLayout::LabelRole, lMAP);
     flResults->setWidget(0, QFormLayout::FieldRole, lMAPval);
     flResults->setWidget(1, QFormLayout::LabelRole, lSBP);
     flResults->setWidget(1, QFormLayout::FieldRole, lSBPval);
-    flResults->setWidget(2, QFormLayout::LabelRole, lCBP);
+    flResults->setWidget(2, QFormLayout::LabelRole, lDBP);
     flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
     flResults->setWidget(3, QFormLayout::LabelRole, lheartRateAV);
     flResults->setWidget(3, QFormLayout::FieldRole, lHRvalAV);
+    flResults->setContentsMargins(50,0,50,0);
 
     vlResult->addWidget(lInfoResult);
     vlResult->addLayout(flResults);
@@ -450,7 +463,6 @@ void Window::retranslateUi(QMainWindow *window) {
                         "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready.");
-    //"<br><br> <i>Picture missing</i><br>"
     lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
                        "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
                        "Make sure the valve is fully closed.<br>"
@@ -458,7 +470,6 @@ void Window::retranslateUi(QMainWindow *window) {
     lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
                           "Open the valve slightly to release pressure at about 3 mmHg per second."
                           "Wait calmly and try not to move. <br><br>");
-    //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
     lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
                           "Wait for the pressure to go down to 0 mmHg.<br><br>"
                           "You will see the results next.");
@@ -469,11 +480,11 @@ void Window::retranslateUi(QMainWindow *window) {
     btnStart->setText("Start");
     btnReset->setText("Reset");
     btnCancel->setText("Cancel");
-    lMAP->setText("<b><font color=\"red\">MAP:</font></b>");
+    lMAP->setText("<b>MAP:</b>");//<font color="red"></font>
     lMAPval->setText("- mmHg");
-    lSBP->setText("<font color=\"blue\">SBP:</font>");
+    lSBP->setText("<b>SBP:</b>");
     lSBPval->setText("- mmHg");
-    lCBP->setText("<font color=\"green\">DBP:</font>");
+    lDBP->setText("<b>DBP:</b>");
     lDBPval->setText("- mmHg");
     lheartRate->setText("Current heart rate:<br><b>--</b>");
     lheartRateAV->setText("Heart rate:");

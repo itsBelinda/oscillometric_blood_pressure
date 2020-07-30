@@ -83,7 +83,7 @@ private:
     std::atomic<double> minValidHR = 50.0;       //! The minimal valid heart rate
     std::atomic<double> ratio_SBP;               //! from literature, might be changed in settings later
     std::atomic<double> ratio_DBP;               //! from literature, might be changed in settings later
-    std::atomic<double> prominence = 0.5;     //! The min. prominence of one oscillation to count as a maximum
+    std::atomic<double> prominence = 0.25;     //! The min. prominence of one oscillation to count as a maximum
     std::atomic<int> minDataSize = 1200;         //! The min. size of oscillation data. Before this it will not be
     //! analysed.
     std::atomic<int> minPeakTime = 300;          //! The minimal time two peaks should be apart. If there are

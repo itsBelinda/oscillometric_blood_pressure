@@ -21,7 +21,7 @@
 /**
  * Limits for the configuraable variables in Processing and OBPDetection
  */
-#define RATIO_MIN           0.3         //!< The minimal value for the SBP and DBP ratios.
+#define RATIO_MIN           0.4         //!< The minimal value for the SBP and DBP ratios.
 #define RATIO_MAX           0.9         //!< The maximal value for the SBP and DBP ratios.
 #define NBR_PEAKS_MIN       9           //!<
 #define NBR_PEAKS_MAX       25          //!<
