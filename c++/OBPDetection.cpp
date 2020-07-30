@@ -408,13 +408,14 @@ void OBPDetection::findMAP() {
 }
 
 /**
- * Get a pressure value at a specific time. Considers
- * @param time
- * @return
+ * Get a pressure value at a specific time. Considers the average heart rate and gets the pressure as the average
+ * value over the samples for one pulse centered around the specified time value.
+ * @param time The time value (in samples) where to get the pressure.
+ * @return The pressure value at the specified time.
  */
 double OBPDetection::getPressureAt(int time){
     double average;
-    int hrSamplesHalf = (1000 * (int) getAverage(hrData)) / 120;
+    int hrSamplesHalf = (samplingRate * (int) getAverage(hrData)) / 120;
 
     assert(!pData.empty());
 

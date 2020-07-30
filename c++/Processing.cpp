@@ -170,12 +170,11 @@ void Processing::processSample(double newSample) {
     /**
      * Every sample is filtered and sent to the Observers
      */
-    //TODO: change to work with getmmHgValue(newSample)
-    double yLP = iirLP->filter(newSample);
+    double ymmHg = getmmHgValue(newSample);
+    double yLP = iirLP->filter(ymmHg);
     double yHP = iirHP->filter(yLP);
-    double ymmHg = getmmHgValue(yLP);
 
-    notifyNewData(ymmHg, yHP);
+    notifyNewData(yLP, yHP);
 
     if (rawData.size() > DEFAULT_DATA_SIZE) {
         PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
@@ -194,7 +193,7 @@ void Processing::processSample(double newSample) {
                 rawData.clear();
 
             } else {
-                rawData.push_back(yLP);
+                rawData.push_back(newSample);
             }
 
             break;
@@ -217,7 +216,7 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);
             } else {
-                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                rawData.push_back(ymmHg); //record raw data to store later
 
                 // Check if pressure in cuff is large enough, so it can be switched to the next state.
                 if (ymmHg > mmHgInflate) {
@@ -237,9 +236,9 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);
             } else {
-                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                rawData.push_back(ymmHg); //record raw data to store later
 
-                if (obpDetect->processSample(getmmHgValue(yLP), yHP)) {//TODO: heart rate currently not displayed
+                if (obpDetect->processSample(yLP, yHP)) {//TODO: heart rate currently not displayed
                     if (obpDetect->getIsEnoughData()) {
                         notifyHeartRate(obpDetect->getAverageHeartRate());
                         notifySwitchScreen(Screen::emptyCuffScreen);
@@ -259,7 +258,7 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);
             } else {
-                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                rawData.push_back(ymmHg); //record raw data to store later
                 if (ymmHg < 1) {
                     notifyResults(obpDetect->getMAP(), obpDetect->getSBP(), obpDetect->getDBP());
                     record->saveAll(Processing::getFilename(), rawData);

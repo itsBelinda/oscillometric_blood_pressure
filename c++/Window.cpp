@@ -170,7 +170,11 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
-
+/**
+ * Sets up the menu bar to access Settings, Info and Exit.
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated menu bar.
+ */
 QMenuBar *Window::setupMenu(QWidget *parent) {
     actionSettings = new QAction(parent);
     actionSettings->setObjectName(QString::fromUtf8("actionSettings"));
@@ -222,7 +226,7 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
     pltPre = new Plot(xData, yLPData, dataLength, 250, 0.0, parent);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
-    pltOsc = new Plot(xData, yHPData, dataLength, 0.003, -0.003, parent);
+    pltOsc = new Plot(xData, yHPData, dataLength, 3, -3, parent);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
 
     // build right side of window
