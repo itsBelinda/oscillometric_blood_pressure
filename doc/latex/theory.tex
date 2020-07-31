@@ -1,13 +1,15 @@
 \chapter{Background}\label{cp:theory} %TODO maybe call this chapter
 This chapter discusses the findings of researching existing and proposed algorithms for determining systolic and diastolic blood pressure through the oscillometric method. This report focusses on relatively simple algorithms that can be implemented in a real-time application, which is the goal of this project.
+
+The first part of this chapter defines what blood pressure is and how it is measured manually. Afterwards 
 %TODO: do I inlcude python code showing why certain algorithms do not work or do I leave that be?
 
 A brief section at the end of this chapter explores algorithms beyond the scope of this project that have been proposed in recent literature.
 
 \section{What is Blood Pressure?}
-Blood pressure is an important bio-medical measurement and often used for  diagnostics in cardiovascular diseases. Most commonly, systolic and diastolic blood pressure are mentioned in pairs, but the general public knows little about the meaning of them.
+Blood pressure is an important bio-medical measurement and often used for  diagnostics in cardiovascular diseases. Most commonly, systolic and diastolic blood pressure are mentioned in pairs, but what do those numbers mean?
 
-The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (OBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and OBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heart beat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the yellow cross-hatched area. \cite{Boron2012}\paragraph{}
+The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (DBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and DBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heart beat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the yellow cross-hatched area. \cite{Boron2012}\paragraph{}
 
 \begin{figure}[]
 \centering
@@ -17,19 +19,24 @@ The heart is a pump that has two phases. When the ventricle is relaxed, the hear
 \end{figure}
 
 
-Blood pressure can be measured with invasive and non-invasive methods. The most accurate methods are invasive, but require professional expertise because a catheter has to be injected into the vessel. Subsequentially, non-invasive methods are more common because they can be used by everyone. With automated methods, taking blood pressure at home has become convenient and easy. However, the inaccuracies of these measurements are often ignored or unknown.
+Blood pressure can be measured with invasive and non-invasive methods. The most accurate methods are invasive, but require professional expertise because a catheter has to be injected into the blood vessel. Subsequentially, non-invasive methods are more common because they are more convenient to use. With automated methods, taking blood pressure at home has become convenient and easy. However, the inaccuracies of these measurements are often ignored or even unknown.
 
 \section{Manual Blood Pressure Measurement}
-The manual method of measuring blood pressure relies on a sphygmomanometer and listening to the heart or Korokoff sounds (named after their discoverer) with a stethoscope. This is called the \emph{auscultatory method}. \emph{Palpation} is another method where the pulse is felt at the wrist. It will not be discussed any further. The ausculatory method is described below because it provides recommendations that are true for all blood pressure measurements using a cuff. 
+The manual method of measuring blood pressure relies on a sphygmomanometer and listening to the heart or Korokoff sounds (named after their discoverer) with a stethoscope. This is called the \emph{auscultatory method}. \emph{Palpation} is another method where the pulse is felt at the wrist. It only allows detection of the SBP. The ausculatory method is described below because it provides recommendations that are true for all blood pressure measurements using a cuff. 
 
-The sphygmomanometer is shown in figure \ref{fig:sphy}. It consists of a inflatable cuff that is connected to a rubber pump and a scale that indicates the pressure in the cuff. The pump is equipped with a valve that can be opened to release the air.
+The sphygmomanometer is shown in figure \ref{fig:sphy}. It consists of a inflatable cuff that is connected to a rubber pump and a scale that indicates the pressure in the cuff in \SI{}{\mmHg}. The pump is equipped with a valve that can be opened to release air.
 
-%\begin{figure}[h]
-%\centering
-%%\includegraphics[scale=0.125]{GlaLogo.pdf}
-%\caption{Picture of a sphygmomanometer showing the cuff, inflation pump and mercury meter.}
-%\label{fig:sphy}
-%\end{figure}
+
+\SI{}{\mmHg} is a unit to descibe pressure. \SI{1}{\mmHg} is defined as the pressure generated by a column of mercury of \SI{1}{\mm} heigth. Millimeters of Mercury is not part of the International System of Units (SI), but was defined by it before 2019 as \SI{1}{\mmHg} = \SI{133.322}{\Pa} using standard gravitiy.\cite{SI2008} Since 2019, \SI{}{\mmHg} is no longer included in the SI brochure. However, it is still widely used in the medical field.
+ 
+ 
+\begin{figure}[h]
+\centering
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
+\caption{Picture of a sphygmomanometer showing the cuff, inflation pump and mercury meter.}
+\label{fig:sphy}
+\end{figure}
+
 Auscultatory blood pressure measurements are often considered the standard and what automatic methods are compared against. \cite{Sapinski1996}
 
 
@@ -92,15 +99,9 @@ Diastolic pressure highly dependant on arterial stiffness. \cite{Babbs2012}
 
 - algorithms are usually adjusted to match readings of the auscultatory method, but that has its own shortcommings and might introduce further errors
 
-\subsection{General Problems}
-most algorithms expect perfect data to be 'perfect'
 
-natural variablility of blood pressure during measurement
-left and right arm difference 10mmHg normal
-
-
-mmHg is no longer a SI unit since 2019
 
 \subsection{Other Algorithms}
+using pulse morphology and self defined indeces, in the end they settle for using 'OPI': taking the '1st' derrivative of each pulse and taking the maximal value of that to form another slope that looks similar to the original oscillations anyway and then again using ratios to get SBP and DBP. then comparing it to measurements from an omron device. uses datasets with almost 100 pulses (mine work with 10 pulses) \cite{Mafi2012,Mafi2011}
 
-wrist devices: not good because of height of wrist relative to the heart
+using a cuff equipped with a microphone to record Korotkoff sound to detect SBP and DBP but only to then again define a ratio to calculate blood pressure from the oscillation amplitude. Also using the derrivative algorithm, but with many constraints so that a result can be obtained. rat\cite{Jazbinsek2010,Jazbinsek2005,Jazbinsek2016}
