@@ -37,71 +37,82 @@ The sphygmomanometer is shown in figure \ref{fig:sphy}. It consists of a inflata
 \label{fig:sphy}
 \end{figure}
 
-Auscultatory blood pressure measurements are often considered the standard and what automatic methods are compared against. \cite{Sapinski1996}
-
-
+Intra-arteria or direct BP measurement is considered the 'gold standard', but most studies compare the developed algorithm with the ascultatory method, which underestimated SBP and overestimates DBP. \cite{Sapinski1996} Nonetheless, the protocols to test automatic blood pressure moitors given by the British Hypertension Society (BHS) and their American counterpart, the Association for the Advancement of Medical Instrumentation (AAMI), both use the auscultatory method as a reference. \cite{Jazbinsek2010,BHS,AAMI}
+ 
 \subsection{Auscultatory Method}
 It is important that the cuff size is appropriate for the patient's arm. The rubber bladder inside the cuff should cover more than \SI{80}{\%} but less than \SI{100}{\%} of the arm's circumference.
 
-The cuff is completely deflated and tightly fit around the upper arm of the patient. The center of the bladder should be over the brachial artery. The stethoscope is to be placed over the artery between the cuff and the patient's elbow and should not touch the cuff. This could influence the reading because it puts additional pressure on the artery and can interfere with hearing the sounds.\cite{NHS2019}\cite{Reeves1995}
+The cuff is completely deflated and tightly fit around the upper arm of the patient. The center of the bladder should be over the brachial artery and the arm supported at heart level. The stethoscope is to be placed over the artery between the cuff and the patient's elbow and should not touch the cuff. This could influence the reading because it puts additional pressure on the artery and can interfere with hearing the sounds.\cite{NHS2019}\cite{Reeves1995}
 
-The valve at the pump is completely closed and the cuff is inflated to a pressure of about \SI{30}{\mmHg} above the expected systolic pressure. This causes the artery to flatten and not let any blood through. Subsequently, the valve is slightly opened to slowly deflate the cuff at a rate of approximately \SI{3}{\mmHg/\second}. The artery will open and let small amounts of blood through. Systolic pressure is read when a pulse is first heard while deflation is continued. Diastolic pressure is read when the sounds disappear completely. Ultimately, blood can flow freely thorugh the artery. After making sure that no further sounds can be heard by deflating for at least another \SI{10}{\mmHg}, the valve is opened completely to rapildly empty the cuff.   \cite{NHS2019,Reeves1995}
+The valve at the pump is completely closed and the cuff is inflated to a pressure of about \SI{30}{\mmHg} above the expected systolic pressure. This causes the artery to flatten and not let any blood through. Subsequently, the valve is slightly opened to slowly deflate the cuff at a rate of approximately \SI{3}{\mmHg/\second}. The artery will open and let small amounts of blood through. Systolic pressure is read when a pulse is first heard. Meanwhile, deflation continues. Diastolic pressure is read when the sounds disappear completely. Ultimately, blood can flow freely thorugh the artery. After making sure that no further sounds can be heard by deflating for at least another \SI{10}{\mmHg}, the valve is opened completely to rapildly empty the cuff.   \cite{NHS2019,Reeves1995}
 
 There are some discrepancies in literature on how to define the point of the diastolic blood pressure. Some references define it as when the Korokoff sounds dissappear completely. \cite{NHS2019,Reeves1995} Others, predominantly older ressouces, define it as the point where the sounds are muffled.\cite{Boron2012} Here, the former is assumed, because most current literature does and some literature suggests that the auscultatory method overestimates diastolic blood pressure. \cite{Chandrasekhar2019} 
 
+\subsection{Calculation of MAP}
+Traditionally, MAP is calculated as an estimate by adding a third of the PP to the DBP. Or, how it is more commonly reffered to, adding SBP and twice the DBP and dividing the result by 3 (equation \ref{eq:MAP}). According to calculations by Bos \textit{et al.}, this generally underestimates the MAP and they suggest to add $40\%$ rather than a third of DBP. Furthermore, they suggest to use the MAP measured by oscillometric devices rather than calculating it from values obtained through the auscultatory method. \cite{Bos2007}
+
+\begin{equation}
+MAP = \frac{SBP-DBP}{3}+DBP = \frac{SBP+2 DBP}{3}
+\label{eq:MAP}
+\end{equation}
+
+According to Joe \cite{Joe2019} nurses in intensive care units (ICU) today still use the manual calculation method on the automatically obtained SBP and DBP rather than rusting the measured MAP, which introduces large errors. %https://www.youtube.com/watch?v=TG0NcqKeRWE
 
 \section{Automatic Blood Pressure Measurement}
 
-Most modern automatic devices use the oscillometric method detmine blood pressure. They are used both at home and in professional environments. 
+Most modern automatic devices use the oscillometric method to detmine blood pressure. They are used both at home and in professional environments. 
 
-Automatic blood pressure monitors measure pressure in a cuff similar to the one used in the manual method and use the small pressure changes (oscillations) extracted from the deflation curve to estimate blood pressure. Commercially available devices are usually equipped with an electic pump and the bladder contains a pressure sensor. Otherwise, they look similar to the cuff used for manual measurements. Some devices use wrist cuffs, but those are rarely recommended. \cite{BIHSOC2020} The most immediate problem with wrist measurements is the influence of gravity on blood pressue and the accompaning risk of systematic errors when the measurement is not taken at heart level. \cite{Boron2012} This problem is avoided by taking blood pressure at the upper arm. 
+Automatic blood pressure monitors measure pressure in a cuff similar to the one used in the manual method and use the small pressure changes (oscillations) extracted from the deflation curve to estimate blood pressure. Commercially available devices are usually equipped with an electic pump and the bladder contains a pressure sensor. Otherwise, they look similar to the cuff used for manual measurements. Some devices use wrist cuffs, but those are rarely recommended. \cite{BIHSOC2020} The most significant problem using wrist measurements is the influence of gravity on blood pressue and the accompaning risk of systematic errors when the measurement is not taken at heart level. \cite{Boron2012} This problem is avoided by taking blood pressure at the upper arm. 
 
 \paragraph{General Procedure} The procedure is also similar to the manual method. The pressure in the cuff is increased to a level above the expected systolic pressure, which leads to the artery being pushed close. While releasing the pressure slowly through the valve, blood starts flowing through the artery, resulting in small increases in pressure realative to the continuous deflation of the cuff. As the cuff deflates further, these relative changes increase to a maximal value before they start decreasing agian.\cite{Forouzanfar2015,Drzewiecki1994,Ursino1996} The shape, magnitude or envelope of these oscillations are used in various automatic blood pressure algorithms. Methods that do not use oscillations exist, but are not discussed here.
 
+\paragraph{Oscillation Extraction} There are two ways the oscillatilometric waveform (OMW) is extracted from the deflating pressure curve. The first one is filtering. A  bandpass filter with a lower cut-off frequency between \SIrange{0.1}{0.5}{\Hz} and a upper cut-off frequence between \SIrange{0.1}{0.5}{\Hz} is recommendded. \cite{Forouzanfar2015} Implementations usually use first \cite{Lim2015} to sixth order \cite{Jazbinsek2010} Butterworth filters. They are known for their flat pass-band response and a good frequency response. 
 
-\subsection{MAA}
+The second approach is to use detrending. It requires to know the beginning of each pulse to be able to fit a line of continuously deflating pressure to the identified points. Its advantage is, that it additionally reproduces an esimated defaltion curve. However, it requires additional data, for example ECG, for the pulse detection.\cite{Forouzanfar2015}
 
-
-MAP at max osc:\cite{Geddes1982,Drzewiecki1994,Babbs2012}\cite{Ramsey1979} provided compression chamber is kept small \cite{Mauck1980}
-doubt, but still close: weighted av\cite{Chandrasekhar2019}
-lowest pressure of the platau of maximal oscillations \cite{Ursino1996}
+\paragraph{Envelope} The envelope of the OMW is used by basic automatic algorithms. Formation of the envelope is achieved in different ways. The simpleast way is to register only local maxima. Similar to that, and most common, is the subtraction of the following through from a local peak or interpolating the curve of local maxima and local minima to subtract them from each other. Some algorithms additionally fit a courve on the obtained oscillometric waveform envelope (OMVE) in an attempt to remove artifacts. \cite{Forouzanfar2014}
 
 
-a lot of $new$ algorithms can be brought back to this method, they use NN or models to improve the ratios, but in the end, it is the same.
+\subsection{Maximum Amplitude Algorithm}
+The maximum amplitude algorithm (MAA) is based on the assumtion that the oscillations are maximal when the pressure in the cuff equals arterial pressure. Accordingly, the recorded pressure at which oscillations are maximal is considered a valid estimate of the MAP \cite{Babbs2012,Geddes1982,Drzewiecki1994}\cite{Ramsey1979}, as long as the compression chamber is kept small \cite{Mauck1980}. To avoid introducing errors, the cuff should always be tightly fit, because air volume in the cuff causes maximum oscillations to be above the true MAP. Hence, Ursio suggestes to use the lowest pressure of the platau of maximal oscillations as the value to assess MAP.\cite{Ursino1996}
+
+A recent publication by Chandrasekhar \textit{et al.} \cite{Chandrasekhar2019} employs a more complex model than the one originally introduced by Mauck \textit{et al.}\cite{Mauck1980}. They conclude that the MAA results in a weighted average of systolic and disastolic BP. According to their model, MAA underestimates MAP for higher blood pressure. 
+
+\paragraph{Fixed-Ratio Algorithm} The fixed-ratio algorithm builds on the MAA and is based on the assumption that the systolic and diasotlic blood pressure occure at specific fractions of the maximum oscillations before and after its occurence. Determing SBP and DBP after appliyng the MAA was tested by Geddes \textit{et al.} in 1982 \cite{Geddes1982}. Geddes recorded Korokoff sounds while measuring oscillations in order to find a ratio of oscillation amplitudes for SBP and DBP. They defined the ratio for the systolic pressure to be 0.5 and the ratio for the diastolic pulse as 0.8. These ratios were found in an experimental way and Geddes acknowledges that the systolic pressure is overestimated and the ratio for the diastolic pulse is not constant for a range of different diastolic pressures.
+
+Later studies tried to find accurate ratios, mostly experimentally with the ratio for SBP usually beeing determined between 0.45 and 0.73 and the ratio for DBP a bit higher between 0.69 and 0.83.\cite{Drzewiecki1994,Forouzanfar2015} Mathematical models confirmed that a generalised ratio cannot be found. Parameters like the age of the subject and in this regard, the arterial stiffness as well as pulse pressure influence the ratios. \cite{Ursino1996} A higher PP results in a smaller ratio for SBP and larger ratio for DBP. A stiff arterial wall causes volume changes to happen slower. While this has a small effect on the systolic ratio, the diastolic ratio decreases with the stiffness of the artery.\cite{Babbs2012}
+
+% volume changes les rapidly: artery is stiffer!babbs2012
+% pulse pressure: higher pp: smaller s ratio, larger d ratio
+
+%- algorithms are usually adjusted to match readings of the auscultatory method, but that has its own shortcommings and might introduce further errors (some use other oscillometric devices which is even worse)
+
 \subsection{Derrivative Algorighm}
-then go into the different algorithms that were proposed.
+The derrivative algorithm uses the OMVE and plots it against the defation pressure. The points of maximal and minimal slope are determined. The pressure point where the derivative of the OMVE is maximal is assumed to be the diastolic BP and where the derivative is minimal is the systolic BP respectively. \cite{Jazbinsek2010,Forouzanfar2015} 
 
+Even though mathematical models have confimed this method to produce valid estimates of both SBP and DBP without the need for empirically obtained ratios, it is extremely vulnerable to noise and therefore not used in practical applications.  \cite{Babbs2012,Chandrasekhar2019}
 
-MAA (fixed ratio)
-Derrivative
-pulse morphology
-model based
-NN
-PTT
-
-\cite{Chandrasekhar2019}
-fixed rato: overestimates systolic and underestimates diastolic
-
-mention artifact remvoal:
-what artifacts: high frequency noise, movement, muscle contractions
- --> how to make sure only artifacts and not information is remvoed?
-
-
-Determing blood pressure by using bandpass filterd pressure data (oscillations) was tested by Geddes et al. in 1982 \cite{Geddes1982}. Geddes recorded Korokoff sounds while measuring oscillations in order to find a ratio.
-
-The mean arterial pressure (MAP) is generally described as the pressure at which oscillation amplitudes are maximal. Geddes is determining ratios of the MAP to find the systolic and diastolic blood pressure. He defines the ratio for the systolic pressure to be 0.5 and the ratio for the diastolic pulse as 0.8. These ratios were found in an experimental way and Geddes acknowledges that the systolic pressure is overestimated and the ratio for the diastolic pulse is not constant for a range of different diastolic pressures.
-
-Later studies tried to find accurate ratios, mostly experimentally. Mathematical models confirmed that a generalised ratio cannot be found. Parameters like the age of the subject and in this regard, the arterial stiffness influence the ratios. \cite{Babbs2012}
-
-Diastolic pressure highly dependant on arterial stiffness. \cite{Babbs2012}
-
-
-
-- algorithms are usually adjusted to match readings of the auscultatory method, but that has its own shortcommings and might introduce further errors
+%Derrivative
+%pulse morphology
+%model based
+%NN
+%PTT
+%
+%mention artifact remvoal:
+%what artifacts: high frequency noise, movement, muscle contractions
+% --> how to make sure only artifacts and not information is remvoed?
 
 
 
 \subsection{Other Algorithms}
+Since the above mentioned algorithms use only the envelope of the oscillations to determine BP, 
+
+%TODO evaluation of stiffnes with single pulse
+
 using pulse morphology and self defined indeces, in the end they settle for using 'OPI': taking the '1st' derrivative of each pulse and taking the maximal value of that to form another slope that looks similar to the original oscillations anyway and then again using ratios to get SBP and DBP. then comparing it to measurements from an omron device. uses datasets with almost 100 pulses (mine work with 10 pulses) \cite{Mafi2012,Mafi2011}
 
+%TODO move to discussion?
 using a cuff equipped with a microphone to record Korotkoff sound to detect SBP and DBP but only to then again define a ratio to calculate blood pressure from the oscillation amplitude. Also using the derrivative algorithm, but with many constraints so that a result can be obtained. rat\cite{Jazbinsek2010,Jazbinsek2005,Jazbinsek2016}
+
+
+a lot of $new$ algorithms can be brought back to the MAA method, they use NN or models to improve the ratios, but in the end, it is the same.
