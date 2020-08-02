@@ -72,10 +72,10 @@ ratio for systolic pressure also calculated for a reference database},
   issue   = {6},
   volume  = {15},
   comment = {proposes new and seemingly relatively simple algorithms. has to be looked at in more detail:
-only 25 subjects tested, not really a new algorithm, because in the end, it still uses the fixed-ratio method, but adds artifact removal and compares it to some model based algorithms.
+only 25 subjects tested, not really a new algorithm, because in the end, it still uses the fixed-ratio method, but adds artifact removal and compares it to some model based algorithms. 
 results were evaluated by comparing them to the accusatory method (BHS standard, but old)
 
-interesting part:
+interesting part: 
 We further demonstrated from our analysis results (Tables 5 and 6) that the usage of variable characteristic ratio derived based on several features extracted from the OWE improved the blood pressure estimation accuracy over the conventional MAA method using fixed characteristic ratios
 - based on Lee 2013},
   journal = {Sensors (Switzerland)},
@@ -137,8 +137,8 @@ We further demonstrated from our analysis results (Tables 5 and 6) that the usag
   pages    = {761-778},
   volume   = {43},
   abstract = {A mathematical lumped parameter model of the oscillometric technique for indirect blood pressure measurement is presented. The model includes cuff compliance, pressure transmission from the cuff to the brachial artery through the soft tissue of the arm, and the biomechanics of the brachial artery both at positive and negative transmural pressure values. The main aspects of oscillometry are simulated i.e., the increase in cuff pressure pulsatility during cuff deflation maneuvers, the existence of a point of maximum pulsations (about 1.5 mmHg) at a cuff pressure close to mean arterial pressure, and the characteristic ratios for cuff pressure pulsatility at systole and diastole (0.52 and 0.70, respectively, with this model, using basal parameters and an individual set of data for the arterial pressure waveform). Subsequently, the model is used to examine how alterations in some biomechanical factors may prejudice the accuracy of pressure measurement. Numerical simulations indicate that alterations in wall viscoelastic properties and in arterial pressure pulse amplitude may significantly affect the accuracy of pressure estimates, leading to errors as great as 15-20% in the computation of diastolic and systolic arterial pressure. By contrast, changes in arterial pressure mean value and cuff compliance do not seem to have significant influence on the measurement. Evaluation of mean arterial pressure through a characteristic ratio is not robust and may lead to misleading results. Mean arterial pressure may be better evaluated as the lowest pressure at which cuff pulse amplitude reaches a plateau. The obtained results may help to explain the nature of errors which usually limit the reliability of arterial pressure measurement (for instance in the elderly).;A mathematical lumped parameter model of the oscillometric technique for indirect blood pressure measurement is presented. The model includes cuff compliance, pressure transmission from the cuff to the brachial artery through the soft tissue of the arm, and the biomechanics of the brachial artery both at positive and negative transmural pressure values. The main aspects of oscillometry are simulated i.e., the increase in cuff pressure pulsatility during cuff deflation manoeuvres, the existence of a point of maximum pulsations (about 1.5 mmHg) at a cuff pressure close to mean arterial pressure, and the characteristic ratios for cuff pressure pulsatility at systole and diastole (0.52 and 0.70, respectively, with this model, using basal parameters and an individual set of data for the arterial pressure waveform). Subsequently, the model is used to examine how alterations in some biomechanical factors may prejudice the accuracy of pressure measurement. Numerical simulations indicate that alterations in wall viscoelastic properties and in arterial pressure pulse amplitude may significantly affect the accuracy of pressure estimates, leading to errors as great as 15-20% in the computation of diastolic and systolic arterial pressure. By contrast, changes in arterial pressure mean value and cuff compliance do not seem to have significant influence on the measurement. Evaluation of mean arterial pressure through a characteristic ratio is not robust and may lead to misleading results. Mean arterial pressure may be better evaluated as the lowest pressure at which cuff pulse amplitude reaches a plateau. The obtained results may help to explain the nature of errors which usually limit the reliability of arterial pressure measurement (for instance in the elderly).;},
-  comment  = {attempt to mathematically prove oscillometric method. compares obtained values to Geddes.
-conclusion: Geddes values can possibly be made more accurate, because systolic pressure was obtained by him through the accusatory method and that ofent overestimates it. for high arterial pressures, the ratios should be lowered and vice versa.
+  comment  = {attempt to mathematically prove oscillometric method. compares obtained values to Geddes. 
+conclusion: Geddes values can possibly be made more accurate, because systolic pressure was obtained by him through the accusatory method and that ofent overestimates it. for high arterial pressures, the ratios should be lowered and vice versa. 
 MAP should be estimated as the lowest cuff pressure where oscillations have a plateau.
 in the end: accusatory method should be used for sys/dia measurement and oscillometric method for esitmation of MAP},
   isbn     = {0018-9294},
@@ -186,7 +186,7 @@ only included for completeness},
   pages    = {270-274},
   volume   = {53},
   abstract = {A new technique for contour analysis of the pulse wave signal is proposed. It is based on spectral analysis of a sequence of replicated pulse waveforms. Comparative analysis of the sensitivity and specificity of the proposed indices was carried out in a sample of 45 volunteers of different ages and states of arterial health. It was found that the proposed spectral index has higher sensitivity (89%) and specificity (86%) compared to the time-domain indices.},
-  comment  = {determination of arterial stiffness depending on the waveform.
+  comment  = {determination of arterial stiffness depending on the waveform. 
 this could be used to change the ratio depending on arterial stiffness or give an indication on when the determined blood pressure is likely to be off ("unhealthy person detection")},
   isbn     = {0006-3398},
   journal  = {Biomedical Engineering},
@@ -207,6 +207,128 @@ this could be used to change the ratio depending on arterial stiffness or give a
   publisher = {Elsevier health sciences},
   comment   = {Basics about blood pressure and pictures},
   year      = {2012},
+}
+
+@Article{Reeves1995,
+  author    = {Reeves, Richard A.},
+  title     = {Does This Patient Have Hypertension?: How to Measure Blood Pressure},
+  issue     = {15},
+  pages     = {1211--1218},
+  volume    = {273},
+  journal   = {JAMA: The Journal of the American Medical Association},
+  month     = {4},
+  msbib-day = {19},
+  publisher = {American Medical Association},
+  year      = {1995},
+}
+
+@TechReport{Lloyd2018,
+  author      = {Lloyd, Gemma},
+  institution = {Mersey Care NHS Foundation Trust},
+  title       = {Clinical guidelines for Measuring/ Monitoring Blood Pressure},
+  location    = {Prescot},
+  year        = {2018},
+}
+
+@TechReport{AAMI2013,
+  institution = {Association for the Advancement of Medical Instrumentation, Sphygmomanometer Committee, American National Standards Institute, Inc.},
+  title       = {Non-invasive sphygmomanometers — Part 2: Clinical investigation of automated measurement type},
+  location    = {Arlington, VA},
+  year        = {2013},
+}
+
+@Article{OBrien1993,
+  author   = {O'Brien,Eoin and Petrie,James and Littler,William and de Swiet,Michael and Padfield,Paul L. and O'Malley,Kevin and Jamieson,Michael and Altman,Douglas and Bland,Martin and Atkins,Neil},
+  title    = {The British Hypertension Society protocol for the evaluation of automated and semi-automated blood pressure measuring devices with special reference to ambulatory systems},
+  language = {English},
+  pages    = {S43–S63},
+  volume   = {11},
+  abstract = {With the increasing manufacture of expensive systems for the measurement of ambulatory blood pressure there is a need for potential purchasers to be able to satisfy themselves that the systems have been evaluated according to agreed criteria. The British Hypertension Society has, therefore, drawn up a protocol of requirements for the evaluation of these devices. This protocol incorporates many features of the American National Standard for Non-Automated Sphygmomanometers but includes many additional features, such as strict criteria for observer training, interdevice variability testing before and after a month of ambulatory use, and a new system of analysis which permits the test system to be graded. It is recommended that manufacturers of ambulatory blood pressure measuring devices should obtain an unbiased evaluation according to a recognized standard before a device is marketed.},
+  isbn     = {0263-6352},
+  journal  = {Journal of Hypertension},
+  keywords = {Reference Standards; Societies, Medical; Humans; United Kingdom; Hypertension - diagnosis; Blood Pressure Monitors - standards; Equipment Design; Evaluation Studies as Topic},
+  year     = {1993},
+}
+
+@WWW{Joe2019,
+  author  = {Eddy Joe},
+  date    = {2019-08-17},
+  title   = {Blood Pressure Measurements in the ICU: Trust ONLY the MAP in Oscillometric Devices!},
+  url     = {https://www.youtube.com/watch?v=TG0NcqKeRWE},
+  urldate = {2020-08-02},
+}
+
+@WWW{BIHS2020,
+  title        = {BP monitors},
+  url          = {https://bihsoc.org/bp-monitors/},
+  organization = {British and Irish Hypertension Society},
+  urldate      = {2020-08-02},
+}
+
+@Thesis{Forouzanfar2014,
+  author      = {Mohamad Forouzanfar},
+  date        = {2014},
+  institution = {University of Ottawa},
+  title       = {A Modeling Approach for Coeﬃcient-FreeOscillometric Blood Pressure Estimation},
+  type        = {phdthesis},
+}
+
+@Article{Ramsey1979,
+  author   = {Ramsey, Maynard},
+  title    = {Noninvasive automatic determination of mean arterial pressure},
+  issn     = {1741-0444},
+  number   = {1},
+  pages    = {11--18},
+  url      = {https://doi.org/10.1007/BF02440948},
+  volume   = {17},
+  abstract = {A new instrument for the indirect noninvasive measurement of mean arterial pressure (m.a.p.) has been constructed and evaluated in man. The instrument does not require an external microphone or transducer and determines m.a.p. rather than systolic and diastolic pressure. Instead, the method employs the point of maximal oscillations as an indicator of m.a.p. The instrument automatically inflates a standard blood pressure cuff and determines the m.a.p. by measuring the cuff pressure oscillations as the cuff pressure is reduced by discrete increments. Cuff deflation in discrete increments, instead of continuously, allows the oscillation data obtained at each cuff pressure to be tested for artefacts and averaged, greatly enhancing artefact-rejection ability. The m.a.p. is selected as the lowest cuff pressure at which the oscillation amplitude is a maximum. The instrument was tested on the bicep and ankle in a series of 28 studies involving 17 human subjects with intra-arterial catheters. Averaging the mean errors from each of the 28 studies, there was an overall mean error of -- 0·23 mmHg, with a standard deviation of 4·21 mmHg. The correlation coefficient was 0·98. The instrument was found to give good results in a wide variety of clinical subjects and physiologic states.},
+  journal  = {Medical and Biological Engineering and Computing},
+  refid    = {Ramsey1979},
+  year     = {1979},
+}
+
+@Article{Mauck1980,
+  author    = {Mauck, G. W. and Smith, C. R. and Geddes, L. A. and Bourl, J. D.},
+  title     = {The meaning of the point of maximum oscillations in cuff pressure in the indirect measurement of blood pressure-part II},
+  issue     = {1},
+  pages     = {28--33},
+  volume    = {102},
+  journal   = {Journal of Biomechanical Engineering},
+  publisher = {J Biomech Eng},
+  year      = {1980},
+}
+
+@Article{Jazbinsek2005,
+  author = {Jazbinsek, Vojko and Luznik, J and Trontelj, Zvonko},
+  title  = {Non-invasive blood pressure measurements: separation of the arterial pressure oscillometric waveform from the deflation using digital filtering},
+  month  = {01},
+  year   = {2005},
+}
+
+@InProceedings{Mafi2011,
+  author    = {M. {Mafi} and S. {Rajan} and M. {Bolic} and V. Z. {Groza} and H. R. {Dajani}},
+  booktitle = {2011 Annual International Conference of the IEEE Engineering in Medicine and Biology Society},
+  title     = {Blood pressure estimation using oscillometric pulse morphology},
+  doi       = {10.1109/IEMBS.2011.6090691},
+  pages     = {2492-2496},
+  abstract  = {A novel pulse morphology-based approach for estimation of blood pressure from non-invasive oscillometric blood pressure measurement is presented. Quantitative measures that describe the pulse morphology are utilized to obtain the estimates of mean arterial, systolic, and diastolic pressures. Preliminary results obtained from a small set of measurements are used to demonstrate the feasibility of the proposed approach. The estimates obtained through pulse morphology-based approach is compared with those obtained from a commercial blood pressure device.},
+  issn      = {1558-4615},
+  keywords  = {blood pressure measurement;blood pressure estimation;oscillometric pulse morphology;quantitative measures;arterial pressure;systolic pressure;diastolic pressure;Blood pressure;Biomedical monitoring;Morphology;Pulse measurements;Indexes;Pressure measurement;Silicon;Oscillometric waveform;Pulse morphology;Blood Pressure;Adult;Aged;Blood Pressure;Feasibility Studies;Female;Humans;Male;Middle Aged},
+  month     = {Aug},
+  year      = {2011},
+}
+
+@Article{Mafi2012,
+  author   = {Mafi,Majid and Rajan,Sreeraman and Bolic,Miodrag and Groza,Voicu Z. and Dajani,Hilmi R.},
+  title    = {Blood pressure estimation using maximum slope of oscillometric pulses},
+  language = {English},
+  pages    = {3239},
+  volume   = {2012},
+  abstract = {A new oscillometric pulse index (OPI) derived from the maximum slope (MS) of each pulse in the oscillometric blood pressure waveform is proposed for blood pressure estimation. Maximum slope for each pulse is obtained using the first derivative of the pulse and an envelope of the values corresponding to the maximum slopes is obtained. The maximum of the envelope is taken as the mean arterial pressure (MAP) and the systolic blood pressure (SBP) and diastolic blood pressure (DBP) estimates are obtained as a fraction of the MAP, similar to the traditional maximum amplitude algorithm (MAA). The proposed algorithm is tested on 18 healthy subjects. The MAP, SBP and DBP estimates obtained from the proposed algorithm are compared with those obtained from a commercial blood pressure device and with the estimates obtained using the MAA and morphological qualitative measures available in the literature.},
+  isbn     = {1557-170X},
+  journal  = {Conference proceedings (IEEE Engineering in Medicine and Biology Society. Conf.)},
+  keywords = {Humans; Middle Aged; Blood Pressure Determination - instrumentation; Adult; Female; Male; Aged; Oscillometry},
+  year     = {2012},
 }
 
 @Comment{jabref-meta: databaseType:biblatex;}
