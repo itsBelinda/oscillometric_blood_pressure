@@ -52,8 +52,8 @@ There are some discrepancies in literature on how to define the point of the dia
 Traditionally, MAP is calculated as an estimate by adding a third of the PP to the DBP. Or, how it is more commonly referred to, adding SBP and twice the DBP and dividing the result by 3 (equation \ref{eq:MAP}). According to calculations by Bos \textit{et al.}, this generally underestimates the MAP and they suggest to add $40\%$ rather than a third of DBP. Furthermore, they suggest to use the MAP measured by oscillometric devices rather than calculating it from values obtained through the auscultatory method. \cite{Bos2007}
 
 \begin{equation}
-MAP = \frac{SBP-DBP}{3}+DBP = \frac{SBP+2 DBP}{3}
 \label{eq:MAP}
+MAP = \frac{SBP-DBP}{3}+DBP = \frac{SBP+2\times DBP}{3}
 \end{equation}
 
 According to Joe \cite{Joe2019} nurses in intensive care units (ICU) today still use the manual calculation method on the automatically obtained SBP and DBP rather than rusting the measured MAP, which introduces large errors. %https://www.youtube.com/watch?v=TG0NcqKeRWE
@@ -103,16 +103,62 @@ Even though mathematical models have confirmed this method to produce valid esti
 % --> how to make sure only artifacts and not information is remvoed?
 
 
+%TODO move to discussion?
+Jazbinsek \textit{et al.} did an evalutation of the fixed-ratio and derivative algorithms. They used a device equipped with ECG and a microphone to validate their results. Various ways to form the envelope were used, including detrending, filtering and even using the low frequency part of the audio signal of a microphone that recorded Korotkoff sounds. However, to evaluate the fixted-ratio method, they used a commercial device to find average ratios and used the values from the same device to as a reference for the evaluation. Their evaluation of the derivative algorithm showed many local extrema as expected. The algorithm was only able to perform by appling addintional constraints that bias the measurements significantly. For expample, the extrema has to be distanced from the MAP value more than \SI{15}{\mmHg}. \cite{Jazbinsek2010,Jazbinsek2005,Jazbinsek2016}
+
 
 \subsection{Other Algorithms}
-Since the above mentioned algorithms use only the envelope of the oscillations to determine BP,
+Since the above mentioned algorithms use only the envelope of the oscillations to determine BP, they discard all the informatin that lies within the shape of a single pulse. Naturally, scientists have tried to find ways to use this information to improve BP algorithms.
 
-%TODO evaluation of stiffnes with single pulse
-
-using pulse morphology and self defined indices, in the end they settle for using 'OPI': taking the '1st' derivative of each pulse and taking the maximal value of that to form another slope that looks similar to the original oscillations anyway and then again using ratios to get SBP and DBP. then comparing it to measurements from an Omron device. uses datasets with almost 100 pulses (mine work with 10 pulses) \cite{Mafi2012,Mafi2011}
-
-%TODO move to discussion?
-using a cuff equipped with a microphone to record Korotkoff sound to detect SBP and DBP but only to then again define a ratio to calculate blood pressure from the oscillation amplitude. Also using the derivative algorithm, but with many constraints so that a result can be obtained. rat\cite{Jazbinsek2010,Jazbinsek2005,Jazbinsek2016}
+There are a variety of different ideas that have been tested in small scale experiments of mostly with less than 30 test subjects. While they all claim to improve BP mesaurements compared to the fixed-ratio algorithm, they often lack significant evidence and mathematical validation. 
 
 
-a lot of $new$ algorithms can be brought back to the MAA method, they use NN or models to improve the ratios, but in the end, it is the same.
+\paragraph{Non-Fixed Ratio}Sapinski \cite{Sapinski1996} proposed a standard algorithm. This algorithm uses ratios to determine the SBP and DBP from MAP as above, but calculates the ratios based on the oscillations. The integral of the maximal oscillation is divided by its time period and gives the amplitude of the pulse wave at systolic pressure. The amplitude at diastolic pressuere is defined as the difference between the MAP amplitude and the SBP amplitue. This algorithm is based on theroretical assumtions formed form comparisons to the direct method, e.g. that the added oscillation pulse amplitudes at systolic and diastolic pressures equal the amplitude at mean presure. Sapinski mentions that the average value of systolic oscillation is \SI{40}{\%} of the MAP amplitude and \SI{60}{\%} for the diastolic oscillation, respecitively. This part is regularly quoted in other literture, withouth mentioning that this is not a proposed ratio. Sapinski concludes, that the proposed algorithm does not fulfill the criteria of the AAMI standard compared to the auscultatory method, but does compared to the invasie method. No further literaure has been found that validate or contraditct these findings.
+
+
+\paragraph{Pulse Morphology} Specific characteristics of single pulses can be examined to determine blood pressure. Following are four of the most commonly used indeces. The definitions are used from Mafi \textit{et al.}\cite{Mafi2011} 
+
+
+\begin{itemize}
+
+\item Stiffness index (SI): The height of the subject ($h$) divided by the time difference between systolic and diasolic peak ($\Delta T$) (eqation \ref{eq:SI}) is an indicator for arterial stiffnes, but requires to know the person's height. 
+\begin{equation}
+\label{eq:SI}
+SI=\frac{h}{\Delta T}
+\end{equation}
+
+\item Augmentation index (AI): The difference of systolic ($A_S$) and diasolic peak ($A_D$), divided by the systolic peak, expressed in percentage of pulse pressure (eqation \ref{eq:AI}). 
+\begin{equation}
+\label{eq:AI}
+AI=\frac{A_S-A_D}{A_S}\times100\%
+\end{equation}
+
+
+\item Reflection index (RI): The of systolic ($A_S$) divided by the diasolic peak ($A_D$), expressed in percentage (eqation \ref{eq:RI}).
+\begin{equation}
+\label{eq:RI}
+RI=\frac{A_S}{A_S}\times100\%
+\end{equation}
+
+
+
+\item $\Delta T/T$ Ratio: The time difference between systolic and diasolic peak ($\Delta T$) is devided by the duration of the pulse ($T$). Both $T$ and $\Delta T$ increase with age. 
+
+\end{itemize}
+
+Mafi \textit{et al.}\cite{Mafi2011} plotted the indeces in time and used absolute maxima or minima to dertermine MAP. There is a siginificant spike where MAP is expected. Using local maxima and minima next to the found MAP to estimate SBP and DBP has less significance. Problematic with this approach is that the reference values were measured by an Omron device with an unknown implementation of oscillometric blood pressure. Because the device did not display the measured MAP, the MAP reference was calculated using equation \ref{eq:MAP}, which is known be wrong using accurate values of SBP and DBP and likely delivers arbitrairy values when using values from an automatic device.
+ 
+%TODO discussion?
+Another implementation from Mafi \textit{et al.}\cite{Mafi2012} is taking the '1st' derivative of each pulse and taking the maximal value of that to form another curve that looks similar to the one used in MAA. This curve is then treated equally to the fixed-ratio algorithm to determine MAP, SBP and DBP. The ratios are determined experimentally using reference measurements. Additionally, the MAP is again calculated using the faulty equation \ref{eq:MAP} and the 18 test subjects aged between 24 and 68 are healty and have no history of cardiovascular disease. The authors argue that the shape is less sensitive to noise than the amplitude and therefore, their approach is more robust than MAA. 
+ 
+ 
+\paragraph{Neural Networks} The features extracted from above, and more, are often used in neural networks (NN). However, it has been shown, that the indices can reliably only be used to determine MAP. Moreover, some of the features are hightly dependant on external factors. For example, the exact deflation rate influences the duraion of the OMWE (proposed by Lee \textit{et al.}\cite{Lee2013}) and the constraint of \SIrange{2}{3}{\mmHg/\second} given by Lim \textit{et al.}\cite{Lim2015}, who implemented a NN using the proposed features, seems hardly enough. Similartly, the used filter by Lim \textit{et al.}, a first-order bandpass Butterworth filter with cut-off frequencies of \SI{0.5}{\Hz} and \SI{5}{\Hz}, is likely to remove valuable information from the pulses.
+
+\paragraph{Model Based Algorithms} These algorithms use a predicted OMVE and fit it to the observed one to determine the characteristics. While they do consider factors that the standard algorithms discard, such as arterial stiffness and pulse pressure, they are vulnerable to artefacts that are not considered by the model. They could be used validate algorithms. \cite{Babbs2012}
+
+
+
+
+
+
+
