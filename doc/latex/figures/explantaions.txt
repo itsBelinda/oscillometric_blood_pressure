@@ -1,0 +1,21 @@
+
+derrivative_envelope.pdf: from ../data/sample_07_10.dat
+Pulse:  72.5
+    MAP:  80.76
+    SBP:  94.87
+    DBP:  73.94
+
+mmHg_Signal.pdf and proces_signal.pdf: from ../data/sample_07_10.dat
+Pulse:  72.2
+MAP (max value):  82.64
+    SBP:  97.21
+    DBP:  73.04
+MAP (max-min value):  85.5
+    SBP:  98.83
+    DBP:  72.64
+MAP (interpolation):  82.49
+    SBP:  99.14
+    DBP:  71.83
+MAP (polyfit):  81.53
+    SBP:  105.63
+    DBP:  66.53

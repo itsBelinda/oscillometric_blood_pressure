@@ -29,12 +29,13 @@
 \usepackage[useregional]{datetime2}
 \DTMlangsetup[en-GB]{showdayofmonth=false}
 
+\setcounter{tocdepth}{2}
 
 \title{MSc Project: Oscillometric Blood Pressure}
-\author{Belinda Kneubühler}
+\author{Belinda Kneubuhler}
 \date{\today}
 
-\newcommand*{\myref}[1]{ref{#1}~\nameref{#1}}
+\newcommand*{\myref}[1]{\ref{#1}~\nameref{#1}}%#todo fix:
 \newcommand{\stdNbr}{2504756K}
 \newcommand{\course}{MSc Computer Systems Engineering}
 
@@ -85,7 +86,10 @@ Second Supervisor: & Kiran Ramesh\\
 \include{abstract}
 \tableofcontents
 \listoftables
+\begingroup
+\let\clearpage\relax
 \listoffigures
+\endgroup
 \include{acknowledgements}
 \include{declaration}
 
@@ -100,7 +104,7 @@ Second Supervisor: & Kiran Ramesh\\
 \include{derivation}
 
 \backmatter  % Turn off chapter numbering
+\bibliographystyle{IEEEtran}
 \bibliography{references}
-\bibliographystyle{ieeetr}
 
 \end{document}
