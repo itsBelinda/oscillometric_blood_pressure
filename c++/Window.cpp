@@ -22,7 +22,7 @@ Window::Window(Processing *process, QWidget *parent) :
         yHPData[i] = 0;
     }
 
-    std::lock_guard<std::mutex> guard(pltMtx); //automatically releases mutex when control leaves scope.
+    std::lock_guard<std::mutex> guard(mtxPlt); //automatically releases mutex when control leaves scope.
     currentScreen = Screen::startScreen;
     setupUi(this);
 
@@ -81,14 +81,14 @@ void Window::setupUi(QMainWindow *window) {
     lMeter->setAlignment(Qt::AlignCenter);
     meter = new QwtDial(lWidget);
     meter->setObjectName(QString::fromUtf8("meter"));
-    meter->setUpperBound(260.0);
+    meter->setUpperBound(250.0);
     meter->setScaleStepSize(20.0);
     meter->setWrapping(false);
     meter->setInvertedControls(false);
     meter->setLineWidth(4);
     meter->setMode(QwtDial::RotateNeedle);
-    meter->setMinScaleArc(20.0);
-    meter->setMaxScaleArc(300.0);
+    meter->setMinScaleArc(30.0);
+    meter->setMaxScaleArc(330.0);
     meter->setMinimumSize(400, 400);
     needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
@@ -170,7 +170,11 @@ void Window::setupUi(QMainWindow *window) {
 
 }
 
-
+/**
+ * Sets up the menu bar to access Settings, Info and Exit.
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated menu bar.
+ */
 QMenuBar *Window::setupMenu(QWidget *parent) {
     actionSettings = new QAction(parent);
     actionSettings->setObjectName(QString::fromUtf8("actionSettings"));
@@ -210,11 +214,6 @@ QWidget *Window::setupPlots(QWidget *parent) {
     vlRight = new QVBoxLayout();
     vlRight->setObjectName(QString::fromUtf8("vlRight"));
 
-    lTitlePlotRaw = new QLabel(parent);
-    lTitlePlotRaw->setObjectName(QString::fromUtf8("lTitlePlotRaw"));
-    lTitlePlotOsc = new QLabel(parent);
-    lTitlePlotOsc->setObjectName(QString::fromUtf8("lTitlePlotOsc"));
-
     line = new QFrame(parent);
     line->setObjectName(QString::fromUtf8("line"));
     line->setFrameShape(QFrame::HLine);
@@ -222,15 +221,20 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
     pltPre = new Plot(xData, yLPData, dataLength, 250, 0.0, parent);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
-    pltOsc = new Plot(xData, yHPData, dataLength, 0.003, -0.003, parent);
+    pltPre->setAxisTitles("time (sec)", "pressure (mmHg)");
+    pltOsc = new Plot(xData, yHPData, dataLength, 3, -3, parent);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
+    pltOsc->setAxisTitles("time (sec)", "oscillations (ΔmmHg)");
+
+    double extP = pltPre->getyAxisExtent();
+    double extO = pltOsc->getyAxisExtent();
+    double extent = (extP > extO) ? extP : extO;
+    pltOsc->setyAxisExtent(extent);
+    pltPre->setyAxisExtent(extent);
 
     // build right side of window
-    vlRight->addWidget(lTitlePlotRaw);
     vlRight->addWidget(pltPre);
     vlRight->addWidget(line);
-    vlRight->addItem(vSpace5);
-    vlRight->addWidget(lTitlePlotOsc);
     vlRight->addWidget(pltOsc);
     rWidget->setLayout(vlRight);
 
@@ -262,11 +266,11 @@ QWidget *Window::setupStartPage(QWidget *parent) {
     btnStart->setDisabled(true);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     vlStart->addItem(vSpace4);
     vlStart->addWidget(lInfoStart);
-    vlStart->addItem(vSpace6);
+    vlStart->addItem(vSpace5);
     vlStart->addWidget(btnStart);
 
     lInstrStart->setLayout(vlStart);
@@ -292,7 +296,6 @@ QWidget *Window::setupInflatePage(QWidget *parent) {
 
     vSpace1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     lInfoPump = new QLabel(parent);
     lInfoPump->setObjectName(QString::fromUtf8("lInfoPump"));
@@ -330,9 +333,9 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     lheartRate->setAlignment(Qt::AlignCenter);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    vlRelease->addItem(vSpace6);
+    vlRelease->addItem(vSpace5);
     vlRelease->addWidget(lInfoRelease);
     vlRelease->addItem(vSpace4);
     vlRelease->addWidget(lheartRate);
@@ -380,36 +383,50 @@ QWidget *Window::setupResultPage(QWidget *parent) {
 
     btnReset = new QPushButton(parent);
     btnReset->setObjectName(QString::fromUtf8("btnReset"));
+    QFont f;
+    f.setBold(true);
+    f.setPointSize(14);
 
     flResults = new QFormLayout();
     flResults->setObjectName(QString::fromUtf8("flResults"));
     lMAP = new QLabel(parent);
+    lMAP->setFont(f);
     lMAP->setObjectName(QString::fromUtf8("lMAP"));
     lMAPval = new QLabel(parent);
     lMAPval->setObjectName(QString::fromUtf8("lMAPval"));
+    lMAPval->setFont(f);
+    f.setPointSize(12);
     lSBP = new QLabel(parent);
     lSBP->setObjectName(QString::fromUtf8("lSBP"));
+    lSBP->setFont(f);
     lSBPval = new QLabel(parent);
     lSBPval->setObjectName(QString::fromUtf8("lSBPval"));
-    lCBP = new QLabel(parent);
-    lCBP->setObjectName(QString::fromUtf8("lCBP"));
+    lSBPval->setFont(f);
+    lDBP = new QLabel(parent);
+    lDBP->setObjectName(QString::fromUtf8("lDBP"));
+    lDBP->setFont(f);
     lDBPval = new QLabel(parent);
     lDBPval->setObjectName(QString::fromUtf8("lDBPval"));
+    lDBPval->setFont(f);
     lheartRateAV = new QLabel(parent);
     lheartRateAV->setObjectName(QString::fromUtf8("lheartRateAV"));
-    lheartRateAV->setMinimumWidth(250);
+    f.setBold(false);
+    lheartRateAV->setFont(f);
+    lheartRateAV->setMinimumWidth(150);
     lHRvalAV = new QLabel(parent);
     lHRvalAV->setObjectName(QString::fromUtf8("lHRvalAV"));
+    lHRvalAV->setFont(f);
     lHRvalAV->setMinimumWidth(150);
 
     flResults->setWidget(0, QFormLayout::LabelRole, lMAP);
     flResults->setWidget(0, QFormLayout::FieldRole, lMAPval);
     flResults->setWidget(1, QFormLayout::LabelRole, lSBP);
     flResults->setWidget(1, QFormLayout::FieldRole, lSBPval);
-    flResults->setWidget(2, QFormLayout::LabelRole, lCBP);
+    flResults->setWidget(2, QFormLayout::LabelRole, lDBP);
     flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
     flResults->setWidget(3, QFormLayout::LabelRole, lheartRateAV);
     flResults->setWidget(3, QFormLayout::FieldRole, lHRvalAV);
+    flResults->setContentsMargins(50,0,50,0);
 
     vlResult->addWidget(lInfoResult);
     vlResult->addLayout(flResults);
@@ -445,7 +462,6 @@ void Window::retranslateUi(QMainWindow *window) {
                         "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready.");
-    //"<br><br> <i>Picture missing</i><br>"
     lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
                        "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
                        "Make sure the valve is fully closed.<br>"
@@ -453,7 +469,6 @@ void Window::retranslateUi(QMainWindow *window) {
     lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
                           "Open the valve slightly to release pressure at about 3 mmHg per second."
                           "Wait calmly and try not to move. <br><br>");
-    //"<i>Add deflation feedback. Possibly have meter here, too.</i>"
     lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
                           "Wait for the pressure to go down to 0 mmHg.<br><br>"
                           "You will see the results next.");
@@ -464,15 +479,17 @@ void Window::retranslateUi(QMainWindow *window) {
     btnStart->setText("Start");
     btnReset->setText("Reset");
     btnCancel->setText("Cancel");
-    lMAP->setText("<b><font color=\"red\">MAP:</font></b>");
+    lMAP->setText("<b>MAP:</b>");//<font color="red"></font>
     lMAPval->setText("- mmHg");
-    lSBP->setText("<font color=\"blue\">SBP:</font>");
+    lSBP->setText("<b>SBP:</b>");
     lSBPval->setText("- mmHg");
-    lCBP->setText("<font color=\"green\">DBP:</font>");
+    lDBP->setText("<b>DBP:</b>");
     lDBPval->setText("- mmHg");
     lheartRate->setText("Current heart rate:<br><b>--</b>");
-    lheartRateAV->setText("Average heart rate:");
+    lheartRateAV->setText("Heart rate:");
     lHRvalAV->setText("- beats/min");
+    pltPre->setPlotTitle("Low-pass filtered pressure ");
+    pltOsc->setPlotTitle("High-pass filtered oscillations");
 
     actionSettings->setText("Settings");
     actionInfo->setText("Info");
@@ -485,10 +502,10 @@ void Window::retranslateUi(QMainWindow *window) {
  * Handles the timer event to update the UI.
  */
 void Window::timerEvent(QTimerEvent *) {
-    pltMtx.lock();
+    mtxPlt.lock();
     pltOsc->replot();
     pltPre->replot();
-    pltMtx.unlock();
+    mtxPlt.unlock();
 }
 
 /**
@@ -497,10 +514,10 @@ void Window::timerEvent(QTimerEvent *) {
  * @param oData The newly available oscillation data.
  */
 void Window::eNewData(double pData, double oData) {
-    pltMtx.lock();
+    mtxPlt.lock();
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
-    pltMtx.unlock();
+    mtxPlt.unlock();
 
     bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
     assert(bOk);
@@ -595,7 +612,7 @@ void Window::eReady() {
     bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,
                                          Q_ARG(bool, false));
     // Checks that function call is valid during development. Do not put function inside assert,
-    // because it will be removed in release build!
+    // because it will be removed in the release build!
     assert(bOk);
 }
 

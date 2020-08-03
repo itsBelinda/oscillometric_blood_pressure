@@ -138,7 +138,7 @@ Mafi \textit{et al.}\cite{Mafi2011} plotted the indices in time and used absolut
 
 %TODO discussion?
 Another implementation from Mafi \textit{et al.}\cite{Mafi2012} is taking the '1st' derivative of each pulse and taking the maximal value of that to form another curve that looks similar to the one used in MAA. This curve is then treated equally to the fixed-ratio algorithm to determine MAP, SBP and DBP. The ratios are determined experimentally using reference measurements. Additionally, the MAP is again calculated using the faulty equation \ref{eq:MAP} and the 18 test subjects aged between 24 and 68 are healthy and have no history of cardiovascular disease. The authors argue that the shape is less sensitive to noise than the amplitude and therefore, their approach is more robust than MAA.
- 
+
 
 \paragraph{Neural Networks} The features extracted from above, and more, are often used in neural networks (NN). However, it has been shown, that the indices can reliably only be used to determine the MAP. Moreover, some of the features are highly dependant on external factors. For example, the exact deflation rate influences the duration of the OMWE (proposed by Lee \textit{et al.}\cite{Lee2013}) and the constraint of \SIrange{2}{3}{\mmHg/\second} given by Lim \textit{et al.}\cite{Lim2015}, who implemented a NN using the proposed features, seems hardly enough. Similarly, the used filter by Lim \textit{et al.}, a first-order bandpass Butterworth filter with cut-off frequencies of \SI{0.5}{\Hz} and \SI{5}{\Hz}, is likely to remove valuable information from the pulses.
 

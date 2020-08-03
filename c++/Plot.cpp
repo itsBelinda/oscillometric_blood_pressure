@@ -1,3 +1,8 @@
+#include <iostream>
+#include <qwt/qwt_scale_widget.h>
+#include <qwt/qwt_legend.h>
+#include <qwt/qwt_plot_layout.h>
+
 #include "Plot.h"
 
 int Plot::nextPenColour = (int) Qt::darkRed;
@@ -29,8 +34,10 @@ Plot::Plot(double *xData, double *yData, int length, double yMax, double yMin, Q
  * Sets the title of the plot.
  * @param title
  */
-void Plot::setPlotTitle(const QString& title) {
-    QwtPlot::setTitle(title);
+void Plot::setPlotTitle(const QString &title) {
+    QwtText pltTitle( title );
+    pltTitle.setRenderFlags( Qt::AlignLeft | Qt::AlignVCenter );
+    QwtPlot::setTitle( pltTitle );
 }
 
 /**
@@ -38,10 +45,15 @@ void Plot::setPlotTitle(const QString& title) {
  * @param bottomTitle
  * @param leftTitle
  */
-void Plot::setAxisTitles(const QString& bottomTitle, const QString& leftTitle) {
+void Plot::setAxisTitles(const QString &bottomTitle, const QString &leftTitle) {
     QwtPlot::setAxisTitle(QwtPlot::xBottom, bottomTitle);
     QwtPlot::setAxisTitle(QwtPlot::yLeft, leftTitle);
+//    QwtText pltTitle( title );
+//    pltTitle.setRenderFlags( Qt::AlignRight | Qt::AlignVCenter );
+//    pltTitle.setFont( plot->axisTitle( QwtPlot::xBottom ).font() );
+//    plot->setAxisTitle( QwtPlot::xBottom, axisTitle );
 }
+
 /**
  * Adjusts the scaling of the y-axis.
  * @param yMax
@@ -50,6 +62,43 @@ void Plot::setAxisTitles(const QString& bottomTitle, const QString& leftTitle) {
 void Plot::setyAxisScale(double yMin, double yMax) {
     QwtPlot::setAxisScale(QwtPlot::yLeft, yMin, yMax);
 }
+
+/**
+ *
+ * @return
+ */
+double Plot::getyAxisExtent() {
+    QwtScaleWidget *scaleWidget = this->axisWidget(QwtPlot::yLeft);
+    QwtScaleDraw *sd = scaleWidget->scaleDraw();
+    double extent = sd->extent(scaleWidget->font());
+    if (!scaleWidget->title().isEmpty())
+        extent += scaleWidget->title().textSize().height();
+    if (this->legend() && QwtPlot::LegendPosition::LeftLegend == this->plotLayout()->legendPosition()) {
+        double legendSize = this->legend()->sizeHint().width();
+        extent += legendSize;
+    }
+    return extent;
+}
+
+/**
+ * Adjusts the scaling of the y-axis.
+ * @param yMax
+ * @param yMin
+ */
+void Plot::setyAxisExtent(double extent) {
+
+    QwtScaleWidget *scaleWidget = this->axisWidget(QwtPlot::yLeft);
+    double extentAdj = extent;
+    if (!scaleWidget->title().text().isEmpty()) {
+        extentAdj -= scaleWidget->title().textSize().height();
+    }
+    if (this->legend() && QwtPlot::LegendPosition::LeftLegend == this->plotLayout()->legendPosition()) {
+        double legendSize = this->legend()->sizeHint().width();
+        extentAdj -= legendSize;
+    }
+    scaleWidget->scaleDraw()->setMinimumExtent(extentAdj);
+}
+
 /**
  * Adds a new data sample to the end of the graph, deleting the oldest one.
  * @param yNew
