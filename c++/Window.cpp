@@ -22,7 +22,7 @@ Window::Window(Processing *process, QWidget *parent) :
         yHPData[i] = 0;
     }
 
-    std::lock_guard<std::mutex> guard(pltMtx); //automatically releases mutex when control leaves scope.
+    std::lock_guard<std::mutex> guard(mtxPlt); //automatically releases mutex when control leaves scope.
     currentScreen = Screen::startScreen;
     setupUi(this);
 
@@ -81,14 +81,14 @@ void Window::setupUi(QMainWindow *window) {
     lMeter->setAlignment(Qt::AlignCenter);
     meter = new QwtDial(lWidget);
     meter->setObjectName(QString::fromUtf8("meter"));
-    meter->setUpperBound(260.0);
+    meter->setUpperBound(250.0);
     meter->setScaleStepSize(20.0);
     meter->setWrapping(false);
     meter->setInvertedControls(false);
     meter->setLineWidth(4);
     meter->setMode(QwtDial::RotateNeedle);
-    meter->setMinScaleArc(20.0);
-    meter->setMaxScaleArc(300.0);
+    meter->setMinScaleArc(30.0);
+    meter->setMaxScaleArc(330.0);
     meter->setMinimumSize(400, 400);
     needle = new QwtDialSimpleNeedle(
             QwtDialSimpleNeedle::Arrow, true, Qt::black,
@@ -214,11 +214,6 @@ QWidget *Window::setupPlots(QWidget *parent) {
     vlRight = new QVBoxLayout();
     vlRight->setObjectName(QString::fromUtf8("vlRight"));
 
-    lTitlePlotRaw = new QLabel(parent);
-    lTitlePlotRaw->setObjectName(QString::fromUtf8("lTitlePlotRaw"));
-    lTitlePlotOsc = new QLabel(parent);
-    lTitlePlotOsc->setObjectName(QString::fromUtf8("lTitlePlotOsc"));
-
     line = new QFrame(parent);
     line->setObjectName(QString::fromUtf8("line"));
     line->setFrameShape(QFrame::HLine);
@@ -226,15 +221,20 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
     pltPre = new Plot(xData, yLPData, dataLength, 250, 0.0, parent);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
+    pltPre->setAxisTitles("time (sec)", "pressure (mmHg)");
     pltOsc = new Plot(xData, yHPData, dataLength, 3, -3, parent);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
+    pltOsc->setAxisTitles("time (sec)", "oscillations (ΔmmHg)");
+
+    double extP = pltPre->getyAxisExtent();
+    double extO = pltOsc->getyAxisExtent();
+    double extent = (extP > extO) ? extP : extO;
+    pltOsc->setyAxisExtent(extent);
+    pltPre->setyAxisExtent(extent);
 
     // build right side of window
-    vlRight->addWidget(lTitlePlotRaw);
     vlRight->addWidget(pltPre);
     vlRight->addWidget(line);
-    vlRight->addItem(vSpace5);
-    vlRight->addWidget(lTitlePlotOsc);
     vlRight->addWidget(pltOsc);
     rWidget->setLayout(vlRight);
 
@@ -266,11 +266,11 @@ QWidget *Window::setupStartPage(QWidget *parent) {
     btnStart->setDisabled(true);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     vlStart->addItem(vSpace4);
     vlStart->addWidget(lInfoStart);
-    vlStart->addItem(vSpace6);
+    vlStart->addItem(vSpace5);
     vlStart->addWidget(btnStart);
 
     lInstrStart->setLayout(vlStart);
@@ -296,7 +296,6 @@ QWidget *Window::setupInflatePage(QWidget *parent) {
 
     vSpace1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
     vSpace2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     lInfoPump = new QLabel(parent);
     lInfoPump->setObjectName(QString::fromUtf8("lInfoPump"));
@@ -334,9 +333,9 @@ QWidget *Window::setupDeflatePage(QWidget *parent) {
     lheartRate->setAlignment(Qt::AlignCenter);
 
     vSpace4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace5 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    vlRelease->addItem(vSpace6);
+    vlRelease->addItem(vSpace5);
     vlRelease->addWidget(lInfoRelease);
     vlRelease->addItem(vSpace4);
     vlRelease->addWidget(lheartRate);
@@ -489,6 +488,8 @@ void Window::retranslateUi(QMainWindow *window) {
     lheartRate->setText("Current heart rate:<br><b>--</b>");
     lheartRateAV->setText("Heart rate:");
     lHRvalAV->setText("- beats/min");
+    pltPre->setPlotTitle("Low-pass filtered pressure ");
+    pltOsc->setPlotTitle("High-pass filtered oscillations");
 
     actionSettings->setText("Settings");
     actionInfo->setText("Info");
@@ -501,10 +502,10 @@ void Window::retranslateUi(QMainWindow *window) {
  * Handles the timer event to update the UI.
  */
 void Window::timerEvent(QTimerEvent *) {
-    pltMtx.lock();
+    mtxPlt.lock();
     pltOsc->replot();
     pltPre->replot();
-    pltMtx.unlock();
+    mtxPlt.unlock();
 }
 
 /**
@@ -513,10 +514,10 @@ void Window::timerEvent(QTimerEvent *) {
  * @param oData The newly available oscillation data.
  */
 void Window::eNewData(double pData, double oData) {
-    pltMtx.lock();
+    mtxPlt.lock();
     pltPre->setNewData(pData);
     pltOsc->setNewData(oData);
-    pltMtx.unlock();
+    mtxPlt.unlock();
 
     bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
     assert(bOk);

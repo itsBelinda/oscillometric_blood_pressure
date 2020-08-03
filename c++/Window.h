@@ -68,7 +68,7 @@ private:
     std::atomic<Screen> currentScreen;
 
     // mutex for thread save access to the plots:
-    std::mutex pltMtx;
+    std::mutex mtxPlt;
 
     // UI components:
     QSplitter *splitter;
@@ -92,7 +92,6 @@ private:
     QSpacerItem *vSpace2;
     QSpacerItem *vSpace4;
     QSpacerItem *vSpace5;
-    QSpacerItem *vSpace6;
     QLabel *lMeter;
     QLabel *lInfoStart;
     QLabel *lInfoPump;
@@ -113,7 +112,6 @@ private:
     QLabel *lSBPval;
     QLabel *lDBP;
     QLabel *lDBPval;
-    QLabel *lTitlePlotRaw;
     QLabel *lTitlePlotOsc;
     Plot *pltPre;
     Plot *pltOsc;

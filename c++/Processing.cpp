@@ -250,7 +250,7 @@ void Processing::processSample(double newSample) {
             } else {
                 rawData.push_back(ymmHg); //record raw data to store later
 
-                if (obpDetect->processSample(yLP, yHP)) {//TODO: heart rate currently not displayed
+                if (obpDetect->processSample(yLP, yHP)) {
                     if (obpDetect->getIsEnoughData()) {
                         notifyHeartRate(obpDetect->getAverageHeartRate());
                         notifySwitchScreen(Screen::emptyCuffScreen);
