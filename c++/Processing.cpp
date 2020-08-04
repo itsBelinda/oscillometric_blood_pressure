@@ -67,39 +67,47 @@ void Processing::setAmbientVoltage(double voltage) {
 }
 
 
-void Processing::setRatioSBP(double val){
-    if(!bRunning) {
+void Processing::setRatioSBP(double val) {
+    if (!bRunning) {
         obpDetect->setRatioSBP(val);
     }
 }
-double Processing::getRatioSBP(){
+
+double Processing::getRatioSBP() {
     return obpDetect->getRatioSBP();
 }
-void Processing::setRatioDBP(double val){
-    if(!bRunning) {
+
+void Processing::setRatioDBP(double val) {
+    if (!bRunning) {
         obpDetect->setRatioDBP(val);
     }
 }
-double Processing::getRatioDBP(){
+
+double Processing::getRatioDBP() {
     return obpDetect->getRatioDBP();
 }
-void Processing::setMinNbrPeaks(int val){
-    if(!bRunning) {
+
+void Processing::setMinNbrPeaks(int val) {
+    if (!bRunning) {
         obpDetect->setMinNbrPeaks(val);
     }
 }
-int Processing::getMinNbrPeaks(){
+
+int Processing::getMinNbrPeaks() {
     return obpDetect->getMinNbrPeaks();
 }
-void Processing::setPumpUpValue(int val){
-    if(!bRunning && val < MAX_PUMPUP){
+
+void Processing::setPumpUpValue(int val) {
+    if (!bRunning && val < MAX_PUMPUP) {
         mmHgInflate = (double) val;
     }
 }
-int Processing::getPumpUpValue(){
+
+int Processing::getPumpUpValue() {
     return mmHgInflate;
 }
-void Processing::resetConfigValues(){
+
+void Processing::resetConfigValues() {
     bMeasuring = false;
     mmHgInflate = 180.0;
     obpDetect->resetConfigValues();
@@ -169,14 +177,17 @@ void Processing::processSample(double newSample) {
 
     /**
      * Every sample is filtered and sent to the Observers
+     * after configuration is done
      */
-    //TODO: change to work with getmmHgValue(newSample)
-    double yLP = iirLP->filter(newSample);
-    double yHP = iirHP->filter(yLP);
-    double ymmHg = getmmHgValue(yLP);
-
-    notifyNewData(ymmHg, yHP);
-
+    double ymmHg = 0.0;
+    double yLP = 0.0;
+    double yHP = 0.0;
+    if (currentState != ProcState::Config) {
+        ymmHg = getmmHgValue(newSample);
+        yLP = iirLP->filter(ymmHg);
+        yHP = iirHP->filter(yLP);
+        notifyNewData(yLP, yHP);
+    }
     if (rawData.size() > DEFAULT_DATA_SIZE) {
         PLOG_WARNING << "Recording too long to continue algorithm. Cancelled";
         bMeasuring = false; // Setting bMeasuring false will ensure return to Idle state.
@@ -194,7 +205,7 @@ void Processing::processSample(double newSample) {
                 rawData.clear();
 
             } else {
-                rawData.push_back(yLP);
+                rawData.push_back(newSample);
             }
 
             break;
@@ -217,7 +228,7 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);
             } else {
-                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                rawData.push_back(ymmHg); //record raw data to store later
 
                 // Check if pressure in cuff is large enough, so it can be switched to the next state.
                 if (ymmHg > mmHgInflate) {
@@ -237,9 +248,9 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);
             } else {
-                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                rawData.push_back(ymmHg); //record raw data to store later
 
-                if (obpDetect->processSample(getmmHgValue(yLP), yHP)) {//TODO: heart rate currently not displayed
+                if (obpDetect->processSample(yLP, yHP)) {
                     if (obpDetect->getIsEnoughData()) {
                         notifyHeartRate(obpDetect->getAverageHeartRate());
                         notifySwitchScreen(Screen::emptyCuffScreen);
@@ -259,7 +270,7 @@ void Processing::processSample(double newSample) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);
             } else {
-                rawData.push_back(getmmHgValue(newSample)); //record raw data to store later
+                rawData.push_back(ymmHg); //record raw data to store later
                 if (ymmHg < 1) {
                     notifyResults(obpDetect->getMAP(), obpDetect->getSBP(), obpDetect->getDBP());
                     record->saveAll(Processing::getFilename(), rawData);
@@ -283,7 +294,7 @@ void Processing::processSample(double newSample) {
  * @return The corresponding value in mmHg.
  */
 double Processing::getmmHgValue(double voltageValue) const {
-    return ((voltageValue - ambientVoltage) * mmHg_per_kPa * kPa_per_V * corrFactor);
+    return ((voltageValue - ambientVoltage) * kPa_per_V * corrFactor) / kPa_per_mmHg;
 }
 
 bool Processing::checkAmbient() {

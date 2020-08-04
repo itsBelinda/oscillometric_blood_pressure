@@ -15,10 +15,13 @@ public:
 
     void setPlotTitle(const QString& title);
     void setAxisTitles(const QString& bottomTitle, const QString& leftTitle);
+    double getyAxisExtent();
+    void setyAxisExtent(double extent);
     void setyAxisScale(double yMin, double yMax);
     void setNewData(double yNew);
 private:
     static int nextPenColour;   //!< Stores the pen color for the next plot object
+    QwtScaleWidget *tsest;
 
     QwtPlotCurve *dataCurve;    //!< The curve object
     double *xData, *yData;      //!< Pointers to the x and y data
