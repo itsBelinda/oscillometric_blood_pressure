@@ -2,19 +2,19 @@
 This chapter discusses the findings of researching existing and proposed algorithms for determining systolic and diastolic blood pressure through the oscillometric method. This report focusses on relatively simple algorithms that can be implemented in a real-time application, which is the goal of this project.
 
 The first part of this chapter defines what blood pressure is and how it is measured manually. Afterwards
-%TODO: do I include python code showing why certain algorithms do not work or do I leave that be? --> discussion
+%TODO do I include python code showing why certain algorithms do not work or do I leave that be? --> discussion
 
 A brief section at the end of this chapter explores algorithms beyond the scope of this project that have been proposed in recent literature.
 
 \section{What is Blood Pressure?}
 Blood pressure is an important bio-medical measurement and often used for diagnostics in cardiovascular diseases. Most commonly, systolic and diastolic blood pressure are mentioned in pairs, but what do those numbers mean?
 
-The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (DBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and DBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heartbeat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the yellow cross-hatched area. \cite{Boron2012}\paragraph{}
+The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (DBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and DBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heartbeat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the orange area. \cite{Boron2012}\ Because the blood pressure is simplified as a sine wave the MAP is in the middle between SDP and DBP, usually the MAP is closer to DBP. \paragraph{}
 
 \begin{figure}[h]
 \centering
-%\includegraphics[scale=0.125]{GlaLogo.pdf}
-\caption{Blood pressure characteristic values. Source: \cite{Boron2012}}
+%\includegraphics[width=0.55\textwidth]{figures/MAP.pdf}
+\caption{Blood pressure characteristic values. Blood pressure is simplified as a sine wave.} %TODO update picture: currently heart rate of 120 
 \label{fig:BP}
 \end{figure}
 
@@ -31,7 +31,7 @@ Millimetres of mercury (\SI{}{\mmHg}) is a unit to describe pressure. \SI{1}{\mm
 
 \begin{figure}[h]
 \centering
-%\includegraphics[scale=0.125]{GlaLogo.pdf}
+%\includegraphics[scale=0.125]{figures/spy.pdf}
 \caption{Picture of a sphygmomanometer showing the cuff, inflation pump and mercury meter.}
 \label{fig:sphy}
 \end{figure}
@@ -63,17 +63,28 @@ Most modern automatic devices use the oscillometric method to determine blood pr
 
 Automatic blood pressure monitors measure pressure in a cuff similar to the one used in the manual method and uses the small pressure changes (oscillations) extracted from the deflation curve to estimate blood pressure. Commercially available devices are usually equipped with an electric pump and the bladder contains a pressure sensor. Otherwise, they look similar to the cuff used for manual measurements. Some devices use wrist cuffs, but those are rarely recommended. \cite{BIHS2020} The most significant problem using wrist measurements is the influence of gravity on blood pressure and the accompanying risk of systematic errors when the measurement is not taken at heart level. \cite{Boron2012} This problem is avoided by taking blood pressure at the upper arm.
 
-\paragraph{General Procedure} The procedure is also similar to the manual method. The pressure in the cuff is increased to a level above the expected systolic pressure, which leads to the artery being pushed close. While releasing the pressure slowly through the valve, blood starts flowing through the artery, resulting in small increases in pressure relative to the continued deflation of the cuff. As the cuff deflates further, these relative changes increase to a maximal value before they start decreasing again.\cite{Forouzanfar2015,Drzewiecki1994,Ursino1996} The shape, magnitude or envelope of these oscillations are used in various automatic blood pressure algorithms. Methods that do not use oscillations exist, but are not discussed here.
+\paragraph{General Procedure} The procedure is also similar to the manual method. The pressure in the cuff is increased to a level above the expected systolic pressure, which leads to the artery being pushed close. While releasing the pressure slowly through the valve, blood starts flowing through the artery, resulting in small increases in pressure relative to the continued deflation of the cuff. As the cuff deflates further, these relative changes increase to a maximal value before they start decreasing again.\cite{Forouzanfar2015,Drzewiecki1994,Ursino1996} The shape, magnitude or envelope of these oscillations are used in various automatic blood pressure algorithms. Methods that do not use oscillations exist, but are not discussed here. 
 
-\paragraph{Oscillation Extraction} There are two ways the oscillometric waveform (OMW) is extracted from the deflating pressure curve. The first one is filtering. A  bandpass filter with a lower cut-off frequency between \SIrange{0.1}{0.5}{\Hz} and an upper cut-off frequency between \SIrange{0.1}{0.5}{\Hz} is recommended. \cite{Forouzanfar2015} Implementations usually use first \cite{Lim2015} to sixth order \cite{Jazbinsek2010} Butterworth filters. They are known for their flat pass-band response and good frequency response.
+
+\paragraph{Oscillation Extraction} There are two ways the oscillometric waveform (OMW) is extracted from the deflating pressure curve. The first one is filtering. A bandpass filter with a lower cut-off frequency between \SIrange{0.1}{0.5}{\Hz} and an upper cut-off frequency between \SIrange{0.1}{0.5}{\Hz} is recommended. \cite{Forouzanfar2015} Implementations usually use first \cite{Lim2015} to sixth order \cite{Jazbinsek2010} Butterworth filters. They are known for their flat pass-band response and good frequency response. 
 
 The second approach is to use de-trending. It requires to know the beginning of each pulse to be able to fit a line of continuously deflating pressure to the identified points. Its advantage is, that it additionally reproduces an estimated deflation curve. However, it requires additional data, for example, ECG for pulse detection.\cite{Forouzanfar2015}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/oscillations.jpeg}
+\caption{A simulated blood pressure extraction. (a) shows the defalting pressure in the cuff and (b) the high-pass filtered oscillations. Source: \cite{Babbs2012} (CC)}
+\label{fig:osc}
+\end{figure}
+
+Ultimately, from a deflation curve as in the simulated signal in figure \ref{fig:osc} on the top, the oscillations are extracted. The bottom plot in figure \ref{fig:osc} shows oscillations extracted with a thrid order Butterworth bandpass filter with the cut-off frequencies at \SI{0.5}{\Hz} and \SI{5}{\Hz}. \cite{Babbs2012} 
+
 
 \paragraph{Envelope} The envelope of the OMW is used by basic automatic algorithms. Formation of the envelope is achieved in different ways. The simplest way is to register only local maxima. Similar to that, and most common, is the subtraction of the following through from a local peak or interpolating the curve of local maxima and local minima to subtract them from each other. Some algorithms additionally fit a curve on the obtained oscillometric waveform envelope (OMWE) in an attempt to remove artefacts. \cite{Forouzanfar2014}
 
 
 \subsection{Maximum Amplitude Algorithm}
-The maximum amplitude algorithm (MAA) is based on the assumption that the oscillations are maximal when the pressure in the cuff equals arterial pressure. Accordingly, the recorded pressure at which oscillations are maximal is considered a valid estimate of the MAP \cite{Babbs2012,Geddes1982,Drzewiecki1994}\cite{Ramsey1979}, as long as the compression chamber is kept small \cite{Mauck1980}. To avoid introducing errors, the cuff should always be tightly fit, because air volume in the cuff causes maximum oscillations to be above the true MAP. Hence, Ursio suggests to use the lowest pressure of the plateau of maximal oscillations as the value to assess MAP.\cite{Ursino1996}
+The maximum amplitude algorithm (MAA) is based on the assumption that the oscillations are maximal when the pressure in the cuff equals arterial pressure. Accordingly, the recorded pressure at which oscillations are maximal is considered a valid estimate of the MAP \cite{Babbs2012,Geddes1982,Drzewiecki1994}\cite{Ramsey1979}, as long as the compression chamber is kept small \cite{Mauck1980}. To avoid introducing errors, the cuff should always be tightly fit, because air volume in the cuff causes maximum oscillations to be above the true MAP. Hence, Ursio and Cristalli suggest to use the lowest pressure of the plateau of maximal oscillations as the value to assess MAP.\cite{Ursino1996}
 
 A recent publication by Chandrasekhar \textit{et al.} \cite{Chandrasekhar2019} employs a more complex model than the one originally introduced by Mauck \textit{et al.}\cite{Mauck1980}. They conclude that the MAA results in a weighted average of systolic and diastolic BP. According to their model, MAA underestimates MAP for higher blood pressure.
 
@@ -140,6 +151,8 @@ Mafi \textit{et al.}\cite{Mafi2011} plotted the indices in time and used absolut
 Another implementation from Mafi \textit{et al.}\cite{Mafi2012} is taking the '1st' derivative of each pulse and taking the maximal value of that to form another curve that looks similar to the one used in MAA. This curve is then treated equally to the fixed-ratio algorithm to determine MAP, SBP and DBP. The ratios are determined experimentally using reference measurements. Additionally, the MAP is again calculated using the faulty equation \ref{eq:MAP} and the 18 test subjects aged between 24 and 68 are healthy and have no history of cardiovascular disease. The authors argue that the shape is less sensitive to noise than the amplitude and therefore, their approach is more robust than MAA.
 
 
+\paragraph{Model-Based Algorithms} These algorithms use a predicted OMWE and fit it to the observed one to determine the characteristics. While they do consider factors that the standard algorithms discard, such as arterial stiffness and pulse pressure, they are vulnerable to artefacts that are not considered by the model. They could be used to validate algorithms. \cite{Babbs2012}
+
 \paragraph{Neural Networks} The features extracted from above, and more, are often used in neural networks (NN). However, it has been shown, that the indices can reliably only be used to determine the MAP. Moreover, some of the features are highly dependant on external factors. For example, the exact deflation rate influences the duration of the OMWE (proposed by Lee \textit{et al.}\cite{Lee2013}) and the constraint of \SIrange{2}{3}{\mmHg/\second} given by Lim \textit{et al.}\cite{Lim2015}, who implemented a NN using the proposed features, seems hardly enough. Similarly, the used filter by Lim \textit{et al.}, a first-order bandpass Butterworth filter with cut-off frequencies of \SI{0.5}{\Hz} and \SI{5}{\Hz}, is likely to remove valuable information from the pulses.
 
-\paragraph{Model-Based Algorithms} These algorithms use a predicted OMWE and fit it to the observed one to determine the characteristics. While they do consider factors that the standard algorithms discard, such as arterial stiffness and pulse pressure, they are vulnerable to artefacts that are not considered by the model. They could be used to validate algorithms. \cite{Babbs2012}
+
