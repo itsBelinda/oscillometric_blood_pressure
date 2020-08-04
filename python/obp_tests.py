@@ -57,12 +57,12 @@ ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
 
 # 5 Hz LP filter
 f5 = 20
-bLP, aLP = signal.butter(6, f5/fs*2, 'lowpass')
+bLP, aLP = signal.butter(4, f5/fs*2, 'lowpass')
 yfLP = signal.lfilter(bLP, aLP, ymmHg)
 
 # 0.5 Hz HP filter
-f05 = 0.5
-bHP, aHP = signal.butter(2, f05/fs*2, 'highpass')
+f05 = 0.3
+bHP, aHP = signal.butter(4, f05/fs*2, 'highpass')
 yfHP = signal.lfilter(bHP, aHP, yfLP)
 
 #%% Filter display
