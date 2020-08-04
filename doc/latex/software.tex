@@ -1,28 +1,26 @@
 \chapter{Software}\label{cp:sw}
 
-This chapter contains a description of the developed software. It provides a brief overview of the important architecture and algorithm implementations. The projects GitHub page provides the full source code, setup instructions and Doxygen documentation.\cite{Belinda2020} %TODO: possibly attach the whole Doxygen documentation (latex format) in attachments"
+This chapter is a description of the developed software. It provides a brief overview of the important architecture and algorithm implementations. The projects GitHub page provides the full source code, setup instructions and Doxygen documentation.\cite{Belinda2020} %TODO: possibly attach the whole Doxygen documentation (latex format) in attachments"
 The project is licensed under the GNU General Public License v2.0.
 
 \section{Overview}
-The application is split into user interface (UI) and data processing. Each part runs in their own thread and they are kept separated from each other. The data processing class is called $Processing$ and the user interface class $Window$. 
-
-Communication between the classes is done with callbacks in an Observer pattern from the processing to the window class. The processing class is an observable subject that the window class registers to. The window has a reference to the processing class to pass on user input.
+The application is split into the user interface (UI) and data processing. Each part runs in their thread and they are kept separated from each other. The data processing class is called $Processing$ and the user interface class $Window$. 
 
 The user interface is built with Qt, an open-source widget toolkit for creating graphical user interfaces. Additionally, the subset Qt Widgets for Technical Applications (Qwt) is used to display plots of the acquired data.
 
 The processing class handles data acquisition and processing, sending notifications to the observer with instructions on what action to perform or what values to update.
 
-
-\subsection{Compilation}
-The project is set up as a CMake project. Usually, Qt projects are set up using qmake (a .pro file), but CMake is supported as well. This application chose CMake because it is more powerful and allows integration with other tools, e.g. for continuous integration. %TODO potentially include information about Travis CI (if set up)
-
-CMake ensures all required dependencies are installed as defined in the file CMakeList.txt and automatically generates a Makefile. This Makefile is used to build the project, linking all defined librairies.
-For example, this application requires the C++20 standard for the implemented algorithm. CMake generates an error when trying to build the application with a compiler that does not support the C++20 standard.
+Communication between the classes is done with callbacks in an Observer pattern from the processing to the window class. The processing class is an observable subject that the window class registers to. The window has a reference to the processing class to pass on user input.
 
 
+\subsection{Project Setup and Compilation}
+The project is set up as a CMake project. Usually, Qt projects are set up using qmake (a .pro file), but CMake is supported as well. This application chose CMake because it is more powerful and allows integration with other tools, e.g. for continuous integration (CI). %TODO potentially include information about Travis CI (if set up)
+
+CMake ensures all required dependencies are installed as defined in the file CMakeList.txt and automatically generates a Makefile. This Makefile is used to build the project, linking all defined files and libraries.
+For example, this application requires the C++20 standard for the implemented algorithm. CMake generates an error when trying to build the application with a compiler that does not support C++20.
 
 \subsection{Class Diagram}
-The \myref{fig:CD} shows a simplified class diagram of the application. Following is a more in depth discussion of its elements.
+The \myref{fig:CD} shows a simplified class diagram of the application. Following is a more in-depth discussion of its elements.
 
 \begin{figure}
 \centering
@@ -33,9 +31,7 @@ The \myref{fig:CD} shows a simplified class diagram of the application. Followin
 
 
 \section{User Interface}
-The user interface is shown in figure \myref{fig:UI}. It is split up into two parts. The left side accepts user input and gives instructions to the user what they have to do to take their own blood pressure. The right side shows the data that is being acquired in real time. There are two plots. The upper plot shows pressure data filtered with a low pass filter of \SI{10}{\Hz}, the lower plot shows the data band pass filtered at \SI{0.5}{\Hz} and \SI{10}{\Hz}. This is the oscillogram that is the main input for the algorithm to determine the user's blood pressure.
-
-
+The user interface is shown in figure \myref{fig:UI}. It is split up into two parts. The left side accepts user input and gives instructions to the user what they have to do to take their blood pressure. The right side shows the data being acquired in real-time. There are two plots. The upper plot shows pressure data filtered with a low-pass filter of \SI{10}{\Hz}, the lower plot shows the data additionally low-pass filtered at \SI{0.5}{\Hz}, which results in a bandpass filter. This is the oscillogram that is the main input for the algorithm to determine the user's blood pressure.
 
 \begin{figure}
 \centering
@@ -44,27 +40,67 @@ The user interface is shown in figure \myref{fig:UI}. It is split up into two pa
 \label{fig:UI}
 \end{figure}
 
-As mentioned above, the graphical user interface is built with Qt.
-The QtDesigner was used to design a first draft of the UI, but because this does not allow integration into applications that are built outside of the Qt development environment, the whole UI was completely built in C++ code from this draft.
+As mentioned above, the graphical user interface (GUI) is built with Qt.
+The QtDesigner was used to design a first draft of the UI, but because this does not allow integration into applications that are built outside of the Qt development environment, the whole UI was completely built-in C++ code from this draft.
 
+\subsection{Guided Blood Pressure Measurement}
+The left side of the GUI guides the user through taking blood pressure. The process is split up into five pages that are shown in figure \ref{fig:UIguide}.  All pages have a dial that shows the current pressure in \SI{}{\mmHg}. The first page has information on how to prepare for the measurement. Pressing the button at the bottom of the page starts the measurement process. The button is only enabled if the processing part of the application is ready.
 
-concept
+The second page instructs the user to pump up the pressure in the cuff to a certain value. The default value is \SI{180}{\mmHg}. Once that value is reached, the GUI automatically switches to the next page.
 
-Signals and slots
+This page tells the user to release the pressure in the cuff again. This should be done slowly at a rate of approximately \SI{3}{\mmHg/\second}. There is currently no other feedback than the dial for how fast the pressure is being released. At the bottom of the page, the current heart rate, calculated from the latest oscillation peaks, is shown.
 
-thread safety
+Once enough data is collected, the fourth page is shown. It requires the user to deflate the cuff completely to show the results. If the algorithm fails to collect enough data within a specified time (currently configured as 5 minutes) the measurement stops and goes back to the start page.
 
-settings
+When the pressure in the cuff reaches nearly zero, the final results page is shown. It displays MAP, SBP, DBP and the average heart rate during the measurement. All data is shown as whole numbers without decimals. 
 
 \subsection{Menu}
-A menubar provides access to an information pane as well as a settings pane. Both open up as new windows and disable user input on the main window. Data acquisition is kept running and is displayed in the plots.
+A menubar provides access to an information pane as well as a settings pane. Both open up as dialogue windows and disable user input on the main window. Data acquisition is kept running and is displayed in the plots.
 
 \subsubsection{Information}
-Version nbr, links
+The information pane shows the application version number, shows the licence and provides a link to the project GitHub page.
 
 \subsubsection{Settings}
-Explain settings
+The settings dialogue lets the user change some application configurations. The user is not recommended to change these if they are not aware of the consequences. The settings are stored persistently but only take effect after restarting the application. The range of accepted values is limited, to keep the algorithm working. Because not all values have been tested, the user is warned that the application might not perform reliably anymore. The values are stored once the user presses the 'OK' button. If the 'Cancel' button is clicked, the settings application closed without saving the values.
 
+The values can be reset by pushing the corresponding button. These changes take effect immediately. 
+
+\subsection{The Window Class}
+The Window class inherits from the QMainWindow class and the IObserver class. The QMainWindow class makes the class an executable Qt window, with Qt taking care of updating the GUI and generating events for button clicks and so on. The IObserver makes the class able to be registered as an observer for a subject that will send notifications to the observer. More on the IObserver Class below.
+
+All GUI elements are set up in the constructor of Window, including the settings and info plane. However, they will only be shown if necessary. 
+
+\subsection{The IObserver Class}
+The IObserver class defines the functions that the observable class (the subject) uses to notify the observer. All functions are virtual but implemented as empty functions. This way, the observing class can choose to implement and therefore listen to the notifications that it wants to and ignore the ones that it does not. 
+
+The following methods can be implemented:
+\begin{itemize}
+\item New Data
+Sends a new data pair to the observer. Each data pair consists of pressure data and oscillation data. Both are doubles.
+\item Switch Screen
+Tells the observer which screen to display.
+\item Results
+Sends the results to the observer. The results are three doubles for MAP, SBP and DBP.
+\item Heart Rate
+Sends a new heart rate value to the observer. The value is a double.
+\item Ready
+Informs the observer that the subject is ready.
+\end{itemize}
+
+\subsubsection{Thread safety}
+Because the methods from the IObserver class are called from a subject, which is likely to be running in another thread than the window, it is important to implement all functions in a thread-safe manner. Qt offers a good way to do this by sending queued events. 
+
+One example of how to enable the start button, in a not thread-safe way is as follows: 
+
+   $ btnStart->setDisabled(false);$
+
+Instead, the function QMetaObject::invokeMethod is called with a Qt::QueuedConnection. This is done by specifying the object, which function of the object to call, what arguments to set, and the type of event to send. The Qt::QueuedConnection will send an event into a queue that will be handled when the thread is executed. The function to call is given as a string argument. Considering the example above, this results in the following statement:
+
+%    $bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,  Q_ARG(bool, false));
+%
+    assert(bOk);
+
+The return value confirms if the connection could be made, e.g. the given string is a valid function to call for the given object. This is tested through an assert during development. The assert will fail if the boolean is not true. It is important not to have the assert around the whole function call, because it will be removed in the release build.
 
 \section{Data Processing}
 In the Processing class, the data is acquired and processed. The acquisition is handled by the ComediHandler handles data acquisition a
@@ -74,8 +110,6 @@ In the Processing class, the data is acquired and processed. The acquisition is 
 \begin{itemize}
 \item Qt %TODO ref
 \item CppThread a wrapper to the std::thread class written by Bernd Porr to avoid static methods. %TODO ref
-\item \emph{iir1} An implementation of infinite impulse response (IIR) filters for sample-by-sample, real time processing written in C++ by Bernd Porr. Provided as a librairy.%TODO ref
+\item \emph{iir1} An implementation of the infinite impulse response (IIR) filters for sample-by-sample, real-time processing written in C++ by Bernd Porr. Provided as a library.%TODO ref
 \item \emph{plog} Portable, simple and extensible C++ logging library. %TODO ref
 \end{itemize}
-
-d	
