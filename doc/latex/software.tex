@@ -4,13 +4,13 @@ This chapter is a description of the developed software. It provides a brief ove
 The project is licensed under the GNU General Public License v2.0.
 
 \section{Overview}
-The application is split into the user interface (UI) and data processing. Each part runs in their thread and they are kept separated from each other. The data processing class is called $Processing$ and the user interface class $Window$. 
+The application is split into the user interface (UI) and data processing. Each part runs in their thread and they are kept separated from each other. The data processing class is called \mintinline{cpp}{Processing} and the user interface class \mintinline{cpp}{Window}. 
 
 The user interface is built with Qt, an open-source widget toolkit for creating graphical user interfaces. Additionally, the subset Qt Widgets for Technical Applications (Qwt) is used to display plots of the acquired data.
 
-The processing class handles data acquisition and processing, sending notifications to the observer with instructions on what action to perform or what values to update.
+The \mintinline{cpp}{Processing} class handles data acquisition and processing, sending notifications to the observer with instructions on what action to perform or what values to update.
 
-Communication between the classes is done with callbacks in an Observer pattern from the processing to the window class. The processing class is an observable subject that the window class registers to. The window has a reference to the processing class to pass on user input.
+Communication between the classes is done with callbacks in an observer pattern from the \mintinline{cpp}{Processing} to the \mintinline{cpp}{Window} class. The processing class is an observable subject that the window class registers to. The window has a reference to the processing class to pass on user input.
 
 
 \subsection{Project Setup and Compilation}
@@ -22,9 +22,9 @@ For example, this application requires the C++20 standard for the implemented al
 \subsection{Class Diagram}
 The \myref{fig:CD} shows a simplified class diagram of the application. Following is a more in-depth discussion of its elements.
 
-\begin{figure}
+\begin{figure}[ht]
 \centering
-\includegraphics[scale=0.125]{GlaLogo.pdf}
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
 \caption{The Class Diagram.}
 \label{fig:CD}
 \end{figure}
@@ -35,16 +35,23 @@ The user interface is shown in figure \myref{fig:UI}. It is split up into two pa
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.125]{GlaLogo.pdf}
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
 \caption{UI}
 \label{fig:UI}
 \end{figure}
 
 As mentioned above, the graphical user interface (GUI) is built with Qt.
-The QtDesigner was used to design a first draft of the UI, but because this does not allow integration into applications that are built outside of the Qt development environment, the whole UI was completely built-in C++ code from this draft.
+The QtDesigner was used to design a first draft of the GUI, but because this does not allow integration into applications that are built outside of the Qt development environment, the whole GUI was completely built-in C++ code from this draft.
 
 \subsection{Guided Blood Pressure Measurement}
 The left side of the GUI guides the user through taking blood pressure. The process is split up into five pages that are shown in figure \ref{fig:UIguide}.  All pages have a dial that shows the current pressure in \SI{}{\mmHg}. The first page has information on how to prepare for the measurement. Pressing the button at the bottom of the page starts the measurement process. The button is only enabled if the processing part of the application is ready.
+
+\begin{figure}[ht]
+\centering
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
+\caption{The screens that guide the user through taking their blood pressure in the order that they are shown.}
+\label{fig:UIguide}
+\end{figure}
 
 The second page instructs the user to pump up the pressure in the cuff to a certain value. The default value is \SI{180}{\mmHg}. Once that value is reached, the GUI automatically switches to the next page.
 
@@ -58,53 +65,104 @@ When the pressure in the cuff reaches nearly zero, the final results page is sho
 A menubar provides access to an information pane as well as a settings pane. Both open up as dialogue windows and disable user input on the main window. Data acquisition is kept running and is displayed in the plots.
 
 \subsubsection{Information}
-The information pane shows the application version number, shows the licence and provides a link to the project GitHub page.
+The information pane shows the application version number, shows the licence and provides a link to the project GitHub page. Figure \ref{fig:UIinfo} shows the dialogue.
+
+\begin{figure}[ht]
+\centering
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
+\caption{The information dialogue.}
+\label{fig:UIinfo}
+\end{figure}
+
 
 \subsubsection{Settings}
-The settings dialogue lets the user change some application configurations. The user is not recommended to change these if they are not aware of the consequences. The settings are stored persistently but only take effect after restarting the application. The range of accepted values is limited, to keep the algorithm working. Because not all values have been tested, the user is warned that the application might not perform reliably anymore. The values are stored once the user presses the 'OK' button. If the 'Cancel' button is clicked, the settings application closed without saving the values.
+The settings dialogue (shown in figure \ref{fig:UIsettings}) lets the user change some application configurations. The user is not recommended to change these if they are not aware of the consequences. The settings are stored persistently but only take effect after restarting the application. The range of accepted values is limited, to keep the algorithm working. Because not all values have been tested, the user is warned that the application might not perform reliably anymore. The values are stored once the user presses the 'OK' button. If the 'Cancel' button is clicked, the settings application closed without saving the values.
 
 The values can be reset by pushing the corresponding button. These changes take effect immediately. 
 
-\subsection{The Window Class}
-The Window class inherits from the QMainWindow class and the IObserver class. The QMainWindow class makes the class an executable Qt window, with Qt taking care of updating the GUI and generating events for button clicks and so on. The IObserver makes the class able to be registered as an observer for a subject that will send notifications to the observer. More on the IObserver Class below.
+\begin{figure}[ht]
+\centering
+%\includegraphics[scale=0.125]{GlaLogo.pdf}
+\caption{The settings dialogue.}
+\label{fig:UIsettings}
+\end{figure}
 
-All GUI elements are set up in the constructor of Window, including the settings and info plane. However, they will only be shown if necessary. 
+The handling and storing of these values are done through the QSettings class of the Qt library. It allows to save and load values by specifying a string key. If there is no key found with the provided key, the default value is selected. The default value is what is hardcoded in the Processing class.
+
+\subsection{The Window Class}
+The \mintinline{cpp}{Window} class inherits from the \mintinline{cpp}{QMainWindow} class and the \mintinline{cpp}{IObserver} class. The \mintinline{cpp}{QMainWindow} class makes the class an executable Qt window, with Qt taking care of updating the GUI and generating events for button clicks and so on. The \mintinline{cpp}{IObserver} makes the class able to be registered as an observer for a subject that will send notifications to the observer. More on the \mintinline{cpp}{IObserver} below.
+
+All GUI elements are set up in the constructor of  \mintinline{cpp}{Window}, including the settings and info plane. However, they will only be shown if necessary. E.g. what page of the user instructions is shown is defined by the setting of the screen enum (currentScreen).
+
+The Window object is instantiated with a reference to a Processing object in the constructor. This is necessary so the user inputs can be relayed and the Processing thread can be stopped when the window is closed and the application exited. 
 
 \subsection{The IObserver Class}
-The IObserver class defines the functions that the observable class (the subject) uses to notify the observer. All functions are virtual but implemented as empty functions. This way, the observing class can choose to implement and therefore listen to the notifications that it wants to and ignore the ones that it does not. 
+The \mintinline{cpp}{IObserver} class defines the functions that the observable class (the subject) uses to notify the observer. All functions are virtual but implemented as empty functions. This way, the observing class can choose to implement and therefore listen to the notifications that it wants to and ignore the ones that it does not. 
 
-The following methods can be implemented:
-\begin{itemize}
-\item New Data
-Sends a new data pair to the observer. Each data pair consists of pressure data and oscillation data. Both are doubles.
-\item Switch Screen
-Tells the observer which screen to display.
-\item Results
-Sends the results to the observer. The results are three doubles for MAP, SBP and DBP.
-\item Heart Rate
-Sends a new heart rate value to the observer. The value is a double.
-\item Ready
+The IObserver class can not be instantiated directly but has to be used to inherit from. This is achieved by having a protected constructor.
+
+\paragraph{The following methods can be implemented:}
+\setlist{nolistsep}
+\begin{itemize}[noitemsep]
+\item Ready: \newline
 Informs the observer that the subject is ready.
+\item New Data: \newline
+Sends a new data pair to the observer. Each data pair consists of pressure data and oscillation data. Both are doubles.
+\item Switch Screen: \newline
+Tells the observer which screen to display.
+\item Results: \newline
+Sends the results to the observer. The results are three doubles for MAP, SBP and DBP.
+\item Heart Rate: \newline
+Sends a new heart rate value to the observer. The value is a double.
 \end{itemize}
 
+These methods are called from a class that inherits from ISubject, which is explained in detail in section \ref{sec:isubject} below. 
+
 \subsubsection{Thread safety}
-Because the methods from the IObserver class are called from a subject, which is likely to be running in another thread than the window, it is important to implement all functions in a thread-safe manner. Qt offers a good way to do this by sending queued events. 
+Because the methods from the \mintinline{cpp}{IObserver} class are called from an object, which is likely to be running in another thread than the window, it is important to implement all functions in a thread-safe manner. Qt offers a good way to do this by sending queued events. 
 
-One example of how to enable the start button, in a not thread-safe way is as follows: 
+One example of how to enable the start button, in a not thread-safe way is by accessing it directly, as follows: 
 
-   $ btnStart->setDisabled(false);$
+\begin{minted}[breaklines]{cpp}  
+btnStart->setDisabled(false);
+\end{minted}
 
-Instead, the function QMetaObject::invokeMethod is called with a Qt::QueuedConnection. This is done by specifying the object, which function of the object to call, what arguments to set, and the type of event to send. The Qt::QueuedConnection will send an event into a queue that will be handled when the thread is executed. The function to call is given as a string argument. Considering the example above, this results in the following statement:
+Instead, the function \mintinline{cpp}{QMetaObject::invokeMethod} is called to send an event to the GUI thread. This is done by specifying the object, which function of the object to call, what arguments to set, and the type of event to send. The \mintinline{cpp}{Qt::QueuedConnection} will send an event into a queue that will be handled when the thread is executed. The function to call is given as a string argument. Considering the example above, this results in the following statement:
 
-%    $bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,  Q_ARG(bool, false));
-%
-    assert(bOk);
+\begin{minted}[breaklines]{cpp}  
+bool bOk = QMetaObject::invokeMethod(btnStart, "setDisabled", Qt::QueuedConnection,  Q_ARG(bool, false));
+assert(bOk);
+\end{minted}
 
-The return value confirms if the connection could be made, e.g. the given string is a valid function to call for the given object. This is tested through an assert during development. The assert will fail if the boolean is not true. It is important not to have the assert around the whole function call, because it will be removed in the release build.
+The return value confirms if the connection could be made, i.e. the given string is a valid function to call for the given object. This is tested through an assert during development. The assert will fail if the boolean is not true. It is important not to have the assert around the whole function call, because it will be removed in the release build. 
+
+The plots have their underlying data set changed every time a new sample is available because a new sample is always added on the right side and an old one is discarded on the left side. This is made by changing the raw data in memory and therefore, the Qt process is not informed about that. To solve this issue, the plots are regularly updated manually. This happens in a timer event with an interval of 50 ms, which is enough for the human eye to see a continuous movement. To avoid thread safety problems, the plot objects are accessed after acquiring a mutex.
 
 \section{Data Processing}
-In the Processing class, the data is acquired and processed. The acquisition is handled by the ComediHandler handles data acquisition a
+In the processing class, the data is acquired and processed. The acquisition is handled by a ComediHandler object, that abstracts handling of the underlying hardware. The data is then filtered and the observers are notified so they can display the new data. 
 
+The logic in the processing object is handled through a state machine.  The state deflate is where the data is analysed to extract the blood pressure characteristics from the oscillations. This is done in a separate class, called OBPDetection.
+
+\subsection{State Machine}
+
+It is implemented in the Processing class. 
+\subsection{Processing Class} 
+The processing class inherits from the CppThread class and the ISubject class. CppThread is a wrapper to the std::thread class that was written by Bernd Porr to avoid static methods and makes the class a runnable thread. It has an instance of ComediHandler to acquire and two filter instances to pre-process the data. The raw, unfiltered data is sored in a vector that can be handed to the Datarecord instance to save it as a file. Meanwhile, the filtered data is sent to the GUI to display and handed to the OPDetection instance that performs the algorithm. While the data acquisition and filtering are running whenever the thread is running, the state machine described above decides when data is passed to the OBPDetection or stored to a file. 
+
+\subsubsection{Thread Safety}
+The processing class has public getter and setter methods, that allow objects, with access to it, to read and change configuration variables. These variables are defined as atomic, to make access to them thread-safe. Similarly, the booleans set by starting and stopping the measurement and stopping the thread are atomic.
+
+\subsection{ISubject}
+ISubject is a simple interface that lets the implementing class easily notify its observers about certain events. Each notification is realised as a private notify-X method. The public methods are 'attach' and 'detach'. Through these, a class that implements the above described IObserver (section \ref{sec:iobserver}) can be attached to the subject. This stores a reference to the object in a list. When one of the notify methods is called, the notification is sent to all the observers in the list. The observer can be removed through the detach method. 
+
+Just like the IObserver class, the ISubject class can not be instantiated directly but has to be used to inherit from. 
+
+\subsection{Data Acquisition}
+\subsection{Filtering}
+\subsection{Blood Pressure Detection}
+\subsection{Storing the Recorded Data}
+
+%TODO \section{Settings}
 \section{Third Party Software}
 
 \begin{itemize}
@@ -113,3 +171,4 @@ In the Processing class, the data is acquired and processed. The acquisition is 
 \item \emph{iir1} An implementation of the infinite impulse response (IIR) filters for sample-by-sample, real-time processing written in C++ by Bernd Porr. Provided as a library.%TODO ref
 \item \emph{plog} Portable, simple and extensible C++ logging library. %TODO ref
 \end{itemize}
+

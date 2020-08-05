@@ -9,12 +9,12 @@ A brief section at the end of this chapter explores algorithms beyond the scope 
 \section{What is Blood Pressure?}
 Blood pressure is an important bio-medical measurement and often used for diagnostics in cardiovascular diseases. Most commonly, systolic and diastolic blood pressure are mentioned in pairs, but what do those numbers mean?
 
-The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (DBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and DBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heartbeat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the orange area. \cite{Boron2012}\ Because the blood pressure is simplified as a sine wave the MAP is in the middle between SDP and DBP, usually the MAP is closer to DBP. \paragraph{}
+The heart is a pump that has two phases. When the ventricle is relaxed, the heart fills up and the diastolic blood pressure (DBP) is observed. When the heart contracts, it pushes the blood through the arterial system and the systolic blood pressure (SBP) is observed. A third characteristic is the difference between SBP and DBP, the pulse pressure (PP). Finally, the mean arterial pressure (MAP) is defined as the average pressure in the artery. Figure \ref{fig:BP} shows how these pressure values are connected in one heartbeat. MAP is the area underneath the blue curve divided by the time of one pulse, indicated by the orange area. \cite{Boron2012} Because the blood pressure is simplified as a sine wave the MAP is in the middle between SDP and DBP, usually the MAP is closer to DBP. \paragraph{}
 
 \begin{figure}[ht]
 \centering
-%\includegraphics[width=0.55\textwidth]{figures/MAP.pdf}
-\caption{Blood pressure characteristic values. Blood pressure is simplified as a sine wave.} %TODO update picture: currently heart rate of 120 
+\includegraphics[width=0.65\textwidth]{figures/MAP.pdf}
+\caption{Characteristic blood pressure values, simplified as a sine wave. The values are: MAP: \SI{100}{\mmHg}, SBP: \SI{120}{\mmHg}, DBP: \SI{80}{\mmHg} and heart rate: \SI{60}{beats\per\second}.}
 \label{fig:BP}
 \end{figure}
 
@@ -72,7 +72,7 @@ The second approach is to use de-trending. It requires to know the beginning of 
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/oscillations.png}
+\includegraphics[width=0.85\textwidth]{figures/simulated_oscillations.jpeg}
 \caption{A simulated blood pressure extraction. (a) shows the defalting pressure in the cuff and (b) the high-pass filtered oscillations. Source: \cite{Babbs2012} (CC)}
 \label{fig:osc}
 \end{figure}
