@@ -1,33 +1,81 @@
 \chapter{Software}\label{cp:sw}
 
-This chapter is a description of the developed software. It provides a brief overview of the important architecture and algorithm implementations. The projects GitHub page provides the full source code, setup instructions and Doxygen documentation.\cite{Belinda2020} %TODO: possibly attach the whole Doxygen documentation (latex format) in attachments"
+This chapter is a description of the developed software. It provides an overview of the architecture and algorithm implementations. The projects GitHub page provides the full source code, setup instructions and Doxygen documentation \citep{Belinda2020}. %TODO: possibly attach the whole Doxygen documentation (latex format) in attachments"
+
 The project is licensed under the GNU General Public License v2.0.
 
 \section{Overview}
-The application is split into the user interface (UI) and data processing. Each part runs in their thread and they are kept separated from each other. The data processing class is called \mintinline{cpp}{Processing} and the user interface class \mintinline{cpp}{Window}. 
+The application is split into the user interface (UI) and data processing. Each part runs in a thread and they are kept separated from each other. The data processing class is called \mintinline{cpp}{Processing} and the user interface class \mintinline{cpp}{Window}. 
 
 The user interface is built with Qt, an open-source widget toolkit for creating graphical user interfaces. Additionally, the subset Qt Widgets for Technical Applications (Qwt) is used to display plots of the acquired data.
 
 The \mintinline{cpp}{Processing} class handles data acquisition and processing, sending notifications to the observer with instructions on what action to perform or what values to update.
 
-Communication between the classes is done with callbacks in an observer pattern from the \mintinline{cpp}{Processing} to the \mintinline{cpp}{Window} class. The processing class is an observable subject that the window class registers to. The window has a reference to the processing class to pass on user input.
-
-
-\subsection{Project Setup and Compilation}
-The project is set up as a CMake project. Usually, Qt projects are set up using qmake (a .pro file), but CMake is supported as well. This application chose CMake because it is more powerful and allows integration with other tools, e.g. for continuous integration (CI). %TODO potentially include information about Travis CI (if set up)
-
-CMake ensures all required dependencies are installed as defined in the file CMakeList.txt and automatically generates a Makefile. This Makefile is used to build the project, linking all defined files and libraries.
-For example, this application requires the C++20 standard for the implemented algorithm. CMake generates an error when trying to build the application with a compiler that does not support C++20.
-
 \subsection{Class Diagram}
-The \myref{fig:CD} shows a simplified class diagram of the application. Following is a more in-depth discussion of its elements.
+Figure \ref{fig:CD} shows a simplified class diagram of the application. It shows the Processing and Window classes in the middle with their most important attributes. 
+
+The Processing class has a ComediHandler object to acquire data, the OBPDetection object implements the main part of the algorithm and the Datarecord object saves the rawData into a file. 
+
+The Window class holds all the UI components. The class diagram in figure \ref{fig:CD} only shows the high level components that are not directly from the Qt library. SettingsDialog and InfoDialog can be opened through the menu bar to access the configuration and further information about the application. The two Plot objects are always visible, while the rest of the main window depends on the Screen enum.
 
 \begin{figure}[ht]
 \centering
-%\includegraphics[scale=0.125]{GlaLogo.pdf}
-\caption{The Class Diagram.}
+\includegraphics[width=\textwidth]{figures/cd2.pdf}
+\caption{The Class Diagram. Needs work.}
 \label{fig:CD}
 \end{figure}
+
+Communication between the  two main objects is done with callbacks in an observer pattern from the \mintinline{cpp}{Processing} to the \mintinline{cpp}{Window} class. The processing class is an observable subject that the window class can register to because it implements IObserver. The window has a reference to the processing class to pass on user input.
+
+Following is a more in-depth discussion of its elements.
+
+\section{Data Processing}
+In the processing class, the data is acquired and processed. The acquisition is handled by a ComediHandler object, that abstracts handling of the underlying hardware. The data is then filtered and the observers are notified so they can display the new data. 
+
+The logic in the processing object is handled through a state machine. The OBPDetection class needs deflating pressure to extract the blood pressure characteristics from the oscillations. The state machine identifies this in the state 'Defalte'. The following section discusses the state machine in detail.
+
+\subsection{State Machine}
+Figure \ref{fig:sm} shows the state machine of the processing class. It is made up of one initial state (Config) that is only entered at start-up, an 'Idle' state and four states that are consecutively entered in an ideal measurement, called 'Inflate', 'Deflate', 'Empty' and 'Results'.
+
+For every arriving sample, the state machine is executed according to the current state and potentially switched to another one. 
+
+In every state, exept 'Confi' the arriving sample is filtered and the results are sent to the observing objects. In the Inflate, Deflate and Empty states, the raw data is additionally recorded an ultimately saved as a file when exiting the Empty state. 
+
+\paragraph{Config} After a reset, the state machine starts in the Config state, where the ambient voltage is registered. This is necessary, because the pressure sensor gives an absolute value, but pressure values are needed relative to atmospheric pressure. The raw pressure is read for \SI{250}{ms} and averaged. If that value has a deviation of less than \SI{1}{\milli\volt}, it is stored as ambient pressure and the state machine processes to the next state.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/state_machine.pdf}
+\caption{The state machine implemented in the Processing class. Needs work.}
+\label{fig:sm}
+\end{figure}
+
+\subsection{Processing Class} 
+The processing class inherits from the CppThread class and the ISubject class. CppThread is a wrapper to the std::thread class that was written by Bernd Porr to avoid static methods and makes the class a runnable thread. It has an instance of ComediHandler to acquire and two filter instances to pre-process the data. The raw, unfiltered data is sored in a vector that can be handed to the Datarecord instance to save it as a file. Meanwhile, the filtered data is sent to the GUI to display and handed to the OPDetection instance that performs the algorithm. While the data acquisition and filtering are running whenever the thread is running, the state machine described above decides when data is passed to the OBPDetection or stored to a file. 
+
+\subsubsection{Thread Safety}
+The processing class has public getter and setter methods, that allow objects, with access to it, to read and change configuration variables. These variables are defined as atomic, to make access to them thread-safe. Similarly, the booleans set by starting and stopping the measurement and stopping the thread are atomic.
+
+\subsection{ISubject}
+ISubject is a simple interface that lets the implementing class easily notify its observers about certain events. Each notification is realised as a private notify-X method. The public methods are 'attach' and 'detach'. Through these, a class that implements the above described IObserver (section \ref{sec:iobserver}) can be attached to the subject. This stores a reference to the object in a list. When one of the notify methods is called, the notification is sent to all the observers in the list. The observer can be removed through the detach method. 
+
+Just like the IObserver class, the ISubject class can not be instantiated directly but has to be used to inherit from. 
+
+
+\subsection{Data Acquisition}
+
+\subsection{Filtering}
+
+\subsection{OBPDetection}
+
+\subsection{Storing the Recorded Data}
+%
+%\subsection{Project Setup and Compilation}
+%The project is set up as a CMake project. Usually, Qt projects are set up using qmake (a .pro file), but CMake is supported as well. This application chose CMake because it is more powerful and allows integration with other tools, e.g. for continuous integration (CI). %TODO potentially include information about Travis CI (if set up)
+%
+%CMake ensures all required dependencies are installed as defined in the file CMakeList.txt and automatically generates a Makefile. This Makefile is used to build the project, linking all defined files and libraries.
+%For example, this application requires the C++20 standard for the implemented algorithm. CMake generates an error when trying to build the application with a compiler that does not support C++20.
+
 
 
 \section{User Interface}
@@ -138,29 +186,6 @@ The return value confirms if the connection could be made, i.e. the given string
 
 The plots have their underlying data set changed every time a new sample is available because a new sample is always added on the right side and an old one is discarded on the left side. This is made by changing the raw data in memory and therefore, the Qt process is not informed about that. To solve this issue, the plots are regularly updated manually. This happens in a timer event with an interval of 50 ms, which is enough for the human eye to see a continuous movement. To avoid thread safety problems, the plot objects are accessed after acquiring a mutex.
 
-\section{Data Processing}
-In the processing class, the data is acquired and processed. The acquisition is handled by a ComediHandler object, that abstracts handling of the underlying hardware. The data is then filtered and the observers are notified so they can display the new data. 
-
-The logic in the processing object is handled through a state machine.  The state deflate is where the data is analysed to extract the blood pressure characteristics from the oscillations. This is done in a separate class, called OBPDetection.
-
-\subsection{State Machine}
-
-It is implemented in the Processing class. 
-\subsection{Processing Class} 
-The processing class inherits from the CppThread class and the ISubject class. CppThread is a wrapper to the std::thread class that was written by Bernd Porr to avoid static methods and makes the class a runnable thread. It has an instance of ComediHandler to acquire and two filter instances to pre-process the data. The raw, unfiltered data is sored in a vector that can be handed to the Datarecord instance to save it as a file. Meanwhile, the filtered data is sent to the GUI to display and handed to the OPDetection instance that performs the algorithm. While the data acquisition and filtering are running whenever the thread is running, the state machine described above decides when data is passed to the OBPDetection or stored to a file. 
-
-\subsubsection{Thread Safety}
-The processing class has public getter and setter methods, that allow objects, with access to it, to read and change configuration variables. These variables are defined as atomic, to make access to them thread-safe. Similarly, the booleans set by starting and stopping the measurement and stopping the thread are atomic.
-
-\subsection{ISubject}
-ISubject is a simple interface that lets the implementing class easily notify its observers about certain events. Each notification is realised as a private notify-X method. The public methods are 'attach' and 'detach'. Through these, a class that implements the above described IObserver (section \ref{sec:iobserver}) can be attached to the subject. This stores a reference to the object in a list. When one of the notify methods is called, the notification is sent to all the observers in the list. The observer can be removed through the detach method. 
-
-Just like the IObserver class, the ISubject class can not be instantiated directly but has to be used to inherit from. 
-
-\subsection{Data Acquisition}
-\subsection{Filtering}
-\subsection{Blood Pressure Detection}
-\subsection{Storing the Recorded Data}
 
 %TODO \section{Settings}
 \section{Third Party Software}

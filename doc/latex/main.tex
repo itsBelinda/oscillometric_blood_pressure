@@ -11,8 +11,8 @@
 % \usepackage{stix}  % uses Times for text and a range of fonts for mathematics
 % End of choices for fonts
 \usepackage{graphicx}  % standard package for importing graphics files
-\usepackage{cite}  % improves format of numerical citations, such as [1-3]
-\usepackage[top=1.8cm, bottom=1.8cm,left=4.0cm,right=1.5cm]{geometry}
+%\usepackage{cite}  % improves format of numerical citations, such as [1-3]
+\usepackage[top=2.0cm, bottom=1.5cm,left=2.5cm,right=2.0	cm]{geometry}
 % These margins are the university guidelines
 \usepackage[onehalfspacing]{setspace}  % gives one-and-a-half line spacing
 % doublespacing is another option and can be changed in the text
@@ -28,6 +28,7 @@
 \usepackage{enumitem}
 \usepackage[useregional]{datetime2}
 \usepackage{enumitem}
+\usepackage[authoryear]{natbib}
 
 % Settings
 %\inputminted[breaklines]{cpp} %fontsize=\footnotesize,
@@ -100,6 +101,7 @@ Second Supervisor: & Kiran Ramesh\\
 \mainmatter % Turn on chapter numbering, reset page numbers, use arabic
 \include{introduction}
 \include{theory}
+\include{algorithm}
 \include{hardware}
 \include{software}
 \include{results}
@@ -109,7 +111,9 @@ Second Supervisor: & Kiran Ramesh\\
 %\include{derivation}
 
 \backmatter  % Turn off chapter numbering
-\bibliographystyle{IEEEtran}
+%\bibliographystyle{IEEEtran}
+\bibliographystyle{apa}
 \bibliography{references}
+%TODO update all references!!!
 
 \end{document}
