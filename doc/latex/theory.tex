@@ -84,7 +84,7 @@ Ultimately, from a deflation curve as in the simulated signal in figure \ref{fig
 \paragraph{Envelope} The envelope of the OMW is used by basic automatic algorithms. Formation of the envelope is achieved in different ways. The simplest way is to register only local maxima. Similar to that, and most common, is the subtraction of the following through from a local peak or interpolating the curve of local maxima and local minima to subtract them from each other. Some algorithms additionally fit a curve on the obtained oscillometric waveform envelope (OMWE) in an attempt to remove artefacts. \cite{Forouzanfar2014}
 
 
-\subsection{Maximum Amplitude Algorithm}
+\subsection{Maximum Amplitude Algorithm}\label{sec:MAA}
 The maximum amplitude algorithm (MAA) is based on the assumption that the oscillations are maximal when the pressure in the cuff equals arterial pressure. Accordingly, the recorded pressure at which oscillations are maximal is considered a valid estimate of the MAP \citep{Babbs2012,Geddes1982,Drzewiecki1994,Ramsey1979}, as long as the compression chamber is kept small \cite{Mauck1980}. To avoid introducing errors, the cuff should always be tightly fit, because air volume in the cuff causes maximum oscillations to be above the true MAP. Hence, Ursio and Cristalli suggest to use the lowest pressure of the plateau of maximal oscillations as the value to assess MAP.\cite{Ursino1996}
 
 A recent publication by Chandrasekhar \textit{et al.} \cite{Chandrasekhar2019} employs a more complex model than the one originally introduced by Mauck \textit{et al.}\cite{Mauck1980}. They conclude that the MAA results in a weighted average of systolic and diastolic BP. According to their model, MAA underestimates MAP for higher blood pressure.
@@ -161,3 +161,5 @@ Write summary of the algorithms with their advantages and disadvantages
 %On page 10 you should have a section which summaries the advantages and
 %disadvantages of the different algorithms. And then your rationale which
 %ones you've like to use.
+
+write about which algorithm will be implemented and why
