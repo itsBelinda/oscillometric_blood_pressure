@@ -55,7 +55,7 @@ In every state, exept 'Config' the arriving sample is filtered and the results a
 
 \paragraph{Inflate} While the pressure is below the configured pump-up pressure (default of \SI{180}{\mmHg}), in the 'Inflate' state, the raw data is recorded. When the pump-up pressure is surpassed, the state switches to 'Deflate'. In case the maximum data size for the recorded data is reached, the measurement is cancelled and the state switched to 'Idle'. Reaching the maximum data size takes \SI{5}{\minute} and should never happen during a measurement.
 
-\paragraph{Deflate} In the 'Deflate' state, the data is fed into the OBPDetection object, which is described below in section \ref{sec:OBP}. This object decided when enough data is recorded and the progression to the 'Empty' state is possible. Alternatively, if the pressure falls below \SI{20}{\mmHg}, or the maximum data size is reached for the recorded data, the measurement is cancelled. 
+\paragraph{Deflate} In the 'Deflate' state, the data is fed into the OBPDetection object, which is described below in section \myref{sec:Deflation}. This object decided when enough data is recorded and the progression to the 'Empty' state is possible. Alternatively, if the pressure falls below \SI{20}{\mmHg}, or the maximum data size is reached for the recorded data, the measurement is cancelled. 
 
 \paragraph{Empty} This state is only needed to finish recording data until the pressure reaches zero. When this happens, the data is written to a file and the state is changed to 'Results'.
 
@@ -70,23 +70,23 @@ The Processing class has public getter and setter methods, that allow objects, w
 
 Similarly, the booleans set by starting and stopping the measurement and stopping the thread are atomic.
 
-\subsection{ISubject}
+\subsection{ISubject Class}\label{sec:isubject}
 ISubject is a simple interface defined in a header file that lets the implementing class notify its observers about certain events. Each notification is realised as a protected notify-X method. The public methods are 'attach' and 'detach'. Through these, a class that implements the below described IObserver (section \ref{sec:iobserver}) can be attached to the subject. This stores a reference to the object in a list. When one of the notify methods is called, the notification is sent to all the observers in the list. An observer can be removed through the detach method. 
 
 The ISubject class can not be instantiated directly but has to be used to inherit from. This is achieved by having a protected constructor.
 
 
 \subsection{Data Acquisition}
-Access to the hardware is abstracted in the ComediHandler class. The class uses the comedi librairy (comedilib) \citep{comedi} to read data from the hardwae device. The ComediHandler is initialised when the Processing object is created. If the initialisation fails, e.g. because there is no device connected, the application terminates and an error message is printed.
+Access to the hardware is abstracted in the ComediHandler class. The class uses the comedi librairy (comedilib) \citep{Comedi2017} to read data from the hardwae device. The ComediHandler is initialised when the Processing object is created. If the initialisation fails, e.g. because there is no device connected, the application terminates and an error message is printed.
 
 Upon a successful startup, single samples can be read from the device either as a raw integer value or as a voltage value. Optionally, the whole buffer content can be read as raw values. The application is only reading voltage values.
 
 
 \subsection{Filtering}
-Two filters are used to process the acquired data as described in section \ref{sec:filt} above. The filter implementation was done by \citet{Porr2020iir}. The objects are initialised when the Processing class is created. They process data sample by sample as needed by a real-time application. Whenever a new sample is passed to them, a single filtered value is retruned. They are causual, so the order in which the samples are passed to it influences future outputs.
+Two filters are used to process the acquired data as described in section \ref{sec:filt} above. The filter implementation was done by \citet{Porr2020iir}. The objects are initialised when the Processing class is created. They process data sample by sample as needed by a real-time application. Whenever a new sample is passed to them, a single filtered value is returned. They are causual, so the order in which the samples are passed to it influences future outputs.
 
 
-\subsection{OBPDetection}
+\subsection{OBPDetection Class}
 The core algorithm is performed by the OBPDetection class. An object is initialised upon creation of the Processing class. The detailed description about what happens inside is provided above in the section \myref{sec:Deflation}. Configuration values that are stored in the OBPDetection class work correspondingly to the ones stored in the Processing class directly. They can be accessed through public getter and setter methods. This could be done anytime, but should only be done when no measurement is happening. If it is done during a measurement, the behaviour can not be guaranteed. 
 
 The configuration values can only be set if they are within reasonable boundaries as defined in macros. However, a valid measurement is not guaranteed, if the values are changed from the default ones.
@@ -165,14 +165,14 @@ The values can be reset by pushing the corresponding button. These changes take 
 
 The handling and storing of these values is done through the QSettings class of the Qt library. It allows to save and load values by specifying a string key. If there is no key found with the provided name, the default value is selected. The default value is what is hard-coded in the Processing class.
 
-\subsection{The Window Class}
-The \mintinline{cpp}{Window} class inherits from the \mintinline{cpp}{QMainWindow} class and the \mintinline{cpp}{IObserver} class. The \mintinline{cpp}{QMainWindow} class makes the class an executable Qt window, with Qt taking care of updating the GUI and generating events for button clicks and so on. The \mintinline{cpp}{IObserver} makes the class able to be registered as an observer for a subject that will send notifications to the observer. More on the \mintinline{cpp}{IObserver} below.
+\subsection{Window Class}
+The \mintinline{cpp}{Window} class inherits from the \mintinline{cpp}{QMainWindow} class and the \mintinline{cpp}{IObserver} class. The QMainWindow class makes the class an executable Qt window, with Qt taking care of updating the GUI and generating events for button clicks and so on. The \mintinline{cpp}{IObserver} makes the class able to be registered as an observer for a subject that will send notifications to the observer. More on the \mintinline{cpp}{IObserver} below.
 
 All GUI elements are set up in the constructor of  \mintinline{cpp}{Window}, including the settings and info plane. However, they will only be shown if necessary. E.g. what page of the user instructions is shown is defined by the setting of the screen enum (currentScreen).
 
 The Window object is instantiated with a reference to a Processing object in the constructor. This is necessary so the user inputs can be relayed and the Processing thread can be stopped when the window is closed and the application exited. 
 
-\subsection{The IObserver Class}
+\subsection{IObserver Class}\label{sec:iobserver}
 The \mintinline{cpp}{IObserver} class defines the functions that the observable class (the subject) uses to notify the observer. All functions are virtual but implemented as empty functions. This way, the observing class can choose to implement and therefore listen to the notifications that it wants to and ignore the ones that it does not. 
 
 Just like the ISubject class, the IObserver class can not be instantiated directly but has to be used to inherit from. 
@@ -180,19 +180,14 @@ Just like the ISubject class, the IObserver class can not be instantiated direct
 \paragraph{The following methods can be implemented:}
 \setlist{nolistsep}
 \begin{itemize}[noitemsep]
-\item Ready: \newline
-Informs the observer that the subject is ready.
-\item New Data: \newline
-Sends a new data pair to the observer. Each data pair consists of pressure data and oscillation data. Both are doubles.
-\item Switch Screen: \newline
-Tells the observer which screen to display.
-\item Results: \newline
-Sends the results to the observer. The results are three doubles for MAP, SBP and DBP.
-\item Heart Rate: \newline
-Sends a new heart rate value to the observer. The value is a double.
+\item \textbf{Ready:} Informs the observer that the subject is ready.
+\item \textbf{New Data:} Sends a new data pair to the observer. Each data pair consists of pressure data and oscillation data. Both are doubles.
+\item \textbf{Switch Screen:} Tells the observer which screen to display.
+\item \textbf{Results:} Sends the results to the observer. The results are three doubles for MAP, SBP and DBP.
+\item \textbf{Heart Rate:} Sends a new heart rate value to the observer. The value is a double.
 \end{itemize}
 
-These methods are called from a class that inherits from ISubject, which is explained in detail in section \ref{sec:isubject} below. 
+These methods are called from a class that inherits from ISubject, which is explained in detail in section \ref{sec:isubject} above. 
 
 \subsubsection{Thread safety}
 Because the methods from the \mintinline{cpp}{IObserver} class are called from an object, which is likely to be running in another thread than the window, it is important to implement all functions in a thread-safe manner. Qt offers a good way to do this by sending queued events. 
@@ -221,10 +216,10 @@ The plots have their underlying data set changed every time a new sample is avai
 The following third party software is used in the developed application:
 
 \begin{itemize}
-\item Qt %TODO ref
-\item CppThread a wrapper to the std::thread class written by Bernd Porr to avoid static methods. %TODO ref
-\item \emph{iir1} An implementation of the infinite impulse response (IIR) filters for sample-by-sample, real-time processing written in C++ by Bernd Porr. Provided as a library.%TODO ref
-\item \emph{plog} Portable, simple and extensible C++ logging library. %TODO ref
-\item \emph{comedilib} 
+\item \textbf{Qt} 5.12.8 LTS, an open-source widget toolkit for creating graphical user interfaces. \citep{Qt2018}
+\item \textbf{CppThread}, a wrapper to the std::thread class written by Bernd Porr to avoid static methods. \citep{Porr2020Thread}
+\item \textbf{iir1} An implementation of the infinite impulse response (IIR) filters for sample-by-sample, real-time processing written in C++ by Bernd Porr. Provided as a library. \citep{Porr2020iir} 
+\item \textbf{plog} 1.1.5, a portable, simple and extensible C++ logging library. \citep{Podobry2019}
+\item \textbf{comedilib} 0.11.0, a library that provides an interface to Comedi data acquisition devices. \\ \citep{Comedi2017}
 \end{itemize}
 
