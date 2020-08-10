@@ -1,7 +1,7 @@
 \chapter{Background}\label{cp:theory}
 This chapter discusses the findings of researching existing and proposed algorithms for determining systolic and diastolic blood pressure through the oscillometric method. This report focusses on relatively simple algorithms that can be implemented in a real-time application, which is the goal of this project.
 
-The first part of this chapter defines what blood pressure is and how it is measured manually. Afterwards
+The first part of this chapter defines what blood pressure is and how it is measured manually. Afterwards, different algorithms are explained and examined. 
 %TODO do I include python code showing why certain algorithms do not work or do I leave that be? --> discussion
 
 A brief section at the end of this chapter explores algorithms beyond the scope of this project that have been proposed in recent literature.
@@ -43,7 +43,7 @@ The cuff size must be appropriate for the patient's arm. The rubber bladder insi
 
 The cuff is completely deflated and tightly fit around the upper arm of the patient. The centre of the bladder should be over the brachial artery and the arm supported at heart level. The stethoscope is to be placed over the artery between the cuff and the patient's elbow and should not touch the cuff. This could influence the reading because it puts additional pressure on the artery and can interfere with hearing the sounds.\cite{Lloyd2018,Reeves1995}
 
-The valve at the pump is completely closed and the cuff is inflated to a pressure of about \SI{30}{\mmHg} above the expected systolic pressure. This causes the artery to flatten and not let any blood through. Subsequently, the valve is slightly opened to slowly deflate the cuff at a rate of approximately \SI{3}{\mmHg/\second}. The artery will open and let small amounts of blood through. Systolic pressure is read when a pulse is first heard. Meanwhile, deflation continues. Diastolic pressure is read when the sounds disappear completely. Ultimately, blood can flow freely through the artery. After making sure that no further sounds can be heard by deflating for at least another \SI{10}{\mmHg}, the valve is opened completely to rapidly empty the cuff.\cite{Lloyd2018,Reeves1995}
+The valve at the pump is completely closed and the cuff is inflated to a pressure of about \SI{30}{\mmHg} above the expected systolic pressure. This causes the artery to flatten and not let any blood through. Next, the valve is slightly opened to slowly deflate the cuff at a rate of approximately \SI{3}{\mmHg/\second}. The artery will open and let small amounts of blood through. Systolic pressure is read when a pulse is first heard. Meanwhile, deflation continues. Diastolic pressure is read when the sounds disappear completely. Ultimately, blood can flow freely through the artery. After making sure that no further sounds can be heard by deflating for at least another \SI{10}{\mmHg}, the valve is opened completely to rapidly empty the cuff.\citep{Lloyd2018,Reeves1995}
 
 There are some discrepancies in literature on how to define the point of the diastolic blood pressure. Some references define it as when the Korotkoff sounds disappear completely. \cite{Lloyd2018,Reeves1995} Others, predominantly older resources, define it as the point where the sounds are muffled.\cite{Boron2012} Here, the former is assumed, because most current literature does and some literature suggests that the auscultatory method overestimates diastolic blood pressure. \cite{Chandrasekhar2019}
 
