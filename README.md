@@ -1,5 +1,11 @@
 # Oscillometric Blood Pressure Measurement
 
+**IMPORTANT:** This repository contains a submodule, the software will not build, if the submodule is not cloned. To clone both this repository and the submodule run the following commands:
+
+    git clone https://github.com/itsBelinda/obp.git
+    git submodule init
+    git submodule update
+
 **This project is under development.**
 
 The aim of this project is to  test the reliability of the automatic oscillometric blood pressure measurement process by implementing a real time application in C++. The application will automatically measure the user's pulse and blood pressure by using a manual blood pressure cuff equipped with a pressure sensor that is connected to a [USBDUX-SIGMA](http://www.linux-usb-daq.co.uk/prod2_duxsigma/) converter, connected to a Linux computer.
@@ -14,7 +20,7 @@ So please go ahead and modify/extend it.
 
 
 # Installation (C++)
-The following instructions concern the code located in the [C++ foler](c++).
+The following instructions concern the code located in the [C++ folder](c++).
 
 The following libraries are required to compile and run the program:
  - [Comedi](http://www.comedi.org)
