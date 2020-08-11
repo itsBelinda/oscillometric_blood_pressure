@@ -140,7 +140,7 @@ double ComediHandler::getVoltageSample(){
 int ComediHandler::readRawSample() {
     unsigned char buffer[readSize];
     if (read(comedi_fileno(dev), buffer, readSize) == 0) {
-        PLOG_ERROR << "Error reading from device: end of acquisition!" << std::endl;
+        PLOG_ERROR << "Error reading from device: end of acquisition!";
         exit(-1);
     }
 

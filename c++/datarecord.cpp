@@ -87,3 +87,14 @@ void Datarecord::saveAll(QString fileName, std::vector<double> samples) {
     }
     stopRecording();
 }
+
+
+void Datarecord::saveAll(QString fileName, std::vector<int> times, std::vector<double> samples) {
+    startRecording(fileName);
+    auto time = times.begin();
+    for (auto sample : samples) {
+        *outStream << (float) *time / samplingRate << "\t" << sample << "\n";
+        time = std::next(time,1);
+    }
+    stopRecording();
+}

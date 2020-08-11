@@ -15,6 +15,7 @@ public:
 
     void addSample(double sample);
     void saveAll(QString fileName, std::vector<double> samples);
+    void saveAll(QString fileName, std::vector<int> times, std::vector<double> samples);
     void startRecording(QString filename);
     void startRecording();
     void stopRecording();

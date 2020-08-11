@@ -120,7 +120,6 @@ void Processing::resetConfigValues() {
 void Processing::run() {
     bRunning = true;
 
-    double i = 0.6;
     while (bRunning) {
 
         if (comedi->getBufferContents() > 0) {
@@ -216,6 +215,7 @@ void Processing::processSample(double newSample) {
         case ProcState::Idle:
 
             if (bMeasuring) {
+                rawData.clear();
                 notifyResults(0.0, 0.0, 0.0);
                 notifyHeartRate(0.0);
                 currentState = ProcState::Inflate;
@@ -234,6 +234,7 @@ void Processing::processSample(double newSample) {
                 if (ymmHg > mmHgInflate) {
                     obpDetect->reset();
                     notifySwitchScreen(Screen::deflateScreen);
+                    std::cout << "raw time shift: " << rawData.size();
                     //TODO: possibly add entry end exit functions for each state
                     // function: switch state: returns new state
                     // performs entry and exit operations (notifications)
@@ -255,8 +256,9 @@ void Processing::processSample(double newSample) {
                         notifyHeartRate(obpDetect->getAverageHeartRate());
                         notifySwitchScreen(Screen::emptyCuffScreen);
                         currentState = ProcState::Calculate;
+                    } else{
+                        notifyHeartRate(obpDetect->getCurrentHeartRate());
                     }
-                    notifyHeartRate(obpDetect->getCurrentHeartRate());
                 }
                 if (ymmHg < 20) {
                     PLOG_WARNING << "Pressure too low to continue algorithm. Cancelled";
@@ -271,7 +273,7 @@ void Processing::processSample(double newSample) {
                 notifySwitchScreen(Screen::startScreen);
             } else {
                 rawData.push_back(ymmHg); //record raw data to store later
-                if (ymmHg < 1) {
+                if (ymmHg < 2) {
                     notifyResults(obpDetect->getMAP(), obpDetect->getSBP(), obpDetect->getDBP());
                     record->saveAll(Processing::getFilename(), rawData);
                     notifySwitchScreen(Screen::resultScreen);
@@ -305,7 +307,7 @@ bool Processing::checkAmbient() {
         double max = *std::max_element(rawData.begin(), rawData.end());
         auto min = *std::min_element(rawData.begin(), rawData.end());
 
-        PLOG_VERBOSE << "min: " << min << " max: " << max << " av: " << av << std::endl;
+        PLOG_VERBOSE << "min: " << min << " max: " << max << " av: " << av;
         if (std::abs(av - max) < AMBIENT_DEVIATION) {
             setAmbientVoltage(av);
             bAmbientValid = true;

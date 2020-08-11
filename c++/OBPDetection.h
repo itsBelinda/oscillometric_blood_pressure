@@ -64,14 +64,15 @@ private:
     // vectors to store values for calculations
     std::vector<double> pData;
     std::vector<double> oData;
-    std::vector<double> omveData;
-    std::vector<int> omveTimes;
+    std::vector<double> omweData;
+    std::vector<int> omweTimes;
     std::vector<double> maxAmp;
     std::vector<int> maxtime;
     std::vector<double> minAmp;
     std::vector<int> mintime;
     std::vector<double> hrData;
-
+//    double lastMinima;
+X
     // variables to store results
     double resMAP{};
     double resSBP{};

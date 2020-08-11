@@ -9,9 +9,8 @@
 
 
 class ISubject {
+
 public:
-    // Pure virtual functions would mean observer has to implement
-    // every method.
     virtual void attach(IObserver *observer) {
         observerList.push_back(observer);
     }
@@ -20,6 +19,8 @@ public:
         observerList.remove(observer);
     }
 
+protected:
+    ISubject() = default;
     virtual void notifyReady() {
         std::for_each(observerList.begin(), observerList.end(),
                       [](IObserver *observer) {

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <numeric>
 #include "OBPDetection.h"
+#include "datarecord.h"
 
 /**
  * Constructor of the OBPDetection class.
@@ -145,8 +146,9 @@ bool OBPDetection::processSample(double pressure, double oscillation) {
  */
 bool OBPDetection::checkMaxima() {
     bool isValid = false;
-    //TODO: prominence as configurable value
-    if (oData.size() > minDataSize && *(oData.end() - 2) > prominence) { // ignores the first second or so
+
+    if (oData.size() > minDataSize && *(oData.end() - 2) > prominence) {
+        //((*(oData.end() - 2)-lastMinima) > prominence)
         //TODO: idea for more robust algorithm:
         // get a bigger sample size (e.g. 100) and check for minimal "prominence"
         // then take the largest of the values and its position
@@ -213,7 +215,7 @@ bool OBPDetection::isValidMaxima() {
                 validPulseCnt++;
                 isValid = true;
             } else {
-                PLOG_INFO << "Invalid pulse after " << validPulseCnt << " valid ones" << std::endl;
+                PLOG_INFO << "Invalid pulse after " << validPulseCnt << " valid ones";
                 validPulseCnt = 0;
                 maxAmp.clear();
                 maxtime.clear();
@@ -263,6 +265,7 @@ void OBPDetection::findMinima() {
             minAmp.push_back(*iter);
             mintime.push_back(dist + *(maxtime.end() - 2));
         }
+//        lastMinima = *iter;
     }
 
 }
@@ -285,11 +288,11 @@ bool OBPDetection::isEnoughData() {
 
 
 /**
- * Calculates the Oscillometric Waveform Envelope (OMVE) from the saved min and max values (minAmp and mintime and
+ * Calculates the Oscillometric Waveform Envelope (OMWE) from the saved min and max values (minAmp and mintime and
  * maxAmp and maxtime) in preparation to find the maximal oscillation and the ratios of it for the systolic and
  * diastolic blood pressure.
  *
- * The calculated values will be stored in omvweTimes and omveData.
+ * The calculated values will be stored in omvweTimes and omweData.
  */
 void OBPDetection::findOWME() {
     // forward iteration using const iterator, because they should not be touched
@@ -318,10 +321,10 @@ void OBPDetection::findOWME() {
         auto lerpMin = std::lerp(*ampMin1, *ampMin2, getRatio(*timeMin1, *timeMin2, *timeMax2));
 
         // Calculate the envelope, save both time and values.
-        omveData.push_back(lerpMax - *ampMin1);
-        omveTimes.push_back(*timeMin1);
-        omveData.push_back(*ampMax2 - lerpMin);
-        omveTimes.push_back(*timeMax2);
+        omweData.push_back(lerpMax - *ampMin1);
+        omweTimes.push_back(*timeMin1);
+        omweData.push_back(*ampMax2 - lerpMin);
+        omweTimes.push_back(*timeMax2);
 
         // Increase all the iterators not handled by the for loop:
         timeMax1++;
@@ -340,10 +343,10 @@ void OBPDetection::findOWME() {
  */
 void OBPDetection::findMAP() {
 
-    auto maxOMVE = std::max_element(omveData.begin(), omveData.end());
-    auto time = omveTimes[std::distance(omveData.begin(), maxOMVE)];
+    auto maxOMWE = std::max_element(omweData.begin(), omweData.end());
+    auto time = omweTimes[std::distance(omweData.begin(), maxOMWE)];
 
-//    std::cout << "maxOMVE: " << *maxOMVE << std::endl;
+//    std::cout << "maxOMWE: " << *maxOMWE << std::endl;
 
     resMAP = getPressureAt(time);
 
@@ -355,28 +358,28 @@ void OBPDetection::findMAP() {
 //    recordOSC.saveAll("osc.dat", oData);
 //    Datarecord recordP(1.0);
 //    recordP.saveAll("p.dat", pData);
-//    Datarecord recordOMVE(1.0);
-//    recordOMVE.saveAll("omve.dat", omveData);
+//    Datarecord recordOMWE(1.0);
+//    recordOMWE.saveAll("omwe.dat", omweTimes, omweData);
 
-//    std::for_each(omveTimes.begin(), omveTimes.end(),
+//    std::for_each(omweTimes.begin(), omweTimes.end(),
 //                  [](int time) {
 //                      std::cout << "t: " << time << std::endl;
 //                  });
 
-    double maxVAL = *maxOMVE;
+    double maxVAL = *maxOMWE;
     double sbpSearch = ratio_SBP * maxVAL;
     double ubSBP;
     double lbSBP;
     int lbTime;
     int ubTime;
 
-    for (auto omveSBP = omveData.begin(); omveSBP != maxOMVE; ++omveSBP) {
-        if (*omveSBP > sbpSearch) {
-            ubSBP = *omveSBP;
-            ubTime = omveTimes[std::distance(omveData.begin(), omveSBP)];
-            omveSBP--;
-            lbSBP = *omveSBP;
-            lbTime = omveTimes[std::distance(omveData.begin(), omveSBP)];
+    for (auto omweSBP = omweData.begin(); omweSBP != maxOMWE; ++omweSBP) {
+        if (*omweSBP > sbpSearch) {
+            ubSBP = *omweSBP;
+            ubTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
+            omweSBP--;
+            lbSBP = *omweSBP;
+            lbTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
             break;
         }
     }
@@ -385,13 +388,13 @@ void OBPDetection::findMAP() {
     resSBP = getPressureAt(lerpSBPtime);
 
     double dbpSearch = ratio_DBP * maxVAL;
-    for (auto omveDBP = maxOMVE; omveDBP != omveData.end(); ++omveDBP) {
-        if (*omveDBP < dbpSearch) {
-            lbSBP = *omveDBP;
-            lbTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
-            omveDBP--;
-            ubSBP = *omveDBP;
-            ubTime = omveTimes[std::distance(omveData.begin(), omveDBP)];
+    for (auto omweDBP = maxOMWE; omweDBP != omweData.end(); ++omweDBP) {
+        if (*omweDBP < dbpSearch) {
+            lbSBP = *omweDBP;
+            lbTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
+            omweDBP--;
+            ubSBP = *omweDBP;
+            ubTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
             break;
         }
     }
@@ -466,13 +469,14 @@ double OBPDetection::getAverage(std::vector<double> avVector) {
 void OBPDetection::reset() {
     pData.clear();
     oData.clear();
-    omveData.clear();
-    omveTimes.clear();
+    omweData.clear();
+    omweTimes.clear();
     maxAmp.clear();
     maxtime.clear();
     minAmp.clear();
     mintime.clear();
     hrData.clear();
+//    lastMinima = 0.0;
 
     resMAP = 0.0;
     resSBP = 0.0;

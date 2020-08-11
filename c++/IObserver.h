@@ -4,6 +4,8 @@
 #include "common.h"
 
 class IObserver {
+protected:
+    IObserver() = default;
 public:
     // Pure virtual functions would mean observer has to handle
     // every update. This way, they can ignore them if they do not

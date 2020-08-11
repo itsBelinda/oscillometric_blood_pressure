@@ -64,8 +64,8 @@ void Plot::setyAxisScale(double yMin, double yMax) {
 }
 
 /**
- *
- * @return
+ * Gets the position of the y-axis. Used to line up vertically stacked plots.
+ * @return The position where the y-axis starts.
  */
 double Plot::getyAxisExtent() {
     QwtScaleWidget *scaleWidget = this->axisWidget(QwtPlot::yLeft);
@@ -81,9 +81,8 @@ double Plot::getyAxisExtent() {
 }
 
 /**
- * Adjusts the scaling of the y-axis.
- * @param yMax
- * @param yMin
+ * Adjusts the position of the y-axis. Used to line up vertically stacked plots.
+ * @param extent The position where the y-axis should start.
  */
 void Plot::setyAxisExtent(double extent) {
 
@@ -101,7 +100,7 @@ void Plot::setyAxisExtent(double extent) {
 
 /**
  * Adds a new data sample to the end of the graph, deleting the oldest one.
- * @param yNew
+ * @param yNew The new data
  */
 void Plot::setNewData(double yNew) {
     static int cnt = 0;

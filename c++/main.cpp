@@ -16,7 +16,7 @@
 #include "Processing.h"
 #include "Window.h"
 #include <plog/Initializers/RollingFileInitializer.h>
-
+//@startuml
 int main(int argc, char **argv) {
 
     plog::init(plog::verbose, "log.csv", 1000000, 5);
@@ -38,4 +38,4 @@ int main(int argc, char **argv) {
 
 }
 
-
+//@enduml
