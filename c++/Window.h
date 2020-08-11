@@ -22,6 +22,7 @@
 #include "Plot.h"
 #include "Processing.h"
 #include "SettingsDialog.h"
+#include "InfoDialogue.h"
 
 //! The Window Class handles the user interface (UI).
 /*!
@@ -55,6 +56,7 @@ private:
     QWidget * setupEmptyCuffPage(QWidget *parent);
     QWidget * setupResultPage(QWidget *parent);
     QWidget * setupSettingsDialog(QWidget *parent);
+    QWidget * setupInfoDialogue(QWidget *parent);
     void retranslateUi(QMainWindow *MainWindow);
 
     // Settings:
@@ -62,6 +64,7 @@ private:
     Processing *process;
     double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
     int dataLength;
+    int pumpUpVal;
 
     // Variables that are changed from outside the UI are made
     // atomic, so access to them is thread safe.
@@ -123,6 +126,7 @@ private:
     QAction *actionInfo;
     QAction *actionExit;
     SettingsDialog *settingsDialog;
+    InfoDialogue *infoDialogue;
 
 
 private slots:

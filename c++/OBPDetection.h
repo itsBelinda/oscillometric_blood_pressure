@@ -72,7 +72,7 @@ private:
     std::vector<int> mintime;
     std::vector<double> hrData;
 //    double lastMinima;
-X
+
     // variables to store results
     double resMAP{};
     double resSBP{};

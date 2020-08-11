@@ -127,6 +127,9 @@ void Window::setupUi(QMainWindow *window) {
     // Settings Dialog
     setupSettingsDialog(window);
 
+    // Info Dialogue
+    setupInfoDialogue(window);
+
     // Set all text fields in one place.
     retranslateUi(window);
 
@@ -449,6 +452,18 @@ QWidget *Window::setupSettingsDialog(QWidget *parent) {
     loadSettings();
     return settingsDialog;
 }
+
+/**
+ * Sets up the dialog for the information.
+ *
+ * @param parent A reference to the parent widget to set for this page.
+ * @return A reference to the generated page.
+ */
+QWidget *Window::setupInfoDialogue(QWidget *parent) {
+
+    infoDialogue = new InfoDialogue(parent);
+    return infoDialogue;
+}
 /**
  * Sets all the text in the main window.
  * @param window A pointer to the main window.
@@ -462,10 +477,12 @@ void Window::retranslateUi(QMainWindow *window) {
                         "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready.");
-    lInfoPump->setText("<b>Pump Up to 180 mmHg</b><br><br>"
-                       "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
-                       "Make sure the valve is fully closed.<br>"
-                       "Use the dial above for reference.");
+    QString infoPump = QString("<b>Pump Up to %1 mmHg</b><br><br>"
+                               "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
+                               "Make sure the valve is fully closed.<br>"
+                               "Use the dial above for reference.").arg(pumpUpVal);
+    lInfoPump->setText(infoPump);
+
     lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
                           "Open the valve slightly to release pressure at about 3 mmHg per second."
                           "Wait calmly and try not to move. <br><br>");
@@ -657,6 +674,8 @@ void Window::clkBtn5() {
  * actionInfo.
  */
 void Window::on_actionInfo_triggered() {
+    infoDialogue->setModal(true);
+    infoDialogue->show();
 
 }
 
@@ -707,7 +726,7 @@ void Window::loadSettings() {
     iVal = settings.value("pumpUpValue", process->getPumpUpValue()).toInt();
     settingsDialog->setPumpUpValue(iVal);
     process->setPumpUpValue(iVal);
-
+    pumpUpVal = iVal;
 }
 /**
  * Does only update the values in the settings file. They will not be applied until the
