@@ -1,7 +1,43 @@
 \chapter{Results and Discussion}\label{cp:res}
+This chapter highlights the important results of the project. It starts off discussing the outcomes of preliminary tests that were done offline with prerecorded data using python.
 
 
-This chapter highlights important results of the project.
+\section{Python Algorithm Tests}
+Before deciding on an algorithm to implement, some test data was recorded and analysed offline using python. Different approaches of the MAA were implemented as well as the derivative algorithm.
+
+The top plot in figure x shows the by now familiar outline of a BP measurement. The bottom plot illustrates how it was analysed. The oscillations were examined for local extrema and the resulting points connected for the maxima and minima. The result is the blue line that forms the envelope around the oscillations. The cyan line is the time difference between two subsequent maxima. From this, the heart rate can be calculated. It is used to determine when to analyse the oscillations. When the heart rate is stable and changes less than 20 % per detection, the start of the oscillometric envelope is assumed. When it changes dr, the end is recognised. These points are identified in the bottom plot in figure x by the vertical lines. 
+
+\subsection{MAA Algorithm}
+
+Figure y shows the same data as before. The top and middle plot are zoomed in from figure x. The bottom plot shows the different ways the OMWE can be calculated. The blue trace is simply the detected maxima connected. The green track is every minimum subtracted from its preceding maximum. Every millisecond interpolated between each of the detected maxima and afterwards, every minimum point subtracted from every maximum form the red trace. Finally, the purple track is a polynomial of 4th order fit to the points calculated in the green track. 
+
+MAP is estimated where the envelopes have their maximum as explained in chapter A. Figure z shows the OMWEs again but normalised by their maximal value for comparison. Vertical lines are drawn at 0.55 and 0.70 where SBP and DBP are estimated in this example.
+
+Table x lists the values for MAP, SBP and DBP that were calculated for each of the OMWE methods. 
+
+All methods estimate MAP within a range of 4 mmHg, the furthest off is the min-max OMWE (green) because it is influenced by small shifts in time. Surprisingly, the OMWE using only the maximum values (blue) estimates MAP closer to the other methods. However, while oscillations are increasing and decreasing, this blue trace shown in figure z seems to lag behind the others in time and SBP is therefore estimated slightly lower, with 97 mmHg. DBP is not estimated lower with 73mmHg. This is due to a pulse peak that is happening in the deflating data. This is a weakness in the python script, it estimates the values at their exact position in the deflating plot without taking into consideration the small pulses that are still occurring there.
+
+The purple polyfit trace does a decent job identifying MAP, but the trace hardly fits the envelope. As is shown in figure z, it is wider than the other traces and therefore estimates SBP sooner and DBP later, resulting in a considerably higher value for SBP with 106mmHg and lower value for DBP with 66mmHg. 
+
+The green OMWE that is considering minima and maxima is similar to the red interpolation one between 23 to 27s. Looking back at figure y, minima follow quickly after maxima in this period. The way this trace is calculated explains why it is slightly shifted backwards in time compared to the red one: The values are evaluated when the maxima happen and the following minimum is subtracted from it. 
+
+Altogether, the red interpolation trace looks the most continuous. Changes in timings of minima and maxima have the least effect on it. The determination of the pressure at the identified time should be done by averaging over the current pulse and not by evaluating the given sample directly from the low-pass filtered deflation curve.
+%
+%MAP (max value):  82.64
+%    SBP:  97.21
+%    DBP:  73.04
+%MAP (max-min value):  85.5
+%    SBP:  98.83
+%    DBP:  72.64
+%MAP (interpolation):  82.49
+%    SBP:  99.14
+%    DBP:  71.83
+%MAP (polyfit):  81.53
+%    SBP:  105.63
+%    DBP:  66.53
+
+
+
 
 
 - valve needs to open continuously to have a steady stream of 3mmHg/s
@@ -19,6 +55,7 @@ This chapter highlights important results of the project.
 %what artifacts: high frequency noise, movement, muscle contractions
 % --> how to make sure only artifacts and not information is remvoed?
 ¨
+\
 \section{General Problems with Algorithms}
 most algorithms expect perfect data to be 'perfect'
 
