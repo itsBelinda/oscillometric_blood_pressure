@@ -3,17 +3,29 @@ This chapter highlights the important results of the project. It starts off disc
 
 
 \section{Python Algorithm Tests}
-Before deciding on an algorithm to implement, some test data was recorded and analysed offline using python. Different approaches of the MAA were implemented as well as the derivative algorithm.
+Before deciding on an algorithm to implement, some test data was recorded and analysed offline using python. Different approaches of the MAA were implemented as well as the derivative algorithm. All python tests are done on the same dataset. The manually determined blood pressure was 110/70, with a large, expected error because the pressure was taken by an untrained person on themselves. 
 
-The top plot in figure x shows the by now familiar outline of a BP measurement. The bottom plot illustrates how it was analysed. The oscillations were examined for local extrema and the resulting points connected for the maxima and minima. The result is the blue line that forms the envelope around the oscillations. The cyan line is the time difference between two subsequent maxima. From this, the heart rate can be calculated. It is used to determine when to analyse the oscillations. When the heart rate is stable and changes less than 20 % per detection, the start of the oscillometric envelope is assumed. When it changes dr, the end is recognised. These points are identified in the bottom plot in figure x by the vertical lines. 
+The top plot in figure x shows the by now familiar outline of a BP measurement. The bottom plot illustrates how it was analysed. The oscillations were examined for local extrema and the resulting points connected for the maxima and minima. The result is the blue line that forms the envelope around the oscillations. The cyan line is the time difference between two subsequent maxima. From this, the heart rate can be calculated. It is used to determine when to analyse the oscillations. When the heart rate is stable and changes less than \SI{20}{\percent} per detection, the start of the oscillometric envelope is assumed. When it changes dr, the end is recognised. These points are identified in the bottom plot in figure x by the vertical lines. 
 
-\subsection{MAA Algorithm}
+\subsection{Fixed-Ratio Algorithm}
 
 Figure y shows the same data as before. The top and middle plot are zoomed in from figure x. The bottom plot shows the different ways the OMWE can be calculated. The blue trace is simply the detected maxima connected. The green track is every minimum subtracted from its preceding maximum. Every millisecond interpolated between each of the detected maxima and afterwards, every minimum point subtracted from every maximum form the red trace. Finally, the purple track is a polynomial of 4th order fit to the points calculated in the green track. 
 
 MAP is estimated where the envelopes have their maximum as explained in chapter A. Figure z shows the OMWEs again but normalised by their maximal value for comparison. Vertical lines are drawn at 0.55 and 0.70 where SBP and DBP are estimated in this example.
 
-Table x lists the values for MAP, SBP and DBP that were calculated for each of the OMWE methods. 
+Table \ref{tbl:maacomp} lists the values for MAP, SBP and DBP that were calculated for each of the OMWE formation methods. 
+
+\begin{table}\label{tbl:maacomp}
+\centering
+\begin{tabular}{lllll}
+\hline
+           & max value & min/max value & interpolation & polynomial fit \\ \hline
+MAP (mmHg) & 82.64     & 85.50         & 82.49         & 81.53          \\ 
+SBP (mmHg) & 97.21     & 98.83         & 99.14         & 105.63         \\ 
+DBP (mmHg) & 73.04     & 72.64         & 71.83         & 66.53          \\ \hline
+\end{tabular}
+\caption[Comparison of different methods to form the OMWE on the calculated BP values for the MAA.]{Comparison of different methods to form the OMWE on the calculated BP values for MAA. MAP was estimated at the maximum of the OMWE, SBP at a ratio of 0.55 of the maximum while rising and DBP at a ratio of 0.70 of the maximum while falling.}
+\end{table}
 
 All methods estimate MAP within a range of 4 mmHg, the furthest off is the min-max OMWE (green) because it is influenced by small shifts in time. Surprisingly, the OMWE using only the maximum values (blue) estimates MAP closer to the other methods. However, while oscillations are increasing and decreasing, this blue trace shown in figure z seems to lag behind the others in time and SBP is therefore estimated slightly lower, with 97 mmHg. DBP is not estimated lower with 73mmHg. This is due to a pulse peak that is happening in the deflating data. This is a weakness in the python script, it estimates the values at their exact position in the deflating plot without taking into consideration the small pulses that are still occurring there.
 
@@ -22,22 +34,67 @@ The purple polyfit trace does a decent job identifying MAP, but the trace hardly
 The green OMWE that is considering minima and maxima is similar to the red interpolation one between 23 to 27s. Looking back at figure y, minima follow quickly after maxima in this period. The way this trace is calculated explains why it is slightly shifted backwards in time compared to the red one: The values are evaluated when the maxima happen and the following minimum is subtracted from it. 
 
 Altogether, the red interpolation trace looks the most continuous. Changes in timings of minima and maxima have the least effect on it. The determination of the pressure at the identified time should be done by averaging over the current pulse and not by evaluating the given sample directly from the low-pass filtered deflation curve.
-%
-%MAP (max value):  82.64
-%    SBP:  97.21
-%    DBP:  73.04
-%MAP (max-min value):  85.5
-%    SBP:  98.83
-%    DBP:  72.64
-%MAP (interpolation):  82.49
-%    SBP:  99.14
-%    DBP:  71.83
-%MAP (polyfit):  81.53
-%    SBP:  105.63
-%    DBP:  66.53
+
+\subsection{Derivative Algorithm}
+
+Figure x shows the oscillation data plotted in time on the left-hand side. The top is the deflating pressure and the bottom the shows the oscillations. 
+
+The right-hand side shows the oscillations plotted in terms of pressure when they were happening. Note that this changes the x-axis and the resulting plot is an inversion in time, because the lower pressures happened later than the higher pressures. 
+
+The plot on the top right shows how this OMWE is formed from the detected maxima and minima. The bottom-right plot shows the derivative of the OMWE. The blue trace is the difference between two successive data points. Because they can be spaced unevenly, the orange trace has the values normalised by the time difference between them. The green trace normalises the values with the pressure difference. While the green trace seems to make the most sense logically, they all look similar, except for the last one being compressed compared to the others. A variation of this figure, where all derivative traces have been normalised by their maximal value for comparison, can be found in the appendix.
+
+Taking the maximum value of the derived OMWE results in the DBP and the minimum value in the SBP as explained in section \myref{sec:der}.
+Table x lists the values for SBP and DBP that were computed for each of the OMWE methods. SBP is identified at 94.87 and DBP at 80.87 or 73.94. The only difference in the three methods is the DBP that is estimated lower by the derivative that was normalised in pressure. This is most likely the closest to the actual value.
+
+\begin{table}[]\label{tbl:derComp}
+\centering
+\begin{tabular}{llll}
+\hline
+           & not normalised & normalised in time & normalised in pressure \\ \hline
+SBP (mmHg) & 94.87          & 94.87              & 94.87                  \\ \hline
+DBP (mmHg) & 80.76          & 80.76              & 73.94                  \\ \hline
+\end{tabular}
+\caption{Comparison of blood pressure values calculated by the derivative algorithm for differently acquired derivatives.}
+\end{table}
+
+
+Other tests, using only the maxima or minima for derivation have produced plots that are even more ambiguous. For this particular example, the minima are smooth and the derivative had a clear indication for the SBP. The plots for this test are located in the appendix.
+
+Additionally, it has to be noted that the tests were done using a very clean data set. If the deflation curve is not as stable as in the example, the derivative algorithm does not work at all. Similarly, even if the deflation is stable, but there are any other artefacts in the oscillations, e.g. from micromovements or natural blood pressure variations over time, wrong blood pressure will be measured. Figure x shows the same algorithm using non-ideal data that was recorded within minutes of the data shown above. All methods determined  SBP at 84.65 mmHg and systolic DBP at 62.58 mmHg. Effectively, being 10 mmHg too low for both values compared to the previous measurement analysed by both the derivative and the fixed-ratio algorithm. 
 
 
 
+\subsection{Summary}
+
+\begin{table}[]\label{tbl:sumPy}
+\centering
+\begin{tabular}{lll}
+\hline
+           & fixed-ratio interpolated & derrivative normalised in pressure\\ \hline
+MAP (mmHg) & 82.49       & -           \\ \hline
+SBP (mmHg) & 99.14       & 94.87       \\ \hline
+DBP (mmHg) & 71.83       & 73.94       \\ \hline
+\end{tabular}
+\caption{Comparison of blood pressure values calculated by the fixed-ratio and the derivative algorithm.}
+\end{table}
+
+
+Table \ref{tbl:sumPy} lists the values of the results from the two best options for the fixed-ratio and derivative algorithm. For the fixed-ratio algorithm, the interpolated version is chosen, because it has the smoothest curve. The derivative algorithm is logically and in the current measurement best for the version normalised in pressure. However, even using clean data that is optimal for the derivative algorithm, the values have little confidence. There is no clear rising and falling curve that has a clear maximum and minimum, but rather an assembly of maxima and minima. Even the smallest, changes in amplitude or time difference have a significant impact on the results. Therefore, this approach is not implemented in the application.
+
+As expected, the fixed-ratio algorithm produced stable estimates of MAP. Of course, it also depends on how the OMWE is defined. The interpolated version has the least sensitivity to noise because it considers the time difference between minima and maxima. SBP and DBP are highly dependant on the chosen ratios. For this test, the ratios were chosen from a mean value of what was recommended in literature from chapter x.
+
+
+
+sw:
+testing taking my own blood pressure 5 times and comparing the results
+
+comparing the result with korotkoff sounds 
+
+
+findings:
+
+
+%from tests, proposed steps: to be summarised in conclusions
 
 
 - valve needs to open continuously to have a steady stream of 3mmHg/s
