@@ -28,7 +28,6 @@
 \usepackage[useregional]{datetime2}
 \usepackage{enumitem}
 \usepackage[round,authoryear]{natbib}
-
 \usepackage[super]{nth}
 \usepackage{hyperref}
 
@@ -45,9 +44,9 @@
 \newcommand*{\myref}[1]{\ref{#1}~\nameref{#1}}%#todo fix:
 \newcommand{\stdNbr}{2504756K}
 \newcommand{\course}{MSc Computer Systems Engineering}
+\newcommand*\circled[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}}
 
 \begin{document}
-
 % Settings:
 \lstset{language=C++}
 \sisetup{range-units=single}
@@ -114,7 +113,7 @@ Second Supervisor: & Kiran Ramesh\\
 
 \backmatter  % Turn off chapter numbering
 %\bibliographystyle{IEEEtran}
-\bibliographystyle{plainnat}%{agsm}{apa}
+\bibliographystyle{apa}%{agsm}{apa}plainnat
 \bibliography{references}
 %TODO update all references!!!
 

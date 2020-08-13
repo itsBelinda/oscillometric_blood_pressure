@@ -60,7 +60,7 @@ Once the second stage is active, the preprocessing checks the core algorithm if 
 \end{figure}
 
 \section{Deflation}\label{sec:Deflation}
-Figure \ref{fig:algoExplain} shows data recorded during the deflation stage. \textcircled{1} shows the low pass filtered data which is used in the core algorithm as a reference. \textcircled{2} is the BP filtered data upon which the algorithm is performed. 
+Figure \ref{fig:algoExplain} shows data recorded during the deflation stage. \circled{1} shows the low pass filtered data which is used in the core algorithm as a reference. \circled{2} is the BP filtered data upon which the algorithm is performed. 
 
 \begin{figure}[ht]
 \centering
@@ -72,14 +72,14 @@ Figure \ref{fig:algoExplain} shows data recorded during the deflation stage. \te
 
 
 \subsection{Extrema Detection}
-\paragraph{Maxima}The next step, indicated with \textcircled{3} is to detect the maxima. Looking at the oscillations, there are local maxima in the troughs between two oscillations. To avoid detecting these, a value needs to have a minimal pronunciation of \SI{0.25}{\Delta\mmHg} to even be considered as a maxima. This limits how the quickly the first oscillations can be detected, but does not influence the algorithm because they are less than \SI{10}{\percent} of the expected maximal amplitude.
+\paragraph{Maxima}The next step, indicated with \circled{3} is to detect the maxima. Looking at the oscillations, there are local maxima in the troughs between two oscillations. To avoid detecting these, a value needs to have a minimal pronunciation of \SI{0.25}{\Delta\mmHg} to even be considered as a maxima. This limits how the quickly the first oscillations can be detected, but does not influence the algorithm because they are less than \SI{10}{\percent} of the expected maximal amplitude.
 
 A sample is identified as a local maxima, due to the previous and following value being lower. Next, is checked if the current and last detected maxima result in a valid heart rate given by a configurable range. The default range is \SIrange{50}{100}{beats/\minute}. In addition, if the last maxima was less than \SI{300}{\milli\second} ago, only the larger of the two is kept and the lower is discarded.
 
 This is due to two factors that were observed in the data and are shown if figure \ref{fig:maxDetectIssue}. The first, shown on the left hand side, is if the bump in the rising edge of the oscillations results in a detected maxima. This is likely due to artefacts from movement. When oscillations are small and rising, these can lead to wrong detections. This is either irrelevant because they occur before systolic BP or they will be discarded because they lead to errors. 
 
 The second issue is shown in figure \ref{fig:maxDetectIssue} on the right. It occurs mainly when oscillations are decreasing and if the filtering is not optimal. 
-\paragraph{Minima} Minima detection, indicated by \textcircled{4} in figure \ref{fig:algoExplain}, is considerably more difficult, especially in the beginning of oscillations as shown in figure \ref{fig:oscMini}. Because there has to be a minima in between two maxima, minima detection is simplified. After detecting two maxima, the lowest value between them is recorded as the minima.
+\paragraph{Minima} Minima detection, indicated by \circled{4} in figure \ref{fig:algoExplain}, is considerably more difficult, especially in the beginning of oscillations as shown in figure \ref{fig:oscMini}. Because there has to be a minima in between two maxima, minima detection is simplified. After detecting two maxima, the lowest value between them is recorded as the minima.
 
 
 \subsection{Heart Rate Detection}\label{sec:HR}
@@ -96,7 +96,7 @@ After finishing the measurement, the average heart rate is calculated from all v
 \section{Oscillometric Waveform Envelope}
 When the detected maxima, marked by the red triangles in \ref{fig:algoExplain}, have reached their highest amplitude and declined again the oscillometric waveform envelope (OMWE) can be calculated. 
 
-This condition is estimated by taking the largest recorded maximum and multiplying it with the ratio for the diastolic blood pressure minus a hysteresis of $0.3$ (equation \ref{eq:cutoff}. If the last recorded maxima is below this value, the extrema detection part of the algorithm (\textcircled{3} and \textcircled{4} in figure \ref{fig:algoExplain}) can be concluded. To avoid a wrong detection of this condition the largest maxima needs to be at least \SI{1.5}{\delta\mmHg}. Otherwise the condition can be detected when oscillations first start occurring and are small with large variations. 
+This condition is estimated by taking the largest recorded maximum and multiplying it with the ratio for the diastolic blood pressure minus a hysteresis of $0.3$ (equation \ref{eq:cutoff}. If the last recorded maxima is below this value, the extrema detection part of the algorithm (\circled{3} and \circled{4} in figure \ref{fig:algoExplain}) can be concluded. To avoid a wrong detection of this condition the largest maxima needs to be at least \SI{1.5}{\delta\mmHg}. Otherwise the condition can be detected when oscillations first start occurring and are small with large variations. 
 
 \begin{equation}
 \label{eq:cutoff}
@@ -115,17 +115,17 @@ To calculate the OMWE from the determined extrema, the following approaches were
 
 1. works decently, but discards the information in the minima. 2. works well for pressure in the systolic range, because minima follow quickly after maxima. Vice versa, 3. works well in the diastolic range. 4. requires the most computations, but is the least sensitive to noise, because it takes the time difference between minima and maxima into consideration. 
 
-When referring back to figure \ref{fig:algoExplain}, \textcircled{5} shows how the OMWE was calculated using the \nth{4}approach and calculating a value for each of the maxima and minima separately. 
+When referring back to figure \ref{fig:algoExplain}, \circled{5} shows how the OMWE was calculated using the \nth{4}approach and calculating a value for each of the maxima and minima separately. 
 
 Figure \ref{fig:interpol} shows how interpolation is used to calculate an interpolated maximum at the time where a minimum occurs to then be able to subtract the minimum from the maximum. Inversely, A minimum is interpolated between two measured minima where a maximum occurs. The resulting plot is displayed in figure \ref{fig:algoExplain} at the bottom. Note that the values are normalised by the maximal value.
 
 
 \subsection{Determination of Blood Pressure Values}
-After calculating the OMWE, the last step is to determine the BP values from it. As explained in chapter \myref{cp:theory}, MAP occurs where the OMWE has its maximum. The time, when the maximum is recorded, is compared to the pressure at that time as indicated by \textcircled{6} in figure \ref{fig:algoExplain}. To account for the oscillations in the deflation curve, the pressure value is averaged over the period of an average heart beat centred around the detected time. The average heart beat is determined from the measurement as explained in section \myref{sec:HR}. In the example above, this results in MAP of \SI{71}{\mmHg}.
+After calculating the OMWE, the last step is to determine the BP values from it. As explained in chapter \myref{cp:theory}, MAP occurs where the OMWE has its maximum. The time, when the maximum is recorded, is compared to the pressure at that time as indicated by \circled{6} in figure \ref{fig:algoExplain}. To account for the oscillations in the deflation curve, the pressure value is averaged over the period of an average heart beat centred around the detected time. The average heart beat is determined from the measurement as explained in section \myref{sec:HR}. In the example above, this results in MAP of \SI{71}{\mmHg}.
 
 Likewise, to determine SBP and DBP, the specific ratios of the maximal oscillations are searched in the OMWE. The example in figure \ref{fig:algoExplain} uses a ratio for systolic BP of 0.5 and for diastolic BP of 0.8 for simplicity.
 
-The systolic BP is determined by stepping backwards in time from the maximal oscillations and the diastolic BP by stepping forwards in time, respectively. Once the value falls below the specific ratio, interpolation is used to find the time where the exact ratio would have occurred. Using the same approach as for the MAP, the specific values found with \textcircled{6} for the data in figure \ref{fig:algoExplain} is \SI{95}{\mmHg} for SBP and \SI{67}{\mmHg} for DBP.
+The systolic BP is determined by stepping backwards in time from the maximal oscillations and the diastolic BP by stepping forwards in time, respectively. Once the value falls below the specific ratio, interpolation is used to find the time where the exact ratio would have occurred. Using the same approach as for the MAP, the specific values found with \circled{6} for the data in figure \ref{fig:algoExplain} is \SI{95}{\mmHg} for SBP and \SI{67}{\mmHg} for DBP.
 
 %TODO results?
 \subsubsection{Implications of Filter Delays}\label{sec:impfilt}
