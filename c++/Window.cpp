@@ -72,6 +72,7 @@ void Window::setupUi(QMainWindow *window) {
     vlLeft->setObjectName(QString::fromUtf8("vlLeft"));
     lInstructions = new QStackedWidget(lWidget);
     lInstructions->setMinimumWidth(500);
+//    lInstructions->set(500);
 
     btnCancel = new QPushButton(lWidget);
     btnCancel->setObjectName(QString::fromUtf8("btnCancel"));
@@ -114,6 +115,7 @@ void Window::setupUi(QMainWindow *window) {
     splitter->addWidget(setupPlots(splitter));
     // Set stretch factor of left part to zero so it will not resize
     splitter->setStretchFactor(0, 0);
+    splitter->setStretchFactor(1, 1);
 
     // Add splitter to main window.
     window->setCentralWidget(splitter);
@@ -142,7 +144,17 @@ void Window::setupUi(QMainWindow *window) {
     splitter->setSizes(Sizes);
 
 
-    //TODO: only for now to be able to switch between the pages of the stacked widget
+
+    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
+    connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
+    connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
+
+    connect(settingsDialog, SIGNAL(accepted()), this, SLOT(updateValues()));
+    connect(settingsDialog, SIGNAL(resetValues()), this, SLOT(resetValuesPerform()));
+
+//    //TODO: remove at the end
+
+//    //TODO: only for now to be able to switch between the pages of the stacked widget
     auto *but0 = new QPushButton("0");
     auto *but1 = new QPushButton("1");
     auto *but2 = new QPushButton("2");
@@ -156,15 +168,6 @@ void Window::setupUi(QMainWindow *window) {
     statusbar->addPermanentWidget(but4);
     auto *spacerbnt = new QLabel(); // fake spacer
     statusbar->addPermanentWidget(spacerbnt, 1);
-
-    connect(btnStart, SIGNAL (released()), this, SLOT (clkBtnStart()));
-    connect(btnCancel, SIGNAL (released()), this, SLOT (clkBtnCancel()));
-    connect(btnReset, SIGNAL (released()), this, SLOT (clkBtnReset()));
-
-    connect(settingsDialog, SIGNAL(accepted()), this, SLOT(updateValues()));
-    connect(settingsDialog, SIGNAL(resetValues()), this, SLOT(resetValuesPerform()));
-
-    //TODO: remove at the end
     connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
     connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
     connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
@@ -198,7 +201,6 @@ QMenuBar *Window::setupMenu(QWidget *parent) {
     menuMenu->addAction(actionExit);
     return menubar;
 }
-//TODO: make plots a bit nicer.
 /**
  * Sets up the page with two plots to display the data.
  *
@@ -224,10 +226,10 @@ QWidget *Window::setupPlots(QWidget *parent) {
 
     pltPre = new Plot(xData, yLPData, dataLength, 250, 0.0, parent);
     pltPre->setObjectName(QString::fromUtf8("pltPre"));
-    pltPre->setAxisTitles("time (sec)", "pressure (mmHg)");
+    pltPre->setAxisTitles("time (s)", "pressure (mmHg)");
     pltOsc = new Plot(xData, yHPData, dataLength, 3, -3, parent);
     pltOsc->setObjectName(QString::fromUtf8("pltOsc"));
-    pltOsc->setAxisTitles("time (sec)", "oscillations (ΔmmHg)");
+    pltOsc->setAxisTitles("time (s)", "oscillations (ΔmmHg)");
 
     double extP = pltPre->getyAxisExtent();
     double extO = pltOsc->getyAxisExtent();
@@ -767,4 +769,5 @@ void Window::resetValuesPerform() {
     settings.setValue("pumpUpValue", process->getPumpUpValue());
     // Reload the values from settings also writes them to the settings dialog:
     loadSettings();
+    retranslateUi(this);
 }
