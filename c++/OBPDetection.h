@@ -80,7 +80,7 @@ private:
     bool enoughData;
 
     // variables to store configurations
-    std::atomic<double> maxValidHR = 100.0;      //! The maximal valid heart rate
+    std::atomic<double> maxValidHR = 120.0;      //! The maximal valid heart rate
     std::atomic<double> minValidHR = 50.0;       //! The minimal valid heart rate
     std::atomic<double> ratio_SBP;               //! from literature, might be changed in settings later
     std::atomic<double> ratio_DBP;               //! from literature, might be changed in settings later

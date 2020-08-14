@@ -256,7 +256,7 @@ void Processing::processSample(double newSample) {
                         notifyHeartRate(obpDetect->getAverageHeartRate());
                         notifySwitchScreen(Screen::emptyCuffScreen);
                         currentState = ProcState::Calculate;
-                    } else{
+                    } else {
                         notifyHeartRate(obpDetect->getCurrentHeartRate());
                     }
                 }

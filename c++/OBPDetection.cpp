@@ -276,13 +276,20 @@ void OBPDetection::findMinima() {
  */
 bool OBPDetection::isEnoughData() {
     bool bIsEnough = false;
+    // minimum number of peaks detected:
     if (maxAmp.size() > minNbrPeaks) {
         auto maxEl = std::max_element(maxAmp.begin(), maxAmp.end());
-        double cutoff = (*maxEl) * (ratio_DBP - cutoffHyst);
-        if (*maxEl > 1.5 && maxAmp.back() < cutoff) {
-            bIsEnough = true;
+        // maximum value has minimal size of 1.5
+        // the last two values are larger than the current --> continuously decreasing
+        if(*maxEl > 1.5 && (maxAmp.back() < *(maxAmp.end()-3)) && (maxAmp.back() < *(maxAmp.end()-2)) ){
+            double cutoff = (*maxEl) * (ratio_DBP - cutoffHyst);
+            // the last three values (current included), are smaller than the cutoff
+            if ((*(maxAmp.end()-3) < cutoff) && (*(maxAmp.end()-2) < cutoff) && (maxAmp.back() < cutoff)) {
+                bIsEnough = true;
+            }
         }
     }
+
     return bIsEnough;
 }
 
@@ -368,45 +375,52 @@ void OBPDetection::findMAP() {
 
     double maxVAL = *maxOMWE;
     double sbpSearch = ratio_SBP * maxVAL;
-    double ubSBP;
-    double lbSBP;
-    int lbTime;
-    int ubTime;
+    double ubSBP = 0;
+    double lbSBP = 0;
+    int lbSTime = 0;
+    int ubSTime = 0;
 
     for (auto omweSBP = omweData.begin(); omweSBP != maxOMWE; ++omweSBP) {
         if (*omweSBP > sbpSearch) {
             ubSBP = *omweSBP;
-            ubTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
+            ubSTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
             omweSBP--;
             lbSBP = *omweSBP;
-            lbTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
+            lbSTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
             break;
         }
     }
 
-    int lerpSBPtime = (int) std::lerp(lbTime, ubTime, getRatio(lbSBP, ubSBP, sbpSearch));
+    int lerpSBPtime = (int) std::lerp(lbSTime, ubSTime, getRatio(lbSBP, ubSBP, sbpSearch));
     resSBP = getPressureAt(lerpSBPtime);
 
     double dbpSearch = ratio_DBP * maxVAL;
+    double ubDBP = 0;
+    double lbDBP = 0;
+    int lbDTime = 0;
+    int ubDTime = 0;
     for (auto omweDBP = maxOMWE; omweDBP != omweData.end(); ++omweDBP) {
         if (*omweDBP < dbpSearch) {
-            lbSBP = *omweDBP;
-            lbTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
+            lbDBP = *omweDBP;
+            lbDTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
             omweDBP--;
-            ubSBP = *omweDBP;
-            ubTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
+            ubDBP = *omweDBP;
+            ubDTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
             break;
         }
     }
-
-    // The curve is falling, "upper bound" time is lower than "lower bound" time.
-    // The ratio is calculated the same way as before, but to account for the lower
-    // value relating to the higher time the ratio is inverted.
-    // The interpolation is done from the "upper bound" time (earlier in time) to the
-    // "lower bound" time (later in time).
-    int lerpDBPtime = (int) std::lerp(ubTime, lbTime, 1.0 - getRatio(lbSBP, ubSBP, dbpSearch));
-    resDBP = getPressureAt(lerpDBPtime);
-
+    if (lbDBP != 0 ) {
+        // The curve is falling, "upper bound" time is lower than "lower bound" time.
+        // The ratio is calculated the same way as before, but to account for the lower
+        // value relating to the higher time the ratio is inverted.
+        // The interpolation is done from the "upper bound" time (earlier in time) to the
+        // "lower bound" time (later in time).
+        int lerpDBPtime = (int) std::lerp(ubDTime, lbDTime, 1.0 - getRatio(lbDBP, ubDBP, dbpSearch));
+        resDBP = getPressureAt(lerpDBPtime);
+    }
+    else{
+        PLOG_WARNING << "couldn't find DBP";
+    }
 }
 
 /**

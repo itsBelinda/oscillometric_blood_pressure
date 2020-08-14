@@ -383,56 +383,68 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     lInfoResult->setObjectName(QString::fromUtf8("lInfoDeflate"));
     lInfoResult->setWordWrap(true);
     lInfoResult->setAlignment(Qt::AlignCenter);
+    vSpace6 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vSpace7 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
     btnReset = new QPushButton(parent);
     btnReset->setObjectName(QString::fromUtf8("btnReset"));
-    QFont f;
-    f.setBold(true);
-    f.setPointSize(14);
+    QFont flb;
+    flb.setBold(true);
+    flb.setPointSize(flb.pointSize()+4);
+    QFont fb;
+    fb.setBold(true);
+    flb.setPointSize(flb.pointSize()+2);
 
     flResults = new QFormLayout();
     flResults->setObjectName(QString::fromUtf8("flResults"));
+    lMeasured = new QLabel(parent);
+    lMeasured->setObjectName(QString::fromUtf8("lMeasured"));
+    lEstimated = new QLabel(parent);
+    lEstimated->setObjectName(QString::fromUtf8("lEstimated"));
     lMAP = new QLabel(parent);
-    lMAP->setFont(f);
+    lMAP->setFont(flb);
     lMAP->setObjectName(QString::fromUtf8("lMAP"));
     lMAPval = new QLabel(parent);
     lMAPval->setObjectName(QString::fromUtf8("lMAPval"));
-    lMAPval->setFont(f);
-    f.setPointSize(12);
+    lMAPval->setFont(flb);
     lSBP = new QLabel(parent);
     lSBP->setObjectName(QString::fromUtf8("lSBP"));
-    lSBP->setFont(f);
+    lSBP->setFont(fb);
     lSBPval = new QLabel(parent);
     lSBPval->setObjectName(QString::fromUtf8("lSBPval"));
-    lSBPval->setFont(f);
+    lSBPval->setFont(fb);
     lDBP = new QLabel(parent);
     lDBP->setObjectName(QString::fromUtf8("lDBP"));
-    lDBP->setFont(f);
+    lDBP->setFont(fb);
     lDBPval = new QLabel(parent);
     lDBPval->setObjectName(QString::fromUtf8("lDBPval"));
-    lDBPval->setFont(f);
+    lDBPval->setFont(fb);
     lheartRateAV = new QLabel(parent);
     lheartRateAV->setObjectName(QString::fromUtf8("lheartRateAV"));
-    f.setBold(false);
-    lheartRateAV->setFont(f);
+    flb.setBold(false);
+    lheartRateAV->setFont(fb);
     lheartRateAV->setMinimumWidth(150);
     lHRvalAV = new QLabel(parent);
     lHRvalAV->setObjectName(QString::fromUtf8("lHRvalAV"));
-    lHRvalAV->setFont(f);
+    lHRvalAV->setFont(fb);
     lHRvalAV->setMinimumWidth(150);
 
-    flResults->setWidget(0, QFormLayout::LabelRole, lMAP);
-    flResults->setWidget(0, QFormLayout::FieldRole, lMAPval);
-    flResults->setWidget(1, QFormLayout::LabelRole, lSBP);
-    flResults->setWidget(1, QFormLayout::FieldRole, lSBPval);
-    flResults->setWidget(2, QFormLayout::LabelRole, lDBP);
-    flResults->setWidget(2, QFormLayout::FieldRole, lDBPval);
-    flResults->setWidget(3, QFormLayout::LabelRole, lheartRateAV);
-    flResults->setWidget(3, QFormLayout::FieldRole, lHRvalAV);
+    flResults->setWidget(0, QFormLayout::LabelRole, lMeasured);
+    flResults->setWidget(1, QFormLayout::LabelRole, lMAP);
+    flResults->setWidget(1, QFormLayout::FieldRole, lMAPval);
+    flResults->setWidget(3, QFormLayout::LabelRole, lEstimated);
+    flResults->setWidget(4, QFormLayout::LabelRole, lSBP);
+    flResults->setWidget(4, QFormLayout::FieldRole, lSBPval);
+    flResults->setWidget(5, QFormLayout::LabelRole, lDBP);
+    flResults->setWidget(5, QFormLayout::FieldRole, lDBPval);
+    flResults->setWidget(2, QFormLayout::LabelRole, lheartRateAV);
+    flResults->setWidget(2, QFormLayout::FieldRole, lHRvalAV);
     flResults->setContentsMargins(50,0,50,0);
 
+    vlResult->addItem(vSpace6);
     vlResult->addWidget(lInfoResult);
     vlResult->addLayout(flResults);
+    vlResult->addItem(vSpace7);
     vlResult->addWidget(btnReset);
     lInstrResult->setLayout(vlResult);
 
@@ -472,30 +484,30 @@ void Window::retranslateUi(QMainWindow *window) {
     window->setWindowTitle("Oscillometric Blood Pressure Measurement");
 
     lInfoStart->setText("<b>Prepare the measurement:</b><br><br>"
-                        "1. Put the cuff on your upper arm of your nondominant hand, making sure it is tight.<br>"
+                        "1. Put the cuff on the upper arm of your non-dominant hand, making sure it is tight.<br>"
                         "2. Rest your arm on a flat surface.<br>"
                         "3. Take the pump into your dominant hand.<br>"
                         "4. Make sure the valve is closed, but you can handle it easily.<br>"
                         "5. Press Start when you are ready.");
-    QString infoPump = QString("<b>Pump Up to %1 mmHg</b><br><br>"
-                               "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to 180 mmHg.<br>"
-                               "Make sure the valve is fully closed.<br>"
-                               "Use the dial above for reference.").arg(pumpUpVal);
-    lInfoPump->setText(infoPump);
+    lInfoPump->setText(QString("<b>Pump-up to %1 mmHg</b><br><br>"
+                               "Using your dominant hand, where your arm is not in the cuff, quickly pump up the cuff to %1 mmHg.<br><br>"
+                               "The valve should stay fully closed.<br>"
+                               "Use the dial above for reference.").arg(pumpUpVal));
 
-    lInfoRelease->setText("<b>Slowly release pressure at 3 mmHg/s</b><br><br>"
-                          "Open the valve slightly to release pressure at about 3 mmHg per second."
-                          "Wait calmly and try not to move. <br><br>");
+    lInfoRelease->setText("<b>Slowly and continuously release pressure.</b><br><br>"
+                          "Open the valve slightly to release pressure at approximately 3 mmHg/s.<br>"
+                          "Wait calmly and try not to move. <br><br>"
+                          "<b>Take your time. The deflation should be as uniform as possible.</b><br><br>");
     lInfoDeflate->setText("<b>Completely open the valve.</b><br><br>"
                           "Wait for the pressure to go down to 0 mmHg.<br><br>"
                           "You will see the results next.");
-    lInfoResult->setText("<b>Results:</b><br><br>"
-                         "Click Reset to start a new measurement<br>");
+    lInfoResult->setText("<b>Results:</b><br>");
 
     lMeter->setText("<b>Pressure in mmHg:</b>");
     btnStart->setText("Start");
     btnReset->setText("Reset");
     btnCancel->setText("Cancel");
+    lMeasured->setText("measured:");
     lMAP->setText("<b>MAP:</b>");//<font color="red"></font>
     lMAPval->setText("- mmHg");
     lSBP->setText("<b>SBP:</b>");
@@ -505,8 +517,9 @@ void Window::retranslateUi(QMainWindow *window) {
     lheartRate->setText("Current heart rate:<br><b>--</b>");
     lheartRateAV->setText("Heart rate:");
     lHRvalAV->setText("- beats/min");
-    pltPre->setPlotTitle("Low-pass filtered pressure ");
-    pltOsc->setPlotTitle("High-pass filtered oscillations");
+    lEstimated->setText("estimated:");
+    pltPre->setPlotTitle("Pressure, low-pass filtered");
+    pltOsc->setPlotTitle("Oscillations, high-pass filtered");
 
     actionSettings->setText("Settings");
     actionInfo->setText("Info");
@@ -538,6 +551,7 @@ void Window::eNewData(double pData, double oData) {
 
     bool bOk = QMetaObject::invokeMethod(meter, "setValue", Qt::QueuedConnection, Q_ARG(double, pData));
     assert(bOk);
+//    std::cout << pData << std::endl;
 }
 /**
  * Handles notifications to switch the displayed screen.

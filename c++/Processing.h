@@ -82,7 +82,7 @@ private:
     double sampling_rate;
     std::atomic<double> mmHgInflate = 180.0;
     double ambientVoltage = 0.7;
-    double corrFactor = 2.5; // due to voltage divider
+    double corrFactor = 2.6; // due to voltage divider
 
 };
 

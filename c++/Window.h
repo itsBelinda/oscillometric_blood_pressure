@@ -95,6 +95,8 @@ private:
     QSpacerItem *vSpace2;
     QSpacerItem *vSpace4;
     QSpacerItem *vSpace5;
+    QSpacerItem *vSpace6;
+    QSpacerItem *vSpace7;
     QLabel *lMeter;
     QLabel *lInfoStart;
     QLabel *lInfoPump;
@@ -109,13 +111,14 @@ private:
     QLabel *lheartRate;
     QLabel *lheartRateAV;
     QLabel *lHRvalAV;
+    QLabel *lMeasured;
     QLabel *lMAP;
     QLabel *lMAPval;
+    QLabel *lEstimated;
     QLabel *lSBP;
     QLabel *lSBPval;
     QLabel *lDBP;
     QLabel *lDBPval;
-    QLabel *lTitlePlotOsc;
     Plot *pltPre;
     Plot *pltOsc;
     QFrame *line;
