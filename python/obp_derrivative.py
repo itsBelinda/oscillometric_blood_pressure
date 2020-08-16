@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 
 #%% Get the data
 
-data = np.loadtxt('../data/sample_07_10.dat')
+data = np.loadtxt('../data/sample_07_07.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
@@ -54,13 +54,17 @@ ymmHg = (y - ambientV)  * mmHg_per_kPa * kPa_per_V * corrFact
 #
 # 5 Hz LP filter
 f5 = 5
-bLP, aLP = signal.butter(6, f5/fs*2, 'lowpass')
+bLP, aLP = signal.butter(4, f5/fs*2, 'lowpass')
 yfLP = signal.lfilter(bLP, aLP, ymmHg)
 
 # 0.5 Hz HP filter
-f05 = 0.5 # TODO: might be better to set lower ~0.3
-bHP, aHP = signal.butter(2, f05/fs*2, 'highpass')
+f05 = 0.3 # TODO: might be better to set lower ~0.3
+bHP, aHP = signal.butter(4, f05/fs*2, 'highpass')
 yfHP = signal.lfilter(bHP, aHP, yfLP)
+
+f5 = .8
+bLLP, aLLP = signal.butter(4, f5/fs*2, 'lowpass')
+yfLLP = signal.lfilter(bLLP, aLLP, ymmHg)
 
 yfBP = yfLP-yfHP
 
@@ -134,6 +138,7 @@ tP = t[iStart:iEnd+1]
 yhpP = yfHP[iStart:iEnd+1]
 ylpP = yfLP[iStart:iEnd+1]
 ybpP = yfBP[iStart:iEnd+1]
+yllpP = yfLLP[iStart:iEnd+1]
 
 # make sure minimas are (at least) defined for every maxima
 minStart = np.argmax(tMinima>tMaximas[oscStartInd])-1
@@ -157,19 +162,25 @@ dPresN = np.zeros(len(dMaxMin))
 dPresNP = np.zeros(len(dMaxMin))
 
 # TODO: which is needed? Interpolation?
-for i in range(0,len(dMaxMin)-1):
-    dPres[i] = (dMaxMin[i+1]-dMaxMin[i])
-    dPresN[i] = (dMaxMin[i+1]-dMaxMin[i])/(tMaxP[i+1]-tMaxP[i])
-    dPresNP[i] = (dMaxMin[i]-dMaxMin[i+1])/(yMaximasP[i+1]-yMaximasP[i])
+yMaxPCalc = yMaximasP[::-1]
+dMaxMinCalc = dMaxMin[::-1] #oscMaxP[::-1]#
+
+# dmin = oscMinP[0:len(tMaxP)]
+# dMaxMinCalc = -dmin[::-1]
+
+for i in range(1,len(dMaxMin)):
+    dPres[i] = (dMaxMinCalc[i]-dMaxMinCalc[i-1])
+    dPresN[i] = (dMaxMinCalc[i]-dMaxMinCalc[i-1])/(tMaxP[i]-tMaxP[i-1])
+    dPresNP[i] = (dMaxMinCalc[i]-dMaxMinCalc[i-1])/(yMaxPCalc[i]-yMaxPCalc[i-1])
     
-maxVal = np.argmax(dMaxMin)    
-pMAP = yMaximasP[maxVal]
+maxVal = np.argmax(dMaxMinCalc)    
+pMAP = yMaxPCalc[maxVal]
 
-maxChange = np.argmax(dPresNP[0:maxVal])
-minChange = np.argmin(dPresNP[maxVal:])+maxVal
+maxChange = np.argmax(dPres)#[0:maxVal])
+minChange = np.argmin(dPres)#[maxVal:])
 
-pSBP = yMaximasP[maxChange]
-pDBP = yMaximasP[minChange]
+pDBP = yMaxPCalc[maxChange]
+pSBP = yMaxPCalc[minChange]
 
 print("using only min/max values of oscillogram")
 print("    MAP: ", np.around(pMAP, decimals=2) )
@@ -177,121 +188,113 @@ print("    SBP: ", np.around(pSBP, decimals=2) )
 print("    DBP: ", np.around(pDBP, decimals=2) )
 
 
+maxChange = np.argmax(dPresN)#[0:maxVal])
+minChange = np.argmin(dPresN)#[maxVal:])
+
+pDBP = yMaxPCalc[maxChange]
+pSBP = yMaxPCalc[minChange]
+
+print("using only min/max values of oscillogram norm in t")
+print("    MAP: ", np.around(pMAP, decimals=2) )
+print("    SBP: ", np.around(pSBP, decimals=2) )
+print("    DBP: ", np.around(pDBP, decimals=2) )
 
 
-#interpolation
-intMax = interp1d(yMaximasP, oscMaxP, kind='quadratic')
-intMin = interp1d(yMinimasP, oscMinP, kind='quadratic')
+maxChange = np.argmax(dPresNP)#[0:maxVal])
+minChange = np.argmin(dPresNP)#[maxVal:])
 
-omweInter = intMax(ybpP)-intMin(ybpP)
-argMaxInter = np.argmax(omweInter)
-pMAPinter = ybpP[argMaxInter]
+pDBP = yMaxPCalc[maxChange]
+pSBP = yMaxPCalc[minChange]
 
-# delata alculated by hand and normalised in pressure
-dPresInter = np.zeros(len(omweInter))
-for i in range(0,len(omweInter)-1):
-    dPresInter[i] = (omweInter[i+1]-omweInter[i]) / (ybpP[i+1]-ybpP[i])
-    
-
-# delata alculated by hand and normalised in pressure
-maxChangeInter = np.argmax(dPresInter[0:argMaxInter])
-minChangeInter = np.argmin(dPresInter[argMaxInter:])+argMaxInter
-
-pSBPInter = ybpP[maxChangeInter]
-pDBPInter = ybpP[minChangeInter]
-
-print("interpolation (by hand, normalised in pressure): " )
-print("    MAP: ", np.around(pMAPinter, decimals=2) )
-print("    SBP: ", np.around(pSBPInter, decimals=2) )
-print("    DBP: ", np.around(pDBPInter, decimals=2) )
-
-# delata alculated by python
-dIPres = np.diff(omweInter)
-dIPres = np.append(0,dIPres)
-
-maxChangeI = np.argmax(dIPres[0:argMaxInter])
-minChangeI = np.argmin(dIPres[argMaxInter:])+argMaxInter
-
-pSBPInt = ybpP[maxChangeI]
-pDBPInt = ybpP[minChangeI]
-
-print("interpolation (by pyhton, not normalised): " )
-print("    MAP: ", np.around(pMAPinter, decimals=2) )
-print("    SBP: ", np.around(pSBPInt, decimals=2) )
-print("    DBP: ", np.around(pDBPInt, decimals=2) )
-
-
+print("using only min/max values of oscillogram norm in p")
+print("    MAP: ", np.around(pMAP, decimals=2) )
+print("    SBP: ", np.around(pSBP, decimals=2) )
+print("    DBP: ", np.around(pDBP, decimals=2) )
 
 
 #%% plot imporant part of singal:
-fig_processSignal, (proc_Pressure, proc_env, proc_delta) = plt.subplots(3,1,
-                sharex=False,sharey=False,num='derrivative envelope')
+fig_processSignal, ((proc_Pressure, proc_env), (proc_osc, proc_delta)) = plt.subplots(2,2, sharex=False,sharey=False,num='derrivative envelope')
 #fig_processSignal.subplots_adjust(hspace=0)
 
-proc_Pressure.plot(tP,ylpP, 'r', label='pressure')
-proc_Pressure.plot(tP,ylpP-yhpP, 'b', label='deflation')
+# proc_Pressure.plot(tP,yllpP, 'b', label='defaltion')
+proc_Pressure.plot(tP,ylpP, 'k', label='pressure')
+
+proc_osc.plot(tP, yhpP, 'k', label='OMW')
 
 #proc_delta.plot(yfLP, intMax(tP)-intMin(tP), 'g', label='OMVE interp.')
-proc_env.plot(yMaximasP, dMaxMin,  label='OMVE max-min')
-proc_env.plot(yMaximasP, oscMaxP, 'r',marker='x', label='OMVE max')
-proc_env.plot(yMinimasP, oscMinP,'b', marker='x', label='OMVE min')
-proc_env.plot(ybpP, intMin(ybpP), 'g', label='OMVE min')
-proc_env.plot(ybpP, intMax(ybpP), 'm', label='OMVE max')
-proc_env.plot(ybpP, omweInter, 'c', label='OMVE interp')
+proc_env.plot(yMaximasP, oscMaxP, 'r',marker='x', label='OMWE max')
+proc_env.plot(yMinimasP, oscMinP,'b', marker='x', label='OMWE min')
+# proc_env.plot(ybpP, intMax(ybpP), 'm', label='OMVE max')
+# proc_env.plot(ybpP, intMin(ybpP), 'g', label='OMVE min')
+proc_env.plot(yMaximasP, dMaxMin, 'k', label='OMWE max-min')
+# proc_env.plot(ybpP, omweInter, 'c', label='OMWE interp.')
 
-proc_delta.plot(yMaximasP, dPres,  label='dOMVE')
-proc_delta.plot(yMaximasP, dPresN,  label='dOMVE n in time')
-proc_delta.plot(yMaximasP, dPresNP,  label='dOMVE n in pressure')
-proc_delta.plot(ybpP, dIPres,  label='dOMVE interpolation')
-proc_delta.plot(ybpP, dPresInter,  label='dOMVE interpolation n in pressure')
 
+proc_delta.plot(yMaxPCalc, dPres, label='dOMWE')
+proc_delta.plot(yMaxPCalc, dPresN, label='dOMWE norm. in t')
+proc_delta.plot(yMaxPCalc, dPresNP, label='dOMWE norm. in p')
+
+# proc_delta.plot(yMaxPCalc, dPres/max(dPres), label='dOMWE')
+# proc_delta.plot(yMaxPCalc, dPresN/max(dPresN), label='dOMWE norm. in t')
+# proc_delta.plot(yMaxPCalc, dPresNP/max(dPresNP), label='dOMWE norm. in p')
 
 proc_Pressure.legend()
+proc_osc.legend()
 proc_delta.legend()
+proc_env.legend()
+proc_Pressure.grid()
+proc_osc.grid()
+proc_delta.grid()
+proc_env.grid()
 
-fig_processSignal.suptitle('Blood Pressure', fontsize=20) 
-proc_Pressure.set_ylabel('mmHg', fontsize=16)
-proc_Pressure.set_xlabel('Time (s)', fontsize=16)
+# fig_processSignal.suptitle('Derivative Algorithm', fontsize=16) 
+proc_Pressure.set_ylabel('pressure (mmHg)', fontsize=12)
+proc_Pressure.set_xlabel('time (s)', fontsize=12)
 proc_Pressure.set_xlim(min(tP), max(tP))
+proc_osc.set_xlabel('time (s)', fontsize=12)
+proc_osc.set_ylabel('oscillation (ΔmmHg)', fontsize=12)
+proc_osc.set_xlim(min(tP), max(tP))
+# proc_env.set_xlim(min(ybpP), max(ybpP))
+# proc_delta.set_xlim(min(ybpP), max(ybpP))
 
-proc_env.set_ylabel('detlat/mmHg', fontsize=16)
-proc_env.set_xlabel('mmHg', fontsize=16)
-proc_env.set_xlim(max(yMaximasP)+10, min(yMaximasP)-10)
-proc_delta.set_ylabel('detlat/mmHg', fontsize=16)
-proc_delta.set_xlabel('mmHg', fontsize=16)
-proc_delta.set_xlim(max(yMaximasP)+10, min(yMaximasP)-10)
-#proc_delta.set_ylim(-3, 3)
+proc_env.set_ylabel('envelope (ΔmmHg)', fontsize=12)
+proc_env.set_xlabel('pressure (mmHg)', fontsize=12)
+proc_env.set_xlim(min(yMaximasP), max(yMaximasP))
+proc_delta.set_ylabel('derivative (Δ2mmHg)', fontsize=12)
+proc_delta.set_xlabel('pressure (mmHg)', fontsize=12)
+proc_delta.set_xlim(min(yMaximasP),max(yMaximasP))
+# proc_delta.set_ylim(-1.2, 1.2)
 plt.get_current_fig_manager().window.showMaximized()
 
 
 #%% Plot full signals
-#(dMaxMin[i]-dMaxMin[i-1])/tMaxP[i]
-# fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
-#                 sharex=True,sharey=False,num='mmHg Signal')
-# fig_timeSignal.subplots_adjust(hspace=0)
+(dMaxMin[i]-dMaxMin[i-1])/tMaxP[i]
+fig_timeSignal, (time_filt, time_LP, time_HP) = plt.subplots(3,1,
+                sharex=True,sharey=False,num='mmHg Signal')
+fig_timeSignal.subplots_adjust(hspace=0)
 
-# time_filt.plot(t,ymmHg, 'b', label='raw')
-# time_LP.plot(t, yfLP, 'r', label='LP')
-# time_HP.plot(t,yfHP, 'g', label='HP')
-# time_HP.plot(tMaximas, oscMax, 'm', label='local maximas')
-# time_HP.plot(tMinima, oscMin, 'm', label='local minimas')
-# time_HP.plot(tMaximas, deltaT, 'c', label='time since last maxima')
-# time_HP.plot(tMaximas, delta2T, 'k', label='2nd derrivative in time')
-# time_HP.axvline(x = (iStart/1000))
-# time_HP.axvline(x = (iEnd/1000))
+time_filt.plot(t,ymmHg, 'b', label='raw')
+time_LP.plot(t, yfLP, 'r', label='LP')
+time_HP.plot(t,yfHP, 'g', label='HP')
+time_HP.plot(tMaximas, oscMax, 'm', label='local maximas')
+time_HP.plot(tMinima, oscMin, 'm', label='local minimas')
+time_HP.plot(tMaximas, deltaT, 'c', label='time since last maxima')
+time_HP.plot(tMaximas, delta2T, 'k', label='2nd derrivative in time')
+time_HP.axvline(x = (iStart/1000))
+time_HP.axvline(x = (iEnd/1000))
 
-# time_filt.legend()
-# time_LP.legend()
-# time_HP.legend()
+time_filt.legend()
+time_LP.legend()
+time_HP.legend()
 
 # fig_timeSignal.suptitle('Blood Pressure', fontsize=20) 
-# time_filt.set_ylabel('mmHg', fontsize=16)
-# time_LP.set_ylabel('mmHg', fontsize=16)
-# time_HP.set_ylabel('detlat/mmHg', fontsize=16)
-# time_HP.set_xlabel('Time (s)', fontsize=16)
-# time_LP.set_xlim(0, max(t))
-# time_HP.set_ylim(-3, 3)
-# plt.get_current_fig_manager().window.showMaximized()
+time_filt.set_ylabel('mmHg', fontsize=14)
+time_LP.set_ylabel('mmHg', fontsize=14)
+time_HP.set_ylabel('detlat/mmHg', fontsize=14)
+time_HP.set_xlabel('Time (s)', fontsize=14)
+time_LP.set_xlim(0, max(t))
+time_HP.set_ylim(-3, 3)
+plt.get_current_fig_manager().window.showMaximized()
  
 
 

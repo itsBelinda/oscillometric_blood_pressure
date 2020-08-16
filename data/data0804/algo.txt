@@ -1,0 +1,20 @@
+map: 71
+dbp: 67
+sbp: 95
+heart rate: 70
+
+time shift: 3998
+
+Pulse:  68.9
+MAP (max value):  71.88
+    SBP:  93.99
+    DBP:  65.01
+MAP (max-min value):  71.88
+    SBP:  95.65
+    DBP:  67.12
+MAP (interpolation):  71.87
+    SBP:  94.5
+    DBP:  66.05
+MAP (polyfit):  74.88
+    SBP:  97.97
+    DBP:  64.01
