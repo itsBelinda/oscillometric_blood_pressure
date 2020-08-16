@@ -155,24 +155,24 @@ void Window::setupUi(QMainWindow *window) {
 //    //TODO: remove at the end
 
 //    //TODO: only for now to be able to switch between the pages of the stacked widget
-    auto *but0 = new QPushButton("0");
-    auto *but1 = new QPushButton("1");
-    auto *but2 = new QPushButton("2");
-    auto *but3 = new QPushButton("3");
-    auto *but4 = new QPushButton("4");
-
-    statusbar->addPermanentWidget(but0);
-    statusbar->addPermanentWidget(but1);
-    statusbar->addPermanentWidget(but2);
-    statusbar->addPermanentWidget(but3);
-    statusbar->addPermanentWidget(but4);
-    auto *spacerbnt = new QLabel(); // fake spacer
-    statusbar->addPermanentWidget(spacerbnt, 1);
-    connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
-    connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
-    connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
-    connect(but3, SIGNAL (released()), this, SLOT (clkBtn4()));
-    connect(but4, SIGNAL (released()), this, SLOT (clkBtn5()));
+//    auto *but0 = new QPushButton("0");
+//    auto *but1 = new QPushButton("1");
+//    auto *but2 = new QPushButton("2");
+//    auto *but3 = new QPushButton("3");
+//    auto *but4 = new QPushButton("4");
+//
+//    statusbar->addPermanentWidget(but0);
+//    statusbar->addPermanentWidget(but1);
+//    statusbar->addPermanentWidget(but2);
+//    statusbar->addPermanentWidget(but3);
+//    statusbar->addPermanentWidget(but4);
+//    auto *spacerbnt = new QLabel(); // fake spacer
+//    statusbar->addPermanentWidget(spacerbnt, 1);
+//    connect(but0, SIGNAL (released()), this, SLOT (clkBtn1()));
+//    connect(but1, SIGNAL (released()), this, SLOT (clkBtn2()));
+//    connect(but2, SIGNAL (released()), this, SLOT (clkBtn3()));
+//    connect(but3, SIGNAL (released()), this, SLOT (clkBtn4()));
+//    connect(but4, SIGNAL (released()), this, SLOT (clkBtn5()));
 
 }
 
@@ -430,6 +430,10 @@ QWidget *Window::setupResultPage(QWidget *parent) {
     lHRvalAV->setObjectName(QString::fromUtf8("lHRvalAV"));
     lHRvalAV->setFont(fb);
     lHRvalAV->setMinimumWidth(150);
+    lMAPval->setAlignment(Qt::AlignRight);
+    lHRvalAV->setAlignment(Qt::AlignRight);
+    lDBPval->setAlignment(Qt::AlignRight);
+    lSBPval->setAlignment(Qt::AlignRight);
 
     flResults->setWidget(0, QFormLayout::LabelRole, lMeasured);
     flResults->setWidget(1, QFormLayout::LabelRole, lMAP);
@@ -512,9 +516,9 @@ void Window::retranslateUi(QMainWindow *window) {
     lMeasured->setText("measured:");
     lMAP->setText("<b>MAP:</b>");//<font color="red"></font>
     lMAPval->setText("- mmHg");
-    lSBP->setText("<b>SBP:</b>");
+    lSBP->setText(QString("<b>SBP (r=%1):</b>").arg(process->getRatioSBP()));
     lSBPval->setText("- mmHg");
-    lDBP->setText("<b>DBP:</b>");
+    lDBP->setText(QString("<b>DBP (r=%1):</b>").arg(process->getRatioDBP()));
     lDBPval->setText("- mmHg");
     lheartRate->setText("Current heart rate:<br><b>--</b>");
     lheartRateAV->setText("Heart rate:");

@@ -234,7 +234,7 @@ void Processing::processSample(double newSample) {
                 if (ymmHg > mmHgInflate) {
                     obpDetect->reset();
                     notifySwitchScreen(Screen::deflateScreen);
-                    std::cout << "raw time shift: " << rawData.size();
+//                    std::cout << "raw time shift: " << rawData.size();
                     //TODO: possibly add entry end exit functions for each state
                     // function: switch state: returns new state
                     // performs entry and exit operations (notifications)
