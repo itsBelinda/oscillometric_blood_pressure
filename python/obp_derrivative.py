@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 
 #%% Get the data
 
-data = np.loadtxt('../data/sample_07_10.dat')
+data = np.loadtxt('../data/sample_07_07.dat')
 fs= 1000 # Hz
 resolution = 24 # bits
 N = len(data)
@@ -61,6 +61,10 @@ yfLP = signal.lfilter(bLP, aLP, ymmHg)
 f05 = 0.3 # TODO: might be better to set lower ~0.3
 bHP, aHP = signal.butter(4, f05/fs*2, 'highpass')
 yfHP = signal.lfilter(bHP, aHP, yfLP)
+
+f5 = .8
+bLLP, aLLP = signal.butter(4, f5/fs*2, 'lowpass')
+yfLLP = signal.lfilter(bLLP, aLLP, ymmHg)
 
 yfBP = yfLP-yfHP
 
@@ -134,6 +138,7 @@ tP = t[iStart:iEnd+1]
 yhpP = yfHP[iStart:iEnd+1]
 ylpP = yfLP[iStart:iEnd+1]
 ybpP = yfBP[iStart:iEnd+1]
+yllpP = yfLLP[iStart:iEnd+1]
 
 # make sure minimas are (at least) defined for every maxima
 minStart = np.argmax(tMinima>tMaximas[oscStartInd])-1
@@ -158,7 +163,10 @@ dPresNP = np.zeros(len(dMaxMin))
 
 # TODO: which is needed? Interpolation?
 yMaxPCalc = yMaximasP[::-1]
-dMaxMinCalc = dMaxMin[::-1]
+dMaxMinCalc = dMaxMin[::-1] #oscMaxP[::-1]#
+
+# dmin = oscMinP[0:len(tMaxP)]
+# dMaxMinCalc = -dmin[::-1]
 
 for i in range(1,len(dMaxMin)):
     dPres[i] = (dMaxMinCalc[i]-dMaxMinCalc[i-1])
@@ -168,8 +176,8 @@ for i in range(1,len(dMaxMin)):
 maxVal = np.argmax(dMaxMinCalc)    
 pMAP = yMaxPCalc[maxVal]
 
-maxChange = np.argmax(dPresNP[0:maxVal])
-minChange = np.argmin(dPresNP[maxVal:])+maxVal
+maxChange = np.argmax(dPres)#[0:maxVal])
+minChange = np.argmin(dPres)#[maxVal:])
 
 pDBP = yMaxPCalc[maxChange]
 pSBP = yMaxPCalc[minChange]
@@ -180,18 +188,42 @@ print("    SBP: ", np.around(pSBP, decimals=2) )
 print("    DBP: ", np.around(pDBP, decimals=2) )
 
 
+maxChange = np.argmax(dPresN)#[0:maxVal])
+minChange = np.argmin(dPresN)#[maxVal:])
+
+pDBP = yMaxPCalc[maxChange]
+pSBP = yMaxPCalc[minChange]
+
+print("using only min/max values of oscillogram norm in t")
+print("    MAP: ", np.around(pMAP, decimals=2) )
+print("    SBP: ", np.around(pSBP, decimals=2) )
+print("    DBP: ", np.around(pDBP, decimals=2) )
+
+
+maxChange = np.argmax(dPresNP)#[0:maxVal])
+minChange = np.argmin(dPresNP)#[maxVal:])
+
+pDBP = yMaxPCalc[maxChange]
+pSBP = yMaxPCalc[minChange]
+
+print("using only min/max values of oscillogram norm in p")
+print("    MAP: ", np.around(pMAP, decimals=2) )
+print("    SBP: ", np.around(pSBP, decimals=2) )
+print("    DBP: ", np.around(pDBP, decimals=2) )
+
+
 #%% plot imporant part of singal:
 fig_processSignal, ((proc_Pressure, proc_env), (proc_osc, proc_delta)) = plt.subplots(2,2, sharex=False,sharey=False,num='derrivative envelope')
 #fig_processSignal.subplots_adjust(hspace=0)
 
-# proc_Pressure.plot(tP,ybpP, 'b', label='defaltion')
+# proc_Pressure.plot(tP,yllpP, 'b', label='defaltion')
 proc_Pressure.plot(tP,ylpP, 'k', label='pressure')
 
 proc_osc.plot(tP, yhpP, 'k', label='OMW')
 
 #proc_delta.plot(yfLP, intMax(tP)-intMin(tP), 'g', label='OMVE interp.')
 proc_env.plot(yMaximasP, oscMaxP, 'r',marker='x', label='OMWE max')
-proc_env.plot(yMinimasP, oscMinP,'b', marker='x', label='OMVE min')
+proc_env.plot(yMinimasP, oscMinP,'b', marker='x', label='OMWE min')
 # proc_env.plot(ybpP, intMax(ybpP), 'm', label='OMVE max')
 # proc_env.plot(ybpP, intMin(ybpP), 'g', label='OMVE min')
 proc_env.plot(yMaximasP, dMaxMin, 'k', label='OMWE max-min')
@@ -202,6 +234,9 @@ proc_delta.plot(yMaxPCalc, dPres, label='dOMWE')
 proc_delta.plot(yMaxPCalc, dPresN, label='dOMWE norm. in t')
 proc_delta.plot(yMaxPCalc, dPresNP, label='dOMWE norm. in p')
 
+# proc_delta.plot(yMaxPCalc, dPres/max(dPres), label='dOMWE')
+# proc_delta.plot(yMaxPCalc, dPresN/max(dPresN), label='dOMWE norm. in t')
+# proc_delta.plot(yMaxPCalc, dPresNP/max(dPresNP), label='dOMWE norm. in p')
 
 proc_Pressure.legend()
 proc_osc.legend()
@@ -213,22 +248,22 @@ proc_delta.grid()
 proc_env.grid()
 
 # fig_processSignal.suptitle('Derivative Algorithm', fontsize=16) 
-proc_Pressure.set_ylabel('mmHg', fontsize=14)
-proc_Pressure.set_xlabel('time (s)', fontsize=14)
+proc_Pressure.set_ylabel('pressure (mmHg)', fontsize=12)
+proc_Pressure.set_xlabel('time (s)', fontsize=12)
 proc_Pressure.set_xlim(min(tP), max(tP))
-proc_osc.set_xlabel('time (s)', fontsize=14)
-proc_osc.set_ylabel('Δ mmHg', fontsize=14)
+proc_osc.set_xlabel('time (s)', fontsize=12)
+proc_osc.set_ylabel('oscillation (ΔmmHg)', fontsize=12)
 proc_osc.set_xlim(min(tP), max(tP))
 # proc_env.set_xlim(min(ybpP), max(ybpP))
 # proc_delta.set_xlim(min(ybpP), max(ybpP))
 
-proc_env.set_ylabel('Δ mmHg', fontsize=14)
-proc_env.set_xlabel('mmHg', fontsize=14)
-proc_env.set_xlim(min(yMaximasP)-1, max(yMaximasP)+1)
-proc_delta.set_ylabel('Δ2 mmHg', fontsize=14)
-proc_delta.set_xlabel('mmHg', fontsize=14)
-proc_delta.set_xlim(min(yMaximasP)-1,max(yMaximasP)+1)
-#proc_delta.set_ylim(-3, 3)
+proc_env.set_ylabel('envelope (ΔmmHg)', fontsize=12)
+proc_env.set_xlabel('pressure (mmHg)', fontsize=12)
+proc_env.set_xlim(min(yMaximasP), max(yMaximasP))
+proc_delta.set_ylabel('derivative (Δ2mmHg)', fontsize=12)
+proc_delta.set_xlabel('pressure (mmHg)', fontsize=12)
+proc_delta.set_xlim(min(yMaximasP),max(yMaximasP))
+# proc_delta.set_ylim(-1.2, 1.2)
 plt.get_current_fig_manager().window.showMaximized()
 
 

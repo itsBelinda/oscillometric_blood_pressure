@@ -14,7 +14,7 @@ The heart is a pump that has two phases. When the ventricle is relaxed, the hear
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.65\textwidth]{figures/MAP.pdf}
+\includegraphics[width=0.65\textwidth]{figures/MAP1.pdf}
 \caption{Characteristic blood pressure values simplified as a sine wave. The values are: MAP: \SI{100}{\mmHg}, SBP: \SI{120}{\mmHg}, DBP: \SI{80}{\mmHg} and heart rate: \SI{60}{beats\per\second}.}
 \label{fig:BP}
 \end{figure}
@@ -69,14 +69,13 @@ The second approach is to use detrending. It requires to know the beginning of e
 
 \begin{figure}[h]
 \centering
-%\includegraphics[width=0.85\textwidth]{figures/simulated_oscillations.jpeg}
-\caption{General procedure explained with example data. TODO}
-%\caption{A simulated blood pressure extraction. (a) shows the defalting pressure in the cuff and (b) the high-pass filtered oscillations. Source: \cite{Babbs2012} (CC)}
+\includegraphics[width=0.95\textwidth]{figures/sample_data.pdf}
+\caption{The deflating pressure data in the top plot is filtered with a \nth{4} order Butterworth high-pass filter with the cut-off frequency at \SI{0.5}{\Hz} to extract the oscillations. The rectangle highlights the vital part of the data.}
 \label{fig:osc}
 \end{figure}
 
 
-Ultimately, from a deflation curve as in the signal in figure \ref{fig:osc} on the top, the oscillations are extracted. The bottom plot in figure \ref{fig:osc} shows oscillations extracted with a third-order Butterworth bandpass filter with the cut-off frequencies at \SI{0.5}{\Hz} and \SI{5}{\Hz} \citep{Babbs2012}.
+Ultimately, from a deflation curve as in the signal in figure \ref{fig:osc} on the top, the oscillations are extracted. The bottom plot in figure \ref{fig:osc} shows oscillations extracted with a \nth{4} order Butterworth high-pass filter with the cut-off frequency at \SI{0.5}{\Hz}. The rectangle shows the part of the signal that is analysed further.
 
 
 \paragraph{Envelope} 
