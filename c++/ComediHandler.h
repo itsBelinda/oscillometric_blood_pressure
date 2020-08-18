@@ -1,3 +1,16 @@
+/**
+ * @file        ComediHandler.h
+ * @brief
+ * @author      Belinda Kneubühler belinda.kneubuehler@gmail.com
+ * @date        2020-08-18
+ * @author      Bernd Porr mail@berndporr.me.uk
+ * @date        2005-2017
+ * @author      Matthias H. Hennig hennig@cn.stir.ac.uk
+ * @date        2003
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
 #ifndef OBP_COMEDIHANDLER_H
 #define OBP_COMEDIHANDLER_H
 

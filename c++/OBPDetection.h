@@ -1,3 +1,12 @@
+/**
+ * @file        OBPDetection.h
+ * @brief
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
 #ifndef OBP_OBPDETECTION_H
 #define OBP_OBPDETECTION_H
 

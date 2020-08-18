@@ -1,4 +1,12 @@
 /**
+ * @file        ComediHandler.cpp
+ * @brief
+ * @version     1.0.0
+ * @author      Belinda Kneubühler belinda.kneubuehler@gmail.com
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
  * This file contains common configurations and general definitions.
  * This is the only place where any defines should be, so they are never duplicated.
  */

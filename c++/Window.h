@@ -1,3 +1,13 @@
+/**
+ * @file        Window.h
+ * @brief       Window header file.
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
+
 #ifndef OBP_WINDOW_H
 #define OBP_WINDOW_H
 
@@ -26,7 +36,8 @@
 
 //! The Window Class handles the user interface (UI).
 /*!
- * The UI consists of ... 
+ * The UI consists of ...
+ * @author Belinda Kneubühler
  */
 class Window : public QMainWindow, public IObserver{
 Q_OBJECT

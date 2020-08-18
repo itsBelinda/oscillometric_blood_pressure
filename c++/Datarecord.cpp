@@ -1,10 +1,16 @@
-//
-// Created by belinda on 30/06/2020.
-//
+/**
+ * @file        Datarecord.cpp
+ * @brief
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
 
 #include <QtCore/QTextStream>
 #include <QtWidgets/QFileDialog>
-#include "datarecord.h"
+#include "Datarecord.h"
 
 // Constructor for preparation
 Datarecord::Datarecord(double samplingRate) // = "default.dat")

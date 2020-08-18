@@ -1,3 +1,12 @@
+/**
+ * @file        Plot.cpp
+ * @brief
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
 #include <iostream>
 #include <qwt/qwt_scale_widget.h>
 #include <qwt/qwt_legend.h>

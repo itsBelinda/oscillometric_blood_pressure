@@ -29,7 +29,7 @@ add_executable(obp
         Plot.cpp
         Processing.cpp
         ComediHandler.cpp
-        datarecord.cpp
+        Datarecord.cpp
         OBPDetection.cpp
         IObserver.h
         ISubject.h

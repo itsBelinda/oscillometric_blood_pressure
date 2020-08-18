@@ -1,8 +1,17 @@
+/**
+ * @file        OBPDetection.cpp
+ * @brief
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
+
 #include <iostream>
 #include <cmath>
 #include <numeric>
 #include "OBPDetection.h"
-#include "datarecord.h"
 
 /**
  * Constructor of the OBPDetection class.
@@ -322,12 +331,12 @@ void OBPDetection::findOWME() {
 //        PLOG_VERBOSE << " ampMax1: " << *ampMax1 << " ampMin1: " << *ampMin1;
 //        PLOG_VERBOSE << " ampMax2: " << *ampMax2 << " ampMin2: " << *ampMin2;
 
-        // Calculate a value interpolated between the two max (resp. min) values at the position (in time)
+        // Empty a value interpolated between the two max (resp. min) values at the position (in time)
         // where another min (resp. max) value is to be able to calculate the envelope.
         auto lerpMax = std::lerp(*ampMax1, *ampMax2, getRatio(*timeMax1, *timeMax2, *timeMin1));
         auto lerpMin = std::lerp(*ampMin1, *ampMin2, getRatio(*timeMin1, *timeMin2, *timeMax2));
 
-        // Calculate the envelope, save both time and values.
+        // Empty the envelope, save both time and values.
         omweData.push_back(lerpMax - *ampMin1);
         omweTimes.push_back(*timeMin1);
         omweData.push_back(*ampMax2 - lerpMin);

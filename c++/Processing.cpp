@@ -1,3 +1,12 @@
+/**
+ * @file        Processing.cpp
+ * @brief
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
 #include <iostream>
 #include <unistd.h>
 #include <cmath>
@@ -234,11 +243,6 @@ void Processing::processSample(double newSample) {
                 if (ymmHg > mmHgInflate) {
                     obpDetect->reset();
                     notifySwitchScreen(Screen::deflateScreen);
-//                    std::cout << "raw time shift: " << rawData.size();
-                    //TODO: possibly add entry end exit functions for each state
-                    // function: switch state: returns new state
-                    // performs entry and exit operations (notifications)
-                    // would that work with the state class being a friendly to Processing?
                     currentState = ProcState::Deflate;
                 }
             }
@@ -255,19 +259,18 @@ void Processing::processSample(double newSample) {
                     if (obpDetect->getIsEnoughData()) {
                         notifyHeartRate(obpDetect->getAverageHeartRate());
                         notifySwitchScreen(Screen::emptyCuffScreen);
-                        currentState = ProcState::Calculate;
+                        currentState = ProcState::Empty;
                     } else {
                         notifyHeartRate(obpDetect->getCurrentHeartRate());
                     }
                 }
                 if (ymmHg < 20) {
                     PLOG_WARNING << "Pressure too low to continue algorithm. Cancelled";
-                    //TODO: notificataion ?
                     bMeasuring = false;
                 }
             }
             break;
-        case ProcState::Calculate:
+        case ProcState::Empty:
             if (!bMeasuring) {
                 currentState = ProcState::Idle;
                 notifySwitchScreen(Screen::startScreen);

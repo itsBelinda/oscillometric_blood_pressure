@@ -1,3 +1,12 @@
+/**
+ * @file        Processing.h
+ * @brief
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ */
 #ifndef OBP_PROCESSING_H
 #define OBP_PROCESSING_H
 
@@ -7,7 +16,7 @@
 
 #include "common.h"
 #include "CppThread.h"
-#include "datarecord.h"
+#include "Datarecord.h"
 #include "ISubject.h"
 #include "ComediHandler.h"
 #include "OBPDetection.h"
@@ -25,9 +34,9 @@ class Processing : public CppThread, public ISubject{
     enum class ProcState {
         Config,
         Idle,
-        Inflate, //possilbly: wait for smallest oscillatin
+        Inflate,
         Deflate,
-        Calculate,
+        Empty,
         Restults,
     };
 
