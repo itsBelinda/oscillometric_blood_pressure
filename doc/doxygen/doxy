@@ -1,0 +1,32 @@
+PROJECT_NAME           = "Real Time Oscillometric Blood Pressure Measurement"
+PROJECT_NUMBER         = 1.0
+PROJECT_BRIEF          = "A real time implementation of oscillometric blood pressure measurement in C++. A GUI guides the user to take their own blood pressure and stores the measurement data as a file."
+OUTPUT_DIRECTORY       = output
+EXTRACT_ALL            = YES
+CLASS_DIAGRAMS         = YES
+HIDE_UNDOC_RELATIONS   = NO
+HAVE_DOT               = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+UML_LOOK               = YES
+UML_LIMIT_NUM_FIELDS   = 50
+TEMPLATE_RELATIONS     = YES
+DOT_GRAPH_MAX_NODES    = YES
+MAX_DOT_GRAPH_DEPTH    = 0
+DOT_TRANSPARENT        = YES
+DOT_IMAGE_FORMAT       = png
+INPUT                  = ../../
+RECURSIVE              = YES
+EXCLUDE                = ../../c++/3rdParty \
+                         ../../c++/moc \
+                         ../../c++/obp_autogen \
+                         ../../c++/CMakeFiles \
+                         ../../c++/tests \
+                         ../../c++/Testing \
+                         ../../doc \
+                         ../../data \
+                         ../../python \
+
+USE_MDFILE_AS_MAINPAGE = README.md #main_page.markdown
+DISABLE_INDEX          = NO
+GENERATE_TREEVIEW      = YES
