@@ -1,6 +1,16 @@
+/**
+ * @file        Window.h
+ * @brief       The header file of the Window class.
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ * Defines the Window class and contains the general class description.
+ */
+
 #ifndef OBP_WINDOW_H
 #define OBP_WINDOW_H
-
 
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QApplication>
@@ -22,12 +32,28 @@
 #include "Plot.h"
 #include "Processing.h"
 #include "SettingsDialog.h"
-
-//! The Window Class handles the user interface (UI).
-/*!
- * The UI consists of ... 
+#include "InfoDialog.h"
+/**
+ * Class dependant configuration values:
  */
-class Window : public QMainWindow, public IObserver{
+#define SCREEN_UPDATE_MS 50  //!< Screen update rate in ms.
+
+
+//! The Window class is the implementation of the graphical user interface (GUI).
+/*!
+ * The Window class inherits from QMainWindow and IObserver. The QMainWindow makes the class an executable Qt window,
+ * with Qt taking care of updating the GUI, generating events for button clicks and so on. The IObserver makes the
+ * class able to be registered as an observer for a subject that will send notifications to the observer. All GUI
+ * elements are set up in the constructor of Window, including the settings and info plane. However, they will only
+ * be shown if necessary. I.e. what page of the user instructions is displayed is defined by the state of the screen
+ * enum (currentScreen).
+ *
+ * The Window object is instantiated with a reference to a Processing object in the constructor. This is necessary
+ * so the user inputs can be relayed and the Processing thread can be stopped when the window is closed, and the
+ * application exited.
+ */
+class Window : public QMainWindow, public IObserver
+{
 Q_OBJECT
 public:
     Window(Processing *process, QWidget *parent = 0);
@@ -37,8 +63,7 @@ public:
 protected:
     void timerEvent(QTimerEvent *e) override;
 private:
-    // Callbacks from observable class, need to be implemented
-    // in a thread safe way:
+    // Callbacks from observable class, need to be implemented in a thread safe way:
     void eNewData(double pData, double oData) override;
     void eSwitchScreen(Screen eNewScreen) override;
     void eResults(double map, double sbp, double dbp) override;
@@ -47,28 +72,31 @@ private:
 
     // Setting up the UI:
     void setupUi(QMainWindow *window);
-    QMenuBar*  setupMenu(QWidget *parent);
-    QWidget * setupPlots(QWidget *parent);
-    QWidget * setupStartPage(QWidget *parent);
-    QWidget * setupInflatePage(QWidget *parent);
-    QWidget * setupDeflatePage(QWidget *parent);
-    QWidget * setupEmptyCuffPage(QWidget *parent);
-    QWidget * setupResultPage(QWidget *parent);
-    QWidget * setupSettingsDialog(QWidget *parent);
+    QMenuBar *setupMenu(QWidget *parent);
+    QWidget *setupPlots(QWidget *parent);
+    QWidget *setupStartPage(QWidget *parent);
+    QWidget *setupInflatePage(QWidget *parent);
+    QWidget *setupDeflatePage(QWidget *parent);
+    QWidget *setupEmptyCuffPage(QWidget *parent);
+    QWidget *setupResultPage(QWidget *parent);
+    QWidget *setupSettingsDialog(QWidget *parent);
+    QWidget *setupInfoDialogue(QWidget *parent);
     void retranslateUi(QMainWindow *MainWindow);
 
     // Settings:
     void loadSettings();
     Processing *process;
-    double xData[MAX_DATA_LENGTH], yLPData[MAX_DATA_LENGTH], yHPData[MAX_DATA_LENGTH];
-    int dataLength;
+    double xData[MAX_DATA_LENGTH],    //!< X-axis of the plot data (time)
+    yLPData[MAX_DATA_LENGTH],         //!< Y-axis of the low-pass filtered pressure data.
+    yHPData[MAX_DATA_LENGTH];         //!< Y-axis of the high-pass filtered data.
+    int dataLength;                   //!< Length of the shown data. Possibility to change zoom.
+    int pumpUpVal;                    //!< Pump-up value used to display required pressure.
 
     // Variables that are changed from outside the UI are made
     // atomic, so access to them is thread safe.
     std::atomic<Screen> currentScreen;
 
-    // mutex for thread save access to the plots:
-    std::mutex mtxPlt;
+    std::mutex mtxPlt;                //!< mutex for thread save access to the plots:
 
     // UI components:
     QSplitter *splitter;
@@ -92,6 +120,8 @@ private:
     QSpacerItem *vSpace2;
     QSpacerItem *vSpace4;
     QSpacerItem *vSpace5;
+    QSpacerItem *vSpace6;
+    QSpacerItem *vSpace7;
     QLabel *lMeter;
     QLabel *lInfoStart;
     QLabel *lInfoPump;
@@ -106,13 +136,14 @@ private:
     QLabel *lheartRate;
     QLabel *lheartRateAV;
     QLabel *lHRvalAV;
+    QLabel *lMeasured;
     QLabel *lMAP;
     QLabel *lMAPval;
+    QLabel *lEstimated;
     QLabel *lSBP;
     QLabel *lSBPval;
     QLabel *lDBP;
     QLabel *lDBPval;
-    QLabel *lTitlePlotOsc;
     Plot *pltPre;
     Plot *pltOsc;
     QFrame *line;
@@ -123,7 +154,7 @@ private:
     QAction *actionInfo;
     QAction *actionExit;
     SettingsDialog *settingsDialog;
-
+    InfoDialog *infoDialogue;
 
 private slots:
     void clkBtnStart();
@@ -132,17 +163,9 @@ private slots:
     void on_actionInfo_triggered();
     void on_actionSettings_triggered();
     void on_actionExit_triggered();
-    void clkBtn1();
-    void clkBtn2();
-    void clkBtn3();
-    void clkBtn4();
-    void clkBtn5();
     void updateValues();
     void resetValuesPerform();
-//private signal:
-//    void setMAPText(const QString &);
 };
-
 
 
 #endif //OBP_WINDOW_H

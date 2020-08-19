@@ -1,3 +1,13 @@
+/**
+ * @file        Processing.h
+ * @brief       The header file of the Processing class.
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ * Defines the Processing class and contains the general class description.
+ */
 #ifndef OBP_PROCESSING_H
 #define OBP_PROCESSING_H
 
@@ -7,40 +17,41 @@
 
 #include "common.h"
 #include "CppThread.h"
-#include "datarecord.h"
+#include "Datarecord.h"
 #include "ISubject.h"
 #include "ComediHandler.h"
 #include "OBPDetection.h"
 
-// Class dependant configuration values:
-#define MAX_PUMPUP 250
-#define IIRORDER 4
+/**
+ * Class dependant configuration values:
+ */
+#define MAX_PUMPUP 250  //!< Maximal settable pump-up value.
+#define IIRORDER 4      //!< IIR filter order.
 
 //! The Processing class handles the data acquisition and processing.
 /*!
- * What happens here ...
+ * The processing class inherits from the CppThread class and the ISubject class. CppThread is a wrapper to the
+ * std::thread class that was written by Bernd Porr to avoid static methods and makes the inheriting class a runnable
+ * thread. Processing has an instance of ComediHandler to acquire and two IIR filter instances to pre-process the data.
+ * The raw, unfiltered data is stored in a vector that can be handed to the Datarecord instance to save it as a file.
+ * The filtered data is sent to the observer(s) to display and passed to the OPDetection instance that performs the
+ * algorithm. Data acquisition and filtering are happening whenever the thread is running, the state machine
+ * decides when data is passed to the OBPDetection or stored to a file.
  */
-class Processing : public CppThread, public ISubject{
+class Processing : public CppThread, public ISubject {
 
     enum class ProcState {
-        Config,
-        Idle,
-        Inflate, //possilbly: wait for smallest oscillatin
-        Deflate,
-        Calculate,
-        Restults,
+        Config,     //!< Configure the ambient pressure.
+        Idle,       //!< Waiting for user to start the measurement.
+        Inflate,    //!< Inflate the cuff.
+        Deflate,    //!< Deflate the cuff slowly.
+        Empty,      //!< Empty the cuff completely
+        Results,    //!< Display the results.
     };
 
 public:
     explicit Processing(double fcLP = 10.0, double fcHP = 0.5);
     ~Processing() override;
-
-    void stopThread();
-
-    void startMeasurement();
-    void stopMeasurement();
-    inline ProcState getCurrentState() const;
-    void setAmbientVoltage(double voltage);
 
     void setRatioSBP(double val);
     double getRatioSBP();
@@ -50,39 +61,51 @@ public:
     int getMinNbrPeaks();
     void setPumpUpValue(int val);
     int getPumpUpValue();
-    void resetConfigValues();
+    double getSamplingRate();
 
+    void resetConfigValues();
+    void startMeasurement();
+    void stopMeasurement();
+    void stopThread();
 
 private:
     void run() override;
-    static QString getFilename();
     void processSample(double newSample);
     [[nodiscard]] double getmmHgValue(double voltageValue) const;
     bool checkAmbient();
-    std::vector<double> rawData;
 
-    Iir::Butterworth::LowPass<IIRORDER> *iirLP;
-    Iir::Butterworth::HighPass<IIRORDER> *iirHP;
+    static QString getFilename();
 
-    Datarecord *record;
-    ComediHandler *comedi;
-    OBPDetection *obpDetect;
-    std::atomic<bool> bRunning; // process is running and displaying data on screen, but not necessary recording/measuring blood pressure it.
-    std::atomic<bool> bMeasuring;
-    ProcState currentState;
+    std::vector<double> rawData;                 //!< stores the acquired raw data
+
+    Iir::Butterworth::LowPass<IIRORDER> *iirLP;  //!< Low-pass filter instance
+    Iir::Butterworth::HighPass<IIRORDER> *iirHP; //!< High-pass filter instance
+
+    Datarecord *record;                         //!< Datarecord instance to store data
+    ComediHandler *comedi;                      //!< ComediHandler instance to acquire data
+    OBPDetection *obpDetect;                    //!< LOBPDetection instance that implements the algorithm
+    std::atomic<bool> bRunning;                 //!< process is running and displaying data on screen.
+    std::atomic<bool> bMeasuring;               //!< Boolean to indicate an ongoing measurement.
+    ProcState currentState;                     //!< Stores the state of the application
 
     /**
-     * Important data acquisition values SI: 1mmHg = 133.322 Pa
-     * 7.5006157584566 wiki: 7.5006157584
+     * Important data acquisition values:
      */
-    const double mmHg_per_kPa = 7.5006157584566; // literature
-    const double kPa_per_mmHg = 0.133322;
-    const double kPa_per_V = 50; // data sheet
+    const double kPa_per_mmHg = 0.133322;       //!< Value of kPa per 1 mmHg, from literature
+    const double kPa_per_V = 50;                //!< Value of kPa per 1 V, from pressure sensor data sheet.
 
-    double sampling_rate;
-    std::atomic<double> mmHgInflate = 180.0;
-    double ambientVoltage = 0.7;
-    double corrFactor = 2.5; // due to voltage divider
+    /**
+     * User set configuration values:
+     */
+    std::atomic<double> mmHgInflate;           //!< Pump-up value used to transition from Inflate to Deflate state.
+    double corrFactor;                         //!< Correction factor to account for voltage divider.
+
+    /**
+     * Program set configuation values.
+     */
+    std::atomic<double> sampling_rate;          //!< The sampling rate of the data acquisition
+    double ambientVoltage;                      //!< The voltage at ambient pressure, needed for calculations.
+
 };
 
 

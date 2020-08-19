@@ -1,11 +1,23 @@
+/**
+ * @file        Plot.h
+ * @brief       The header file of the Plot class.
+ * @author      Belinda Kneubühler
+ * @date        2020-08-18
+ * @copyright   GNU General Public License v2.0
+ *
+ * @details
+ * Defines the Plot class and contains the general class description.
+ */
 #ifndef OBP_PLOT_H
 #define OBP_PLOT_H
 
 #include <qwt/qwt_plot.h>
 #include <qwt/qwt_plot_curve.h>
 
-/**
- * Plot class as a wrapper to QwtPlot to serve the needs of this particular application.
+//! The Plot class displays a single plot as a Qwt widget.
+/*!
+ * The Plot class inherits from QwtPlot. It handles setting up plot and axis titles, scaling and changing the
+ * displayed data.
  */
 class Plot : public QwtPlot {
 public:
@@ -21,7 +33,6 @@ public:
     void setNewData(double yNew);
 private:
     static int nextPenColour;   //!< Stores the pen color for the next plot object
-    QwtScaleWidget *tsest;
 
     QwtPlotCurve *dataCurve;    //!< The curve object
     double *xData, *yData;      //!< Pointers to the x and y data
