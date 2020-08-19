@@ -71,9 +71,10 @@ public:
 private:
     void run() override;
     void processSample(double newSample);
-    static QString getFilename();
     [[nodiscard]] double getmmHgValue(double voltageValue) const;
     bool checkAmbient();
+
+    static QString getFilename();
 
     std::vector<double> rawData;                 //!< stores the acquired raw data
 

@@ -236,8 +236,8 @@ void Processing::stopMeasurement() {
  */
 QString Processing::getFilename() {
     QDateTime dateTime = QDateTime::currentDateTime();
-    QString dateTimeString = dateTime.toString("yyyy-MM-dd_hh-mm-ss");
-    dateTimeString.append("_test.dat");
+    QString dateTimeString = dateTime.toString("yyyy_MM_dd_hh_mm_ss");
+    dateTimeString.append("_data.dat");
     return dateTimeString;
 }
 
