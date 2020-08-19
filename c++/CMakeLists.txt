@@ -44,3 +44,5 @@ add_executable(obp
 
 target_link_libraries(obp Qt5::Widgets Qt5::PrintSupport Qt5::Core comedi iir qwt-qt5 ${CMAKE_THREAD_LIBS_INIT})
 
+include(CTest) # automatically calls enable_testing()
+add_subdirectory(tests)

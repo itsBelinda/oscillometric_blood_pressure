@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 
     PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);
+    // The following values are set to make storing settings simple.
     app.setOrganizationName("UofG");
     app.setApplicationName("Oscillometric Blood Pressure Measurement");
 
