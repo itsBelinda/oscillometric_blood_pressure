@@ -16,56 +16,94 @@
 /**
  * Constructor of the OBPDetection class.
  *
+ * Initialises and resets the data.
+ * @param sampling_rate Sets the sampling rate of the processed data. Used to calculate the heart rate.
  */
 OBPDetection::OBPDetection(double sampling_rate) :
         pData(DEFAULT_DATA_SIZE),
         oData(DEFAULT_DATA_SIZE),
         enoughData(false),
-        samplingRate(sampling_rate){
+        samplingRate(sampling_rate)
+{
     reset();
 }
 
 /**
  * Destructor of the OBPDetection class.
  */
-OBPDetection::~OBPDetection() {
+OBPDetection::~OBPDetection()
+{
 
 }
 
-
-double OBPDetection::getRatioSBP() {
+/**
+ * Get the currently set value for the SBP ratio.
+ * @return The value of the SBP ratio.
+ */
+double OBPDetection::getRatioSBP()
+{
     return ratio_SBP;
 }
 
-void OBPDetection::setRatioSBP(double val) {
-    if (val > MIN_RATIO && val < MAX_RATIO) {
+/**
+ * Sets the value of the SBP ratio.
+ * @param val The value to set.
+ */
+void OBPDetection::setRatioSBP(double val)
+{
+    if (val > MIN_RATIO && val < MAX_RATIO)
+    {
         ratio_SBP = val;
     }
 }
 
-double OBPDetection::getRatioDBP() {
+/**
+ * Get the currently set value for the DBP ratio.
+ * @return The value of the DBP ratio.
+ */
+double OBPDetection::getRatioDBP()
+{
     return ratio_DBP;
 }
 
-void OBPDetection::setRatioDBP(double val) {
-    if (val > MIN_RATIO && val < MAX_RATIO) {
+/**
+ * Sets the value of the DBP ratio.
+ * @param val The value to set.
+ */
+void OBPDetection::setRatioDBP(double val)
+{
+    if (val > MIN_RATIO && val < MAX_RATIO)
+    {
         ratio_DBP = val;
     }
 }
 
-int OBPDetection::getMinNbrPeaks() {
+/**
+ * Gets the currently set value for the minimally required number of peaks.
+ * @return The value of minimally requried number of peaks.
+ */
+int OBPDetection::getMinNbrPeaks()
+{
     return minNbrPeaks;
 }
 
-void OBPDetection::setMinNbrPeaks(int val) {
-    if (val > MIN_PEAKS ) {
+/**
+ * Sets the value for the minimally required number of peaks.
+ * @param val The value to set.
+ */
+void OBPDetection::setMinNbrPeaks(int val)
+{
+    if (val > MIN_PEAKS)
+    {
         minNbrPeaks = val;
     }
 }
+
 /**
  * Resets the configuration values to their default.
  */
-void OBPDetection::resetConfigValues(){
+void OBPDetection::resetConfigValues()
+{
     ratio_SBP = 0.57;
     ratio_DBP = 0.70;
     minNbrPeaks = 10;
@@ -75,9 +113,11 @@ void OBPDetection::resetConfigValues(){
  * Gets the last valid heart rate value if there were any.
  * @return The last entry of the heart rate vector.
  */
-double OBPDetection::getCurrentHeartRate() {
+double OBPDetection::getCurrentHeartRate()
+{
     double cHR = 0.0;
-    if (!hrData.empty()) {
+    if (!hrData.empty())
+    {
         cHR = hrData.back();
     }
     return cHR;
@@ -87,7 +127,8 @@ double OBPDetection::getCurrentHeartRate() {
  * Calculates the average over all saved heart rate entries.
  * @return The average heart rate in the current calculations.
  */
-double OBPDetection::getAverageHeartRate() {
+double OBPDetection::getAverageHeartRate()
+{
     return getAverage(hrData);
 }
 
@@ -95,7 +136,8 @@ double OBPDetection::getAverageHeartRate() {
  * Returns the calculated value for the mean arterial pressure (MAP).
  * @return The calculated MAP.
  */
-double OBPDetection::getMAP() const {
+double OBPDetection::getMAP() const
+{
     return resMAP;
 }
 
@@ -103,7 +145,8 @@ double OBPDetection::getMAP() const {
  * Returns the calculated value for the systolic blood pressure (SBP).
  * @return The calculated SBP.
  */
-double OBPDetection::getSBP() const {
+double OBPDetection::getSBP() const
+{
     return resSBP;
 }
 
@@ -111,11 +154,18 @@ double OBPDetection::getSBP() const {
  * Returns the calculated value for the diastolic blood pressure (DBP).
  * @return The calculated DBP.
  */
-double OBPDetection::getDBP() const {
+double OBPDetection::getDBP() const
+{
     return resDBP;
 }
 
-bool OBPDetection::getIsEnoughData() const {
+/**
+ * Check if enough data has been acquired to start calculation of the OMWE and the BP values.
+ * The calculations could potentially still fail.
+ * @return A boolean that indicates if enough data has been acquired and calculations have started.
+ */
+bool OBPDetection::getIsEnoughData() const
+{
     return enoughData;
 }
 
@@ -130,14 +180,16 @@ bool OBPDetection::getIsEnoughData() const {
  * @param oscillation The oscillation in arbitrary units for this sample.
  * @return True if the calculations are finished.
  */
-bool OBPDetection::processSample(double pressure, double oscillation) {
+bool OBPDetection::processSample(double pressure, double oscillation)
+{
     bool newMax = false;
     pData.push_back(pressure);
     oData.push_back(oscillation);
-    if (checkMaxima()) {
+    if (checkMaxima())
+    {
         findMinima();
-        if (isEnoughData()) {
-            //TODO: put calculation in thread so the rest of the application can continue.
+        if (isEnoughData())
+        {
             findOWME();
             findMAP();
             enoughData = true;
@@ -153,21 +205,19 @@ bool OBPDetection::processSample(double pressure, double oscillation) {
  * local maxima, together with a reference to the 'time' (sample number) it was recorded.
  * @return true if a local maxima was found.
  */
-bool OBPDetection::checkMaxima() {
+bool OBPDetection::checkMaxima()
+{
     bool isValid = false;
 
-    if (oData.size() > minDataSize && *(oData.end() - 2) > prominence) {
-        //((*(oData.end() - 2)-lastMinima) > prominence)
-        //TODO: idea for more robust algorithm:
-        // get a bigger sample size (e.g. 100) and check for minimal "prominence"
-        // then take the largest of the values and its position
+    if (oData.size() > minDataSize && *(oData.end() - 2) > prominence)
+    {
         auto i = std::max_element((oData.end() - 3), oData.end());
 
         // is result the middle entry?
-        if (std::distance(i, oData.end()) == 2) {
+        if (std::distance(i, oData.end()) == 2)
+        {
             isValid = isValidMaxima();
         }
-
 
     }
 
@@ -179,7 +229,8 @@ bool OBPDetection::checkMaxima() {
  * current time and amplitude is saved and the heart rate is calculated from the last valid maximum.
  * @return True if a valid maxima and a new current heart rate was calculated.
  */
-bool OBPDetection::isValidMaxima() {
+bool OBPDetection::isValidMaxima()
+{
     static int validPulseCnt = 0; // Only for logging purposes.
     bool isValid = false;
 
@@ -188,42 +239,51 @@ bool OBPDetection::isValidMaxima() {
     const double testValue = *(oData.end() - 2); // testing the second to last entry
     const auto testSmplNbr = (oData.size() - 1); // NEW: in relation to oData for min-detect!
 
-    if (maxtime.empty()) {
+    if (maxtime.empty())
+    {
         // Accept any value as a first value, only start testing after the second one
         maxtime.push_back(testSmplNbr);
         maxAmp.push_back(testValue);
         // do not set isValid true, because this would start checking for a minimum between two maxima
-    } else {
+    } else
+    {
         assert(!maxtime.empty());
         assert(!maxAmp.empty());
 
         //time since last max is <minPeakTime (ms) and the new sample is larger: replace the old value
-        if ((testSmplNbr - maxtime.back()) < minPeakTime) {
-            if (maxAmp.back() < testValue) {
+        if ((testSmplNbr - maxtime.back()) < minPeakTime)
+        {
+            if (maxAmp.back() < testValue)
+            {
                 maxAmp.back() = testValue;
                 maxtime.back() = testSmplNbr;
-//                std::cout << maxAmp.back() << " replaced\n";
-            } else {
+            } else
+            {
                 // Skip this maxima, it is too quick after the last one, but smaller.
-                if (validPulseCnt > 0) {
+                if (validPulseCnt > 0)
+                {
                     // No new maxima detected, finish function with old values.
                     // validPulseCnt will be increased again by this.
                     validPulseCnt--;
                 }
             }
-        } else {
+        } else
+        {
             maxAmp.push_back(testValue);
             maxtime.push_back(testSmplNbr);
         }
 
-        if (maxtime.size() > 1) {
+        if (maxtime.size() > 1)
+        {
             double newHR = (60.0 * samplingRate) / (double) (maxtime.back() - (*(maxtime.end() - 2)));
 
-            if (isHeartRateValid(newHR)) {
+            if (isHeartRateValid(newHR))
+            {
                 hrData.push_back(newHR);
                 validPulseCnt++;
                 isValid = true;
-            } else {
+            } else
+            {
                 PLOG_INFO << "Invalid pulse after " << validPulseCnt << " valid ones";
                 validPulseCnt = 0;
                 maxAmp.clear();
@@ -246,7 +306,8 @@ bool OBPDetection::isValidMaxima() {
  * @param heartRate The heart rate to be checked.
  * @return True if the heart rate is within the defined bounds.
  */
-bool OBPDetection::isHeartRateValid(double heartRate) {
+bool OBPDetection::isHeartRateValid(double heartRate)
+{
     return (minValidHR <= heartRate && heartRate <= maxValidHR);
 }
 
@@ -254,9 +315,11 @@ bool OBPDetection::isHeartRateValid(double heartRate) {
 /**
  * Finds the minimal value in the oscillation between two maxima.
  */
-void OBPDetection::findMinima() {
+void OBPDetection::findMinima()
+{
 
-    if (maxAmp.size() >= 2) {
+    if (maxAmp.size() >= 2)
+    {
         // get sub-vector of oData from second last to last max value
         auto firstMax = oData.begin() + *(maxtime.end() - 2);
         auto lastMax = oData.begin() + maxtime.back();
@@ -267,14 +330,15 @@ void OBPDetection::findMinima() {
         auto dist = std::distance(firstMax, iter);
 
         // Check if the last maxima value was replaced. If yes, replace last minima value
-        if (mintime.size() == (maxtime.size() - 1)) {
+        if (mintime.size() == (maxtime.size() - 1))
+        {
             minAmp.back() = *iter;
             mintime.back() = dist + *(maxtime.end() - 2);
-        } else {
+        } else
+        {
             minAmp.push_back(*iter);
             mintime.push_back(dist + *(maxtime.end() - 2));
         }
-//        lastMinima = *iter;
     }
 
 }
@@ -283,17 +347,22 @@ void OBPDetection::findMinima() {
  * Checks, if enough data has been received to calculate the blood pressure.
  * @return
  */
-bool OBPDetection::isEnoughData() {
+bool OBPDetection::isEnoughData()
+{
     bool bIsEnough = false;
     // minimum number of peaks detected:
-    if (maxAmp.size() > minNbrPeaks) {
+    if (maxAmp.size() > minNbrPeaks)
+    {
         auto maxEl = std::max_element(maxAmp.begin(), maxAmp.end());
         // maximum value has minimal size of 1.5
         // the last two values are larger than the current --> continuously decreasing
-        if(*maxEl > 1.5 && (maxAmp.back() < *(maxAmp.end()-3)) && (maxAmp.back() < *(maxAmp.end()-2)) ){
+        if (*maxEl > 1.5 && (((maxAmp.back() < *(maxAmp.end() - 3)) && (maxAmp.back() < *(maxAmp.end() - 2))) ||
+                             (maxAmp.back() < 2 * prominence)))
+        {
             double cutoff = (*maxEl) * (ratio_DBP - cutoffHyst);
             // the last three values (current included), are smaller than the cutoff
-            if ((*(maxAmp.end()-3) < cutoff) && (*(maxAmp.end()-2) < cutoff) && (maxAmp.back() < cutoff)) {
+            if ((*(maxAmp.end() - 3) < cutoff) && (*(maxAmp.end() - 2) < cutoff) && (maxAmp.back() < cutoff))
+            {
                 bIsEnough = true;
             }
         }
@@ -310,14 +379,16 @@ bool OBPDetection::isEnoughData() {
  *
  * The calculated values will be stored in omvweTimes and omweData.
  */
-void OBPDetection::findOWME() {
+void OBPDetection::findOWME()
+{
     // forward iteration using const iterator, because they should not be touched
     auto timeMax1 = maxtime.cbegin();
     auto ampMin1 = minAmp.cbegin();
     auto ampMax1 = maxAmp.cbegin();
 
     // The min values are defined between two max values. Therefore, iterate trough them until the second to last value.
-    for (auto timeMin1 = mintime.cbegin(); timeMin1 != (mintime.cend() - 1); ++timeMin1) {
+    for (auto timeMin1 = mintime.cbegin(); timeMin1 != (mintime.cend() - 1); ++timeMin1)
+    {
         auto timeMin2 = std::next(timeMin1, 1);
         auto timeMax2 = std::next(timeMax1, 1);
         auto ampMin2 = std::next(ampMin1, 1);
@@ -325,11 +396,6 @@ void OBPDetection::findOWME() {
 
         assert(*timeMin1 > *timeMax1);
         assert(*timeMin2 > *timeMax2);
-        //TODO: increases processing time A LOT, remove!!!
-//        PLOG_VERBOSE << " tmax1: " << *timeMax1 << " tmin1: " << *timeMin1;
-//        PLOG_VERBOSE << " tmax2: " << *timeMax2 << " tmin2: " << *timeMin2;
-//        PLOG_VERBOSE << " ampMax1: " << *ampMax1 << " ampMin1: " << *ampMin1;
-//        PLOG_VERBOSE << " ampMax2: " << *ampMax2 << " ampMin2: " << *ampMin2;
 
         // Empty a value interpolated between the two max (resp. min) values at the position (in time)
         // where another min (resp. max) value is to be able to calculate the envelope.
@@ -347,8 +413,7 @@ void OBPDetection::findOWME() {
         ampMin1++;
         ampMax1++;
     }
-//    auto finish = std::chrono::high_resolution_clock::now();
-//    std::cout << "done " << std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() << "ns\n";
+
 }
 
 /**
@@ -357,30 +422,13 @@ void OBPDetection::findOWME() {
  * The results will be saved in the result variables resMAP, resSBP and resDBP. They are saved as doubled, but this
  * does not represent their precision.
  */
-void OBPDetection::findMAP() {
+void OBPDetection::findMAP()
+{
 
     auto maxOMWE = std::max_element(omweData.begin(), omweData.end());
-    auto time = omweTimes[std::distance(omweData.begin(), maxOMWE)];
+    auto maxTime = omweTimes[std::distance(omweData.begin(), maxOMWE)];
 
-//    std::cout << "maxOMWE: " << *maxOMWE << std::endl;
-
-    resMAP = getPressureAt(time);
-
-//    PLOG_DEBUG << "MAP pressure p: " << pData[time] << " time: " << time
-//               << "\n pData.size(): " << pData.size() << " oData.size(): " << oData.size();
-//      TODO: done for testing. Keeping as comment for now, might be useful for report
-//      TODO: size of oData could be used as timeout condition. (normal implementation < 1min == 60000 )
-//    Datarecord recordOSC(1.0);
-//    recordOSC.saveAll("osc.dat", oData);
-//    Datarecord recordP(1.0);
-//    recordP.saveAll("p.dat", pData);
-//    Datarecord recordOMWE(1.0);
-//    recordOMWE.saveAll("omwe.dat", omweTimes, omweData);
-
-//    std::for_each(omweTimes.begin(), omweTimes.end(),
-//                  [](int time) {
-//                      std::cout << "t: " << time << std::endl;
-//                  });
+    resMAP = getPressureAt(maxTime);
 
     double maxVAL = *maxOMWE;
     double sbpSearch = ratio_SBP * maxVAL;
@@ -389,8 +437,10 @@ void OBPDetection::findMAP() {
     int lbSTime = 0;
     int ubSTime = 0;
 
-    for (auto omweSBP = omweData.begin(); omweSBP != maxOMWE; ++omweSBP) {
-        if (*omweSBP > sbpSearch) {
+    for (auto omweSBP = omweData.begin(); omweSBP != maxOMWE; ++omweSBP)
+    {
+        if (*omweSBP > sbpSearch)
+        {
             ubSBP = *omweSBP;
             ubSTime = omweTimes[std::distance(omweData.begin(), omweSBP)];
             omweSBP--;
@@ -408,8 +458,10 @@ void OBPDetection::findMAP() {
     double lbDBP = 0;
     int lbDTime = 0;
     int ubDTime = 0;
-    for (auto omweDBP = maxOMWE; omweDBP != omweData.end(); ++omweDBP) {
-        if (*omweDBP < dbpSearch) {
+    for (auto omweDBP = maxOMWE; omweDBP != omweData.end(); ++omweDBP)
+    {
+        if (*omweDBP < dbpSearch)
+        {
             lbDBP = *omweDBP;
             lbDTime = omweTimes[std::distance(omweData.begin(), omweDBP)];
             omweDBP--;
@@ -418,7 +470,8 @@ void OBPDetection::findMAP() {
             break;
         }
     }
-    if (lbDBP != 0 ) {
+    if (lbDBP != 0)
+    {
         // The curve is falling, "upper bound" time is lower than "lower bound" time.
         // The ratio is calculated the same way as before, but to account for the lower
         // value relating to the higher time the ratio is inverted.
@@ -426,8 +479,8 @@ void OBPDetection::findMAP() {
         // "lower bound" time (later in time).
         int lerpDBPtime = (int) std::lerp(ubDTime, lbDTime, 1.0 - getRatio(lbDBP, ubDBP, dbpSearch));
         resDBP = getPressureAt(lerpDBPtime);
-    }
-    else{
+    } else
+    {
         PLOG_WARNING << "couldn't find DBP";
     }
 }
@@ -438,26 +491,27 @@ void OBPDetection::findMAP() {
  * @param time The time value (in samples) where to get the pressure.
  * @return The pressure value at the specified time.
  */
-double OBPDetection::getPressureAt(int time){
+double OBPDetection::getPressureAt(int time)
+{
     double average;
     int hrSamplesHalf = (samplingRate * (int) getAverage(hrData)) / 120;
 
     assert(!pData.empty());
 
-    if( pData.size() > time+hrSamplesHalf) {
-        auto firstP = &pData[time-hrSamplesHalf];
-        auto lastP  = &pData[time + hrSamplesHalf];
+    if (pData.size() > time + hrSamplesHalf)
+    {
+        auto firstP = &pData[time - hrSamplesHalf];
+        auto lastP = &pData[time + hrSamplesHalf];
         std::vector<double> newVec(firstP, lastP);
         average = getAverage(newVec);
-    }
-    else{
+    } else
+    {
         PLOG_WARNING << "Trying to get pressure at time " << time << " with hrSamplesHalf: " << hrSamplesHalf <<
-                "and pData.size(): " << pData.size();
+                     "and pData.size(): " << pData.size();
         average = pData[time];
     }
     return average;
 }
-
 
 
 /**
@@ -469,7 +523,8 @@ double OBPDetection::getPressureAt(int time){
  * @param value         the middle value between the lower and upper bound
  * @return
  */
-double OBPDetection::getRatio(double lowerBound, double upperBound, double value) {
+double OBPDetection::getRatio(double lowerBound, double upperBound, double value)
+{
     return ((value - lowerBound) / (upperBound - lowerBound));
 }
 
@@ -478,9 +533,11 @@ double OBPDetection::getRatio(double lowerBound, double upperBound, double value
  * @param avVector A vector of doubles to take the average from.
  * @return The average of all the values in the vector.
  */
-double OBPDetection::getAverage(std::vector<double> avVector) {
+double OBPDetection::getAverage(std::vector<double> avVector)
+{
     double av = 0.0;
-    if (!avVector.empty()) {
+    if (!avVector.empty())
+    {
         av = std::accumulate(avVector.begin(), avVector.end(), 0.0) / avVector.size();
     }
     return av;
@@ -489,7 +546,8 @@ double OBPDetection::getAverage(std::vector<double> avVector) {
 /**
  * Resets all variables to start a new measurement.
  */
-void OBPDetection::reset() {
+void OBPDetection::reset()
+{
     pData.clear();
     oData.clear();
     omweData.clear();
@@ -499,7 +557,6 @@ void OBPDetection::reset() {
     minAmp.clear();
     mintime.clear();
     hrData.clear();
-//    lastMinima = 0.0;
 
     resMAP = 0.0;
     resSBP = 0.0;

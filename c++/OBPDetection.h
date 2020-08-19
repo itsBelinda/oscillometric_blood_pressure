@@ -1,11 +1,12 @@
 /**
  * @file        OBPDetection.h
- * @brief
+ * @brief       The header file of the OBPDetection class.
  * @author      Belinda Kneubühler
  * @date        2020-08-18
  * @copyright   GNU General Public License v2.0
  *
  * @details
+ * Defines the OBPDetection class and contains the general class description.
  */
 #ifndef OBP_OBPDETECTION_H
 #define OBP_OBPDETECTION_H
@@ -14,10 +15,13 @@
 #include <atomic>
 #include "common.h"
 
-// Class dependant configuration values:
-#define MIN_RATIO 0.01
-#define MAX_RATIO 0.99
-#define MIN_PEAKS 5
+/**
+ * Class dependant configuration values:
+ * They are absolute maximal vales and should never be set.
+ */
+#define MIN_RATIO 0.01 //!< A ratio minimum should be larger than 0.
+#define MAX_RATIO 0.99 //!< A ratio maximum should be smaller than 1.
+#define MIN_PEAKS 5    //!< With less than 5 peaks, the detection is impossible.
 
 
 //! The OBPDetection class handles the implementation of the algorithm to get
@@ -42,8 +46,6 @@
  */
 class OBPDetection {
 //TODO: add configurable parameters in constructor
-//TODO: change osc to use mmHg values
-//TODO: MAP, DBP, SBP as average over heart rate
 public:
     OBPDetection(double sampling_rate);
     ~OBPDetection();
@@ -71,29 +73,30 @@ public:
 
 private:
     // vectors to store values for calculations
-    std::vector<double> pData;
-    std::vector<double> oData;
-    std::vector<double> omweData;
-    std::vector<int> omweTimes;
-    std::vector<double> maxAmp;
-    std::vector<int> maxtime;
-    std::vector<double> minAmp;
-    std::vector<int> mintime;
-    std::vector<double> hrData;
-//    double lastMinima;
+    std::vector<double> pData;    //!< Stores the pressure data.
+    std::vector<double> oData;    //!< Stores the oscillation data.
+    std::vector<double> maxAmp;   //!< Stores the detected maxima.
+    std::vector<int> maxtime;     //!< Stores the times values where the maxima occurred.
+    std::vector<double> minAmp;   //!< Stores the detected minima.
+    std::vector<int> mintime;     //!< Stores the times values where the minima occurred.
+    std::vector<double> omweData; //!< Stores the calculated values of the OMWE.
+    std::vector<int> omweTimes;   //!< Stores the time series where the OMWE was calculated.
+    std::vector<double> hrData;   //!< Stores the detected heart rate values.
 
     // variables to store results
-    double resMAP{};
-    double resSBP{};
-    double resDBP{};
-    bool enoughData;
+    double resMAP{};    //!< The result of the MAP calculation.
+    double resSBP{};    //!< The result of the SBP calculation.
+    double resDBP{};    //!< The result of the DBP calculation.
+    bool enoughData;    //!< Enough data is available to attempt calculation of the OMWE.
 
     // variables to store configurations
-    std::atomic<double> maxValidHR = 120.0;      //! The maximal valid heart rate
-    std::atomic<double> minValidHR = 50.0;       //! The minimal valid heart rate
+    // The values that are directly initialised are considered as configuration alues but not implemented as such,
+    // they might just as well be constants until then.
     std::atomic<double> ratio_SBP;               //! from literature, might be changed in settings later
     std::atomic<double> ratio_DBP;               //! from literature, might be changed in settings later
-    std::atomic<double> prominence = 0.25;     //! The min. prominence of one oscillation to count as a maximum
+    std::atomic<double> maxValidHR = 120.0;      //! The maximal valid heart rate
+    std::atomic<double> minValidHR = 50.0;       //! The minimal valid heart rate
+    std::atomic<double> prominence = 0.25;       //! The min. prominence of one oscillation to count as a maximum
     std::atomic<int> minDataSize = 1200;         //! The min. size of oscillation data. Before this it will not be
     //! analysed.
     std::atomic<int> minPeakTime = 300;          //! The minimal time two peaks should be apart. If there are
@@ -105,7 +108,7 @@ private:
     //! order to be able to end the measurement. This is not from the total OMVE, but from the maximal amplitude.
     //! (OMVE calculated afterwards).
 
-    //private functions:
+    // private functions:
     bool checkMaxima();
     bool isValidMaxima();
     bool isHeartRateValid(double heartRate);

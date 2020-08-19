@@ -1,6 +1,6 @@
 /**
  * @file        ComediHandler.cpp
- * @brief
+ * @brief       The implementation file of the ComediHandler
  * @author      Belinda Kneubühler belinda.kneubuehler@gmail.com
  * @date        2020-08-18
  * @author      Bernd Porr mail@berndporr.me.uk
@@ -10,6 +10,7 @@
  * @copyright   GNU General Public License v2.0
  *
  * @details
+ * This class is based on a previous implementation by Bernd Porr and Matthias H. Henning.
  */
 #include <cstdlib>
 #include "common.h"
@@ -17,6 +18,11 @@
 
 
 // TODO: make singleton
+/**
+ * The constructor of the ComediHandler object.
+ *
+ * Initialises the hardware. If the hardware is not connected, the initialisation fails and the program finishes. *
+ */
 ComediHandler::ComediHandler():
     adChannel(0) {
 
@@ -129,27 +135,44 @@ ComediHandler::ComediHandler():
 
 };
 
-
-ComediHandler::~ComediHandler() {
-
-}
-
-
+/**
+ * Gets the sampling rate from the device.
+ * @return The sampling rate.
+ */
 double ComediHandler::getSamplingRate() {
     return sampling_rate;
 }
+
+/**
+ * Checks the buffer, if there is anything in it.
+ * @return The number of samples in the buffer.
+ */
 int ComediHandler::getBufferContents() {
     return comedi_get_buffer_contents(dev, COMEDI_SUB_DEVICE);
 }
 
+/**
+ * Reads and returns the raw data sample directly.
+ * @return The raw data sample.
+ */
 int ComediHandler::getRawSample() {
     return readRawSample();
 }
 
+/**
+ * Reads a raw data sample and transforms it into voltage. This method should not be called if there is no data in
+ * the buffer.
+ * @return The data sample in voltage.
+ */
 double ComediHandler::getVoltageSample(){
     return comedi_to_phys(readRawSample(), crange, maxdata);
 }
 
+/**
+ * Reads one raw sample from the buffer. This method should not be called if there is no data in
+ * the buffer.
+ * @return The raw ADC value read from the buffer.
+ */
 int ComediHandler::readRawSample() {
     unsigned char buffer[readSize];
     if (read(comedi_fileno(dev), buffer, readSize) == 0) {

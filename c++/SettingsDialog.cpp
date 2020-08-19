@@ -1,49 +1,89 @@
 /**
  * @file        SettingsDialog.cpp
- * @brief
+ * @brief       The implementaion of the SettingsDialog class.
  * @author      Belinda Kneubühler
  * @date        2020-08-18
  * @copyright   GNU General Public License v2.0
  *
- * @details
  */
 #include <iostream>
 #include "SettingsDialog.h"
-
+/**
+ * The constructor of the SettingsDialog class.
+ * @param parent A reference to the parent object.
+ */
 SettingsDialog::SettingsDialog(QWidget *parent) :
         QDialog(parent) {
     setupUi(this);
 }
 
-SettingsDialog::~SettingsDialog() {
-
-}
-
+/**
+ * Gets the value of the set value in the double spin box for the SBP ratio.
+ * @return The value of the double spin box.
+ */
 double SettingsDialog::getRatioSBP() {
     return dsbRatioSBP->value();
 }
+/**
+ * Sets the value of the set value in the double spin box for the SBP ratio.
+ * @param val The value to set.
+ */
 void SettingsDialog::setRatioSBP(double val) {
     dsbRatioSBP->setValue(val);
 }
+
+/**
+ * Gets the value of the set value in the double spin box for the DBP ratio.
+ * @return The value of the double spin box.
+ */
 double SettingsDialog::getRatioDBP() {
     return dsbRatioDBP->value();
 }
+
+/**
+ * Sets the value of the set value in the double spin box for the DBP ratio.
+ * @param val The value to set.
+ */
 void SettingsDialog::setRatioDBP(double val) {
     dsbRatioDBP->setValue(val);
 }
+
+/**
+ * Gets the value of the set value in the spin box for the minimal number of peaks.
+ * @return The value of the spin box.
+ */
 int SettingsDialog::getMinNbrPeaks() {
     return sbMinNbrPeaks->value();
 }
+
+/**
+ * Sets the value of the set value in the spin box for the minimal number of peaks.
+ * @param val The value to set.
+ */
 void SettingsDialog::setMinNbrPeaks(int val) {
     sbMinNbrPeaks->setValue(val);
 }
+
+/**
+ * Gets the value of the set value in the spin box for the pump-up pressure.
+ * @return The value of the spin box.
+ */
 int SettingsDialog::getPumpUpValue() {
     return sbPumpUpValue->value();
 }
+
+/**
+ * Sets the value of the set value in the spin box for the pump-up pressure.
+ * @param val The value to set.
+ */
 void SettingsDialog::setPumpUpValue(int val) {
     sbPumpUpValue->setValue(val);
 }
 
+/**
+ * This method is to be called at the initialisation of the object. It builds the user interface.
+ * @param SettingsDialog A pointer to the object itself.
+ */
 void SettingsDialog::setupUi(QDialog *SettingsDialog) {
     if (SettingsDialog->objectName().isEmpty())
         SettingsDialog->setObjectName(QString::fromUtf8("SettingsDialog"));
@@ -114,6 +154,10 @@ void SettingsDialog::setupUi(QDialog *SettingsDialog) {
     QMetaObject::connectSlotsByName(SettingsDialog);
 }
 
+/**
+ * Sets all the text in the SettingsDialog window.
+ * @param SettingsDialog A pointer to the object itself.
+ */
 void SettingsDialog::retranslateUi(QDialog *SettingsDialog) {
     SettingsDialog->setWindowTitle("Application Settings");
     btnReset->setText("Reset Values");
@@ -126,7 +170,12 @@ void SettingsDialog::retranslateUi(QDialog *SettingsDialog) {
                           "Resetting the values takes effect immediately.");
 }
 
-
+/**
+ * Handles the reset values button event.
+ *
+ * A signal is emitted to be processed by the parent widget.
+ */
 void SettingsDialog::resetClicked(){
     emit resetValues();
 }
+

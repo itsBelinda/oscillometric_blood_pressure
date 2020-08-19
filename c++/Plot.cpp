@@ -1,11 +1,10 @@
 /**
  * @file        Plot.cpp
- * @brief
+ * @brief       The implementation of the Plot class.
  * @author      Belinda Kneubühler
  * @date        2020-08-18
  * @copyright   GNU General Public License v2.0
  *
- * @details
  */
 #include <iostream>
 #include <qwt/qwt_scale_widget.h>
@@ -14,16 +13,16 @@
 
 #include "Plot.h"
 
-int Plot::nextPenColour = (int) Qt::darkRed;
+int Plot::nextPenColour = (int) Qt::darkRed;  //!
 
 /**
  * Plot constructor, initialises an empty plot curve with no titles.
- * @param xData
- * @param yData
- * @param length
- * @param max
- * @param min
- * @param parent
+ * @param xData A pointer to the data that represents the x-axis.
+ * @param yData A pointer to the data that represents the y-axis.
+ * @param length The lenght of the data (the same for x and y-axis.
+ * @param max   The maximal value of the y-axis.
+ * @param min   The maximal value of the y-axis.
+ * @param parent A reference to the parent object.
  */
 Plot::Plot(double *xData, double *yData, int length, double yMax, double yMin, QWidget *parent) :
         QwtPlot(parent),
@@ -41,7 +40,7 @@ Plot::Plot(double *xData, double *yData, int length, double yMax, double yMin, Q
 
 /**
  * Sets the title of the plot.
- * @param title
+ * @param title A QString that is to be set as the plot title.
  */
 void Plot::setPlotTitle(const QString &title) {
     QwtText pltTitle( title );
@@ -51,22 +50,18 @@ void Plot::setPlotTitle(const QString &title) {
 
 /**
  * Sets the x- and y-axis title of the plot.
- * @param bottomTitle
- * @param leftTitle
+ * @param bottomTitle The title on the x-axis on the bottom of the plot.
+ * @param leftTitle The title on the y-axis on the left of the plot.
  */
 void Plot::setAxisTitles(const QString &bottomTitle, const QString &leftTitle) {
     QwtPlot::setAxisTitle(QwtPlot::xBottom, bottomTitle);
     QwtPlot::setAxisTitle(QwtPlot::yLeft, leftTitle);
-//    QwtText pltTitle( title );
-//    pltTitle.setRenderFlags( Qt::AlignRight | Qt::AlignVCenter );
-//    pltTitle.setFont( plot->axisTitle( QwtPlot::xBottom ).font() );
-//    plot->setAxisTitle( QwtPlot::xBottom, axisTitle );
 }
 
 /**
  * Adjusts the scaling of the y-axis.
- * @param yMax
- * @param yMin
+ * @param yMax The maximal value of the y-axis.
+ * @param yMin The minimal value of the y-axis.
  */
 void Plot::setyAxisScale(double yMin, double yMax) {
     QwtPlot::setAxisScale(QwtPlot::yLeft, yMin, yMax);
@@ -109,7 +104,7 @@ void Plot::setyAxisExtent(double extent) {
 
 /**
  * Adds a new data sample to the end of the graph, deleting the oldest one.
- * @param yNew The new data
+ * @param yNew The new data to set at the end of the plot.
  */
 void Plot::setNewData(double yNew) {
     static int cnt = 0;
