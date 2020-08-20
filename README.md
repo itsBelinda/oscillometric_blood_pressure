@@ -3,7 +3,7 @@
 The aim of this project is to  test the reliability of automatic oscillometric blood pressure measurements by implementing a real-time application in C++. The application automatically measures the user's pulse and blood pressure by using a manual blood pressure cuff equipped with a pressure sensor that is connected to a [USB-DUX-SIGMA](http://www.linux-usb-daq.co.uk/prod2_duxsigma/) converter, connected to a Linux computer.
 
 <p align="center">
-  <img src="https://itsbelinda.github.io/obp/doc/latex/figures/hw_overview.svg" alt="obp hardware overview." width="80%">     
+  <img src="doc/latex/figures/hw_overview.svg" alt="obp hardware overview." width="80%">     
 </p>
 
 If there is no USB-DUX devide connected to the computer, the application will not start up. If the USBDUX-D device is used, a warning will be written into the programs log file, but the application will still run. The USBDUX-D device has only 12-bit instead of 24, like the SIGMA device, which is not enough for the blood pressure detection to work.
@@ -18,6 +18,11 @@ A demonstration of the application can be found on YouTube.
   </a>
 </p>
 
+## Documentation
+
+The Doxygen documentation is available on GitHub pages: https://itsbelinda.github.io/obp/
+
+Alternatively, it can be built from the configuration file in the [doxygen](https://github.com/itsBelinda/obp/tree/master/doc/doxygen) folder.
 
 # Installation (C++)
 The following instructions concern the code located in the [C++ folder](https://github.com/itsBelinda/obp/tree/master/c%2B%2B).
@@ -54,7 +59,7 @@ Then install as usual:
 
 ## Building the Projcet
 The project is set-up as a cmake project (details are defined in [CMakeList.txt](https://github.com/itsBelinda/obp/tree/master/c%2B%2B/CMakeLists.txt)). 
-Run `cmake .` from the console in the source foler ([c++](https://github.com/itsBelinda/obp/tree/master/c%2B%2B) to generate the Makefile and `make` to compile. 
+Run `cmake .` from the console in the source foler ([c++](https://github.com/itsBelinda/obp/tree/master/c%2B%2B)) to generate the Makefile and `make` to compile. 
 Run `ctest` to run the test.
 
 
