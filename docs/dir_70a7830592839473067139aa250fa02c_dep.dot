@@ -1,0 +1,18 @@
+digraph "c++/3rdParty/plog/samples/Shared" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_8d03fde5493a5e8d8675f397fdf6800f {
+    graph [ bgcolor="#ddddee", pencolor="black", label="samples" fontname="Helvetica", fontsize="10", URL="dir_8d03fde5493a5e8d8675f397fdf6800f.html"]
+  subgraph clusterdir_70a7830592839473067139aa250fa02c {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_70a7830592839473067139aa250fa02c.html"];
+    dir_70a7830592839473067139aa250fa02c [shape=plaintext label="Shared"];
+    dir_2d7c2c74ec49631d98448886aec08b44 [shape=box label="SharedApp" color="black" fillcolor="white" style="filled" URL="dir_2d7c2c74ec49631d98448886aec08b44.html"];
+    dir_3434840116f72df43db94fa13850ba70 [shape=box label="SharedLib" color="black" fillcolor="white" style="filled" URL="dir_3434840116f72df43db94fa13850ba70.html"];
+  }
+  }
+  dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [shape=box label="include" color="red" URL="dir_05ea78ffc4ddc4f6d9a6448a24f50fa8.html"];
+  dir_2d7c2c74ec49631d98448886aec08b44->dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [headlabel="2", labeldistance=1.5 headhref="dir_000037_000027.html"];
+  dir_3434840116f72df43db94fa13850ba70->dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [headlabel="2", labeldistance=1.5 headhref="dir_000038_000027.html"];
+}

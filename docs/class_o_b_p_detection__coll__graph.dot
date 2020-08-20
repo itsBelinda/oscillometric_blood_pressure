@@ -1,0 +1,8 @@
+digraph "OBPDetection"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="{OBPDetection\n||+ OBPDetection()\l+ ~OBPDetection()\l+ getRatioSBP()\l+ setRatioSBP()\l+ getRatioDBP()\l+ setRatioDBP()\l+ getMinNbrPeaks()\l+ setMinNbrPeaks()\l+ resetConfigValues()\l+ processSample()\l+ getCurrentHeartRate()\l+ getAverageHeartRate()\l+ getMAP()\l+ getSBP()\l+ getDBP()\l+ getIsEnoughData()\l+ reset()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="The OBPDetection class handles the implementation of the algorithm to get blood pressure and heart ra..."];
+}

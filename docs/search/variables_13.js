@@ -1,0 +1,6 @@
+var searchData=
+[
+  ['x_1002',['x',['../struct_point.html#a8c779e11e694b20e0946105a9f5de842',1,'Point::x()'],['../namespaceobp__derrivative.html#adbb26774dcac4e6fed785c76ec9e4d04',1,'obp_derrivative.x()'],['../namespaceobp__fixed__ratio.html#ae822627d7e853ce4d4a6b376a3fa5599',1,'obp_fixed_ratio.x()'],['../namespaceobp__fixed__ratio__recorded__data.html#a52c670257d28f4c3073d889202b44b85',1,'obp_fixed_ratio_recorded_data.x()']]],
+  ['xmax_1003',['xmax',['../namespaceobp__derrivative.html#a62dc2059c5e9748cb53bf1a6ac41bf95',1,'obp_derrivative.xmax()'],['../namespaceobp__fixed__ratio.html#ae335a7019b26fdb3ead92a961e440039',1,'obp_fixed_ratio.xmax()'],['../namespaceobp__fixed__ratio__recorded__data.html#a928daef4379f11bf172847126bffdaef',1,'obp_fixed_ratio_recorded_data.xmax()'],['../namespaceobp__tests.html#af1dfebb5bfb29cb90b3d76b594b9262e',1,'obp_tests.xmax()'],['../namespacesensor__calibration.html#a74dbdf6328ff27d58e823675b83cef8e',1,'sensor_calibration.xmax()']]],
+  ['xpumpedup_1004',['xPumpedUp',['../namespaceobp__derrivative.html#ab0a17206edfbf8401ae7808c44d0b70d',1,'obp_derrivative.xPumpedUp()'],['../namespaceobp__fixed__ratio.html#ae27459ac8ce6ae78856d2cc71f386523',1,'obp_fixed_ratio.xPumpedUp()'],['../namespaceobp__fixed__ratio__recorded__data.html#a8537d86c1bb7df9e8565956a76e98218',1,'obp_fixed_ratio_recorded_data.xPumpedUp()']]]
+];

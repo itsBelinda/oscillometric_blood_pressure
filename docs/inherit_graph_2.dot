@@ -1,0 +1,13 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node13 [label="CppThread",height=0.2,width=0.4,color="black",URL="$class_cpp_thread.html",tooltip=" "];
+  Node13 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 [label="Processing",height=0.2,width=0.4,color="black",URL="$class_processing.html",tooltip="The Processing class handles the data acquisition and processing."];
+  Node0 [label="ISubject",height=0.2,width=0.4,color="black",URL="$class_i_subject.html",tooltip="The ISubject Class provides the functionality to register observers and send events to an observing o..."];
+  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

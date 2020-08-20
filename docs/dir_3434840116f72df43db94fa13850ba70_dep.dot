@@ -1,0 +1,12 @@
+digraph "c++/3rdParty/plog/samples/Shared/SharedLib" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_70a7830592839473067139aa250fa02c {
+    graph [ bgcolor="#ddddee", pencolor="black", label="Shared" fontname="Helvetica", fontsize="10", URL="dir_70a7830592839473067139aa250fa02c.html"]
+  dir_3434840116f72df43db94fa13850ba70 [shape=box, label="SharedLib", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_3434840116f72df43db94fa13850ba70.html"];
+  }
+  dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [shape=box label="include" color="red" URL="dir_05ea78ffc4ddc4f6d9a6448a24f50fa8.html"];
+  dir_3434840116f72df43db94fa13850ba70->dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [headlabel="2", labeldistance=1.5 headhref="dir_000038_000027.html"];
+}

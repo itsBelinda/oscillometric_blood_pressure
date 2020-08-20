@@ -1,0 +1,22 @@
+digraph "plog::IAppender"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="{plog::IAppender\n||+ ~IAppender()\l+ write()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node2 [label="{plog::AndroidAppender\l\< Formatter \>\n||+ AndroidAppender()\l+ write()\l}",height=0.2,width=0.4,color="black",URL="$classplog_1_1_android_appender.html",tooltip=" "];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node3 [label="{plog::ConsoleAppender\l\< Formatter \>\n|# m_mutex\l# m_isatty\l# m_outputStream\l|+ ConsoleAppender()\l+ write()\l# writestr()\l}",height=0.2,width=0.4,color="red",URL="$classplog_1_1_console_appender.html",tooltip=" "];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node5 [label="{plog::DebugOutputAppender\l\< Formatter \>\n||+ write()\l}",height=0.2,width=0.4,color="black",URL="$classplog_1_1_debug_output_appender.html",tooltip=" "];
+  Node1 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node6 [label="{plog::EventLogAppender\l\< Formatter \>\n||+ EventLogAppender()\l+ ~EventLogAppender()\l+ write()\l}",height=0.2,width=0.4,color="black",URL="$classplog_1_1_event_log_appender.html",tooltip=" "];
+  Node1 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node7 [label="{plog::Logger\< instanceId \>\n||+ Logger()\l+ addAppender()\l+ getMaxSeverity()\l+ setMaxSeverity()\l+ checkSeverity()\l+ write()\l+ operator+=()\l}",height=0.2,width=0.4,color="black",URL="$classplog_1_1_logger.html",tooltip=" "];
+  Node1 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node8 [label="{plog::MyAppender\< Formatter \>\n||+ write()\l+ getMessageList()\l}",height=0.2,width=0.4,color="black",URL="$classplog_1_1_my_appender.html",tooltip=" "];
+  Node1 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",arrowtail="onormal",fontname="Helvetica"];
+  Node9 [label="{plog::RollingFileAppender\l\< Formatter, Converter \>\n||+ RollingFileAppender()\l+ write()\l+ setFileName()\l+ rollLogFiles()\l}",height=0.2,width=0.4,color="black",URL="$classplog_1_1_rolling_file_appender.html",tooltip=" "];
+}

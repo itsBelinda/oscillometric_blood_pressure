@@ -1,0 +1,12 @@
+digraph "c++/3rdParty/plog/samples/Chained/ChainedApp" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_233d41caa2fb1c5f21cbd7580add26fc {
+    graph [ bgcolor="#ddddee", pencolor="black", label="Chained" fontname="Helvetica", fontsize="10", URL="dir_233d41caa2fb1c5f21cbd7580add26fc.html"]
+  dir_e2794374c4e9bc00f31ae9167d11aaea [shape=box, label="ChainedApp", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_e2794374c4e9bc00f31ae9167d11aaea.html"];
+  }
+  dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [shape=box label="include" color="red" URL="dir_05ea78ffc4ddc4f6d9a6448a24f50fa8.html"];
+  dir_e2794374c4e9bc00f31ae9167d11aaea->dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [headlabel="2", labeldistance=1.5 headhref="dir_000034_000027.html"];
+}

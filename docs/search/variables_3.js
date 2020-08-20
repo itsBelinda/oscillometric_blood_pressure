@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['data_877',['data',['../namespaceobp__derrivative.html#a64c3ea230b5cd14498f9446cc46054ba',1,'obp_derrivative.data()'],['../namespaceobp__fixed__ratio.html#a157408389e4f3e7d5219bd2a5afc819c',1,'obp_fixed_ratio.data()'],['../namespaceobp__fixed__ratio__recorded__data.html#a4e0fc59efe1b3eccc8c33d23b0a14c01',1,'obp_fixed_ratio_recorded_data.data()'],['../namespaceobp__tests.html#a2908c97708f88b7a5d6d8565140c2fde',1,'obp_tests.data()'],['../namespacesensor__calibration.html#abdf23cb1303287997d6cf227fca5bd96',1,'sensor_calibration.data()']]],
+  ['dataomwe_878',['dataOMWE',['../namespaceobp__fixed__ratio__recorded__data.html#a36641e4f6a3e5166d149816c040c4cb7',1,'obp_fixed_ratio_recorded_data']]],
+  ['dataosc_879',['dataOSC',['../namespaceobp__fixed__ratio__recorded__data.html#a9e9773f1a0b96b47e623d37da098aa55',1,'obp_fixed_ratio_recorded_data']]],
+  ['datap_880',['dataP',['../namespaceobp__fixed__ratio__recorded__data.html#a92f69f7b08867541ca91517afb3131a7',1,'obp_fixed_ratio_recorded_data']]],
+  ['delta2t_881',['delta2T',['../namespaceobp__derrivative.html#a145d2441731e9435da03eb2923e3dc94',1,'obp_derrivative.delta2T()'],['../namespaceobp__fixed__ratio.html#ab16897347c06d7c8af2f6be5ae689b79',1,'obp_fixed_ratio.delta2T()'],['../namespaceobp__fixed__ratio__recorded__data.html#a730e7f2d9af51b8ec5edb8ac7ce71aa8',1,'obp_fixed_ratio_recorded_data.delta2T()']]],
+  ['deltap_882',['deltaP',['../namespaceobp__derrivative.html#a5932d88aaadfdbee810aac6c3b3897cc',1,'obp_derrivative.deltaP()'],['../namespaceobp__fixed__ratio.html#aeb9a72402bc942d4ee28f9a7ddbd8851',1,'obp_fixed_ratio.deltaP()'],['../namespaceobp__fixed__ratio__recorded__data.html#a0e200322f1908b1c2e30e45804c3a359',1,'obp_fixed_ratio_recorded_data.deltaP()']]],
+  ['deltaptest_883',['deltaPtest',['../namespaceobp__fixed__ratio.html#a78b22894968ddee3e13d2d77f85352cb',1,'obp_fixed_ratio.deltaPtest()'],['../namespaceobp__fixed__ratio__recorded__data.html#ab71fca2bbffadb2f6e10619ae62200ff',1,'obp_fixed_ratio_recorded_data.deltaPtest()']]],
+  ['deltat_884',['deltaT',['../namespaceobp__derrivative.html#a1c2acf9099f19c19209553ba7efec8ab',1,'obp_derrivative.deltaT()'],['../namespaceobp__fixed__ratio.html#a923677dbf13d246f5e82d5d034437162',1,'obp_fixed_ratio.deltaT()'],['../namespaceobp__fixed__ratio__recorded__data.html#af53a888970d2d0be79a468bfb41ad4e5',1,'obp_fixed_ratio_recorded_data.deltaT()']]],
+  ['deltattest_885',['deltaTtest',['../namespaceobp__fixed__ratio.html#a1311f04e1c7be5f023b4a2a4ff65bc1c',1,'obp_fixed_ratio.deltaTtest()'],['../namespaceobp__fixed__ratio__recorded__data.html#aa44b78bf0032972208a93cde1b88129c',1,'obp_fixed_ratio_recorded_data.deltaTtest()']]],
+  ['dmaxmin_886',['dMaxMin',['../namespaceobp__derrivative.html#a28fbee0ec85fecd6f259dad1c35aa840',1,'obp_derrivative.dMaxMin()'],['../namespaceobp__fixed__ratio.html#a1ba7d2bf0d864538a46e9aa7a354bd86',1,'obp_fixed_ratio.dMaxMin()'],['../namespaceobp__fixed__ratio__recorded__data.html#aa7d35326a6f04bdd0ab4a11bc39f9992',1,'obp_fixed_ratio_recorded_data.dMaxMin()']]],
+  ['dmaxmincalc_887',['dMaxMinCalc',['../namespaceobp__derrivative.html#ac9e866c1fc712d5fd6cc2822ff147e0d',1,'obp_derrivative']]],
+  ['dosc_888',['dosc',['../namespaceobp__fixed__ratio.html#ab23487dc5158877cef56eb76063b82a2',1,'obp_fixed_ratio.dosc()'],['../namespaceobp__fixed__ratio__recorded__data.html#ad85212b933d8877b105b7c7a6cc1536d',1,'obp_fixed_ratio_recorded_data.dosc()']]],
+  ['dpres_889',['dPres',['../namespaceobp__derrivative.html#a85abffd26d99aeb6e1c93df1b0b280ae',1,'obp_derrivative']]],
+  ['dpresn_890',['dPresN',['../namespaceobp__derrivative.html#ac2df8739e370a28e8b5178908843eb51',1,'obp_derrivative']]],
+  ['dpresnp_891',['dPresNP',['../namespaceobp__derrivative.html#a5ab9e0e758218e401b0d711aab125c92',1,'obp_derrivative']]],
+  ['dt_892',['dt',['../namespaceobp__fixed__ratio.html#ab35ba62906f35959de1dc33f3dc5832f',1,'obp_fixed_ratio.dt()'],['../namespaceobp__fixed__ratio__recorded__data.html#ad8fb69047043a8d67de327c99086cc91',1,'obp_fixed_ratio_recorded_data.dt()']]],
+  ['dummy_893',['dummy',['../interface_greeter.html#aa015f7c0425c5f7180182e084fd2dd80',1,'Greeter']]]
+];

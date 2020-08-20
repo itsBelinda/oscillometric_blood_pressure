@@ -1,0 +1,7 @@
+var searchData=
+[
+  ['label_918',['label',['../namespaceobp__derrivative.html#a4c6f06fa537b97fe102d25c773e1957d',1,'obp_derrivative.label()'],['../namespaceobp__fixed__ratio.html#aaf1c8d49991bda546b41819210a36fb3',1,'obp_fixed_ratio.label()'],['../namespaceobp__fixed__ratio__recorded__data.html#a0823b0eb44f9b331974a2bcc011d4c8d',1,'obp_fixed_ratio_recorded_data.label()'],['../namespaceobp__tests.html#a70b27418afc27c96c078c76fe4ceac4e',1,'obp_tests.label()'],['../namespacesensor__calibration.html#a4a29ff7b686d8f8f80f70b292257ef68',1,'sensor_calibration.label()']]],
+  ['linewidth_919',['linewidth',['../namespaceobp__fixed__ratio__recorded__data.html#a25995406800416ed186c58254772d771',1,'obp_fixed_ratio_recorded_data']]],
+  ['localmax_920',['localMax',['../namespaceobp__derrivative.html#a01a48ca9df5eee368b406368fd852d57',1,'obp_derrivative.localMax()'],['../namespaceobp__fixed__ratio.html#ab8afcede2b176fe1e1955390c4fc12d3',1,'obp_fixed_ratio.localMax()'],['../namespaceobp__fixed__ratio__recorded__data.html#aff56f5dd903d919980e0b9c01bb36fec',1,'obp_fixed_ratio_recorded_data.localMax()']]],
+  ['localmin_921',['localMin',['../namespaceobp__derrivative.html#af99233afc1493290717ce8d443749ca5',1,'obp_derrivative.localMin()'],['../namespaceobp__fixed__ratio.html#ae60a250856e3705404ee917fde73a748',1,'obp_fixed_ratio.localMin()'],['../namespaceobp__fixed__ratio__recorded__data.html#ac7681dab0d2b43054c19296c209964f4',1,'obp_fixed_ratio_recorded_data.localMin()']]]
+];

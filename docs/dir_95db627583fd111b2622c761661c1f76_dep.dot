@@ -1,0 +1,14 @@
+digraph "c++/3rdParty/plog/include/plog/Initializers" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_5988bc57cb32f87d4b7872012fccd734 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="plog" fontname="Helvetica", fontsize="10", URL="dir_5988bc57cb32f87d4b7872012fccd734.html"]
+  dir_95db627583fd111b2622c761661c1f76 [shape=box, label="Initializers", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_95db627583fd111b2622c761661c1f76.html"];
+  }
+  dir_6183e4accd654967e44d7f6d805c2622 [shape=box label="Formatters" URL="dir_6183e4accd654967e44d7f6d805c2622.html"];
+  dir_ab7fb5f2a26dfc4c47ef6c4612267946 [shape=box label="Appenders" URL="dir_ab7fb5f2a26dfc4c47ef6c4612267946.html"];
+  dir_95db627583fd111b2622c761661c1f76->dir_6183e4accd654967e44d7f6d805c2622 [headlabel="2", labeldistance=1.5 headhref="dir_000032_000031.html"];
+  dir_95db627583fd111b2622c761661c1f76->dir_ab7fb5f2a26dfc4c47ef6c4612267946 [headlabel="1", labeldistance=1.5 headhref="dir_000032_000029.html"];
+}

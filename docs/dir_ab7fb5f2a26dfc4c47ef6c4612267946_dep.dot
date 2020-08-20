@@ -1,0 +1,12 @@
+digraph "c++/3rdParty/plog/include/plog/Appenders" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_5988bc57cb32f87d4b7872012fccd734 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="plog" fontname="Helvetica", fontsize="10", URL="dir_5988bc57cb32f87d4b7872012fccd734.html"]
+  dir_ab7fb5f2a26dfc4c47ef6c4612267946 [shape=box, label="Appenders", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_ab7fb5f2a26dfc4c47ef6c4612267946.html"];
+  }
+  dir_233725d7143aa6a698b0847c39c27e57 [shape=box label="Converters" URL="dir_233725d7143aa6a698b0847c39c27e57.html"];
+  dir_ab7fb5f2a26dfc4c47ef6c4612267946->dir_233725d7143aa6a698b0847c39c27e57 [headlabel="2", labeldistance=1.5 headhref="dir_000029_000030.html"];
+}

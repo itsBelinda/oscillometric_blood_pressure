@@ -1,0 +1,12 @@
+digraph "c++/3rdParty/plog/samples/Android/jni" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_cad8742641250905a6e5b9736c7bc9b3 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="Android" fontname="Helvetica", fontsize="10", URL="dir_cad8742641250905a6e5b9736c7bc9b3.html"]
+  dir_d4569127dccc6ad05a299c7995c18c17 [shape=box, label="jni", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_d4569127dccc6ad05a299c7995c18c17.html"];
+  }
+  dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [shape=box label="include" color="red" URL="dir_05ea78ffc4ddc4f6d9a6448a24f50fa8.html"];
+  dir_d4569127dccc6ad05a299c7995c18c17->dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [headlabel="4", labeldistance=1.5 headhref="dir_000033_000027.html"];
+}

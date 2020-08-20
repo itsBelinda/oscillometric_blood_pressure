@@ -1,0 +1,12 @@
+digraph "c++/3rdParty/plog/samples/CustomType" {
+  bgcolor=transparent;
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_8d03fde5493a5e8d8675f397fdf6800f {
+    graph [ bgcolor="#ddddee", pencolor="black", label="samples" fontname="Helvetica", fontsize="10", URL="dir_8d03fde5493a5e8d8675f397fdf6800f.html"]
+  dir_8e9ec6a6a46cfadb5c198ff5a2210d5d [shape=box, label="CustomType", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_8e9ec6a6a46cfadb5c198ff5a2210d5d.html"];
+  }
+  dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [shape=box label="include" color="red" URL="dir_05ea78ffc4ddc4f6d9a6448a24f50fa8.html"];
+  dir_8e9ec6a6a46cfadb5c198ff5a2210d5d->dir_05ea78ffc4ddc4f6d9a6448a24f50fa8 [headlabel="2", labeldistance=1.5 headhref="dir_000010_000027.html"];
+}

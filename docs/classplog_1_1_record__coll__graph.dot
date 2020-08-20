@@ -1,0 +1,8 @@
+digraph "plog::Record"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="{plog::Record\n||+ Record()\l+ ref()\l+ operator\<\<()\l+ operator\<\<()\l+ operator\<\<()\l+ printf()\l+ getTime()\l+ getSeverity()\l+ getTid()\l+ getObject()\l+ getLine()\l+ getMessage()\l+ getFunc()\l+ getFile()\l+ ~Record()\l+ getInstanceId()\l}",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+}

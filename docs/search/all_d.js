@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['sampling_5frate_91',['SAMPLING_RATE',['../common_8h.html#a17889cf1cf83a54524c242fa5a353cf1',1,'common.h']]],
+  ['saveall_92',['saveAll',['../class_datarecord.html#a176b6fa55f71fa98564ef0c921cf60e6',1,'Datarecord']]],
+  ['screen_93',['Screen',['../common_8h.html#a64e169b6e0f42914937270604cc438ed',1,'common.h']]],
+  ['screen_5fupdate_5fms_94',['SCREEN_UPDATE_MS',['../_window_8h.html#a41ce8436f0ca421a19e8afe0cd8bab3c',1,'Window.h']]],
+  ['setaxistitles_95',['setAxisTitles',['../class_plot.html#ab18180f1d17a4f5a66e85930b79766ed',1,'Plot']]],
+  ['setminnbrpeaks_96',['setMinNbrPeaks',['../class_o_b_p_detection.html#afdd1ed1d136ba58c48394ab2dad2ce02',1,'OBPDetection::setMinNbrPeaks()'],['../class_processing.html#a0a08bd660671daa592669aabf1e91e2c',1,'Processing::setMinNbrPeaks()'],['../class_settings_dialog.html#aa6d174d5fe35722f05870949beff3a79',1,'SettingsDialog::setMinNbrPeaks()']]],
+  ['setnewdata_97',['setNewData',['../class_plot.html#a6d99883f5af34d3dc60529a8e31d2081',1,'Plot']]],
+  ['setplottitle_98',['setPlotTitle',['../class_plot.html#a18ee17a23ad72a1ee3f0d831c8f3b137',1,'Plot']]],
+  ['setpumpupvalue_99',['setPumpUpValue',['../class_processing.html#a48912f49a9be0d679174d100eb28602a',1,'Processing::setPumpUpValue()'],['../class_settings_dialog.html#ad2e6a17f06755decc5b31938e7489952',1,'SettingsDialog::setPumpUpValue()']]],
+  ['setratiodbp_100',['setRatioDBP',['../class_o_b_p_detection.html#ad3674bed9d70813278c6b787a58bc02b',1,'OBPDetection::setRatioDBP()'],['../class_processing.html#a9eef5cba26eeaf799eb030fb9de2839c',1,'Processing::setRatioDBP()'],['../class_settings_dialog.html#a83ad8b9e69da3c9a22b990e6575629ee',1,'SettingsDialog::setRatioDBP()']]],
+  ['setratiosbp_101',['setRatioSBP',['../class_o_b_p_detection.html#a6c39b1b34df3e0afcce59dd01c6cc615',1,'OBPDetection::setRatioSBP()'],['../class_processing.html#ac40b38859a829f2a9e26968bfb2784ba',1,'Processing::setRatioSBP()'],['../class_settings_dialog.html#a0169e3d0a62d8266626eea8bd2a1cb25',1,'SettingsDialog::setRatioSBP()']]],
+  ['settingsdialog_102',['SettingsDialog',['../class_settings_dialog.html',1,'SettingsDialog'],['../class_settings_dialog.html#a9933956b777b2c0451e9119581cc22fb',1,'SettingsDialog::SettingsDialog()']]],
+  ['settingsdialog_2ecpp_103',['SettingsDialog.cpp',['../_settings_dialog_8cpp.html',1,'']]],
+  ['settingsdialog_2eh_104',['SettingsDialog.h',['../_settings_dialog_8h.html',1,'']]],
+  ['setyaxisextent_105',['setyAxisExtent',['../class_plot.html#a81b2d419dd70ef2ec6f6e2d52a148502',1,'Plot']]],
+  ['setyaxisscale_106',['setyAxisScale',['../class_plot.html#a79c63905c66c91ad1623c4a56d7d07a1',1,'Plot']]],
+  ['start_107',['start',['../class_cpp_thread.html#a1be46d1be000f41a763289300623c609',1,'CppThread']]],
+  ['startmeasurement_108',['startMeasurement',['../class_processing.html#a5d8be1a4e1b76e42439d5aa412b57c33',1,'Processing']]],
+  ['startrecording_109',['startRecording',['../class_datarecord.html#a96499d3e2efc46f3ad2c9e2a44912594',1,'Datarecord']]],
+  ['startscreen_110',['startScreen',['../common_8h.html#a64e169b6e0f42914937270604cc438edaef6e618349cf513d63e07ce684005f80',1,'common.h']]],
+  ['stopmeasurement_111',['stopMeasurement',['../class_processing.html#a3243875a7f61a9b08fd42801c01f5f12',1,'Processing']]],
+  ['stoprecording_112',['stopRecording',['../class_datarecord.html#ad954b65fa72fa9dd00227cde76922e7d',1,'Datarecord']]],
+  ['stopthread_113',['stopThread',['../class_processing.html#a11c05e7fe49b0f14a290ea96a3228e86',1,'Processing']]]
+];
