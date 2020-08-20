@@ -8,7 +8,13 @@ The aim of this project is to  test the reliability of automatic oscillometric b
 
 If there is no USB-DUX devide connected to the computer, the application will not start up. If the USBDUX-D device is used, a warning will be written into the programs log file, but the application will still run. The USBDUX-D device has only 12-bit instead of 24, like the SIGMA device, which is not enough for the blood pressure detection to work.
 
-
+## Demonstration
+A demonstration of the application can be found on YouTube.
+<p align="center" target="_blank">
+  <a href="https://youtu.be/3zEBVUrJrbY">
+  <img src="https://img.youtube.com/vi/3zEBVUrJrbY/sddefault.jpg" alt="obp hardware overview.">    
+  </a>
+</p>
 
 
 # Installation (C++)
