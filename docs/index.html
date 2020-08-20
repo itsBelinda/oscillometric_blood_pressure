@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="contents">
 <div class="textblock"><p>The aim of this project is to test the reliability of automatic oscillometric blood pressure measurements by implementing a real-time application in C++. The application automatically measures the user's pulse and blood pressure by using a manual blood pressure cuff equipped with a pressure sensor that is connected to a <a href="http://www.linux-usb-daq.co.uk/prod2_duxsigma/">USB-DUX-SIGMA</a> converter, connected to a Linux computer.</p>
 <p align="center"></p>
-<p><object type="image/svg+xml" data="https://itsbelinda.github.io/obp/doc/latex/figures/hw_overview.svg" style="pointer-events: none;" width="80%">obp hardware overview.</object> <br  />
+<p><object type="image/svg+xml" data="doc/latex/figures/hw_overview.svg" style="pointer-events: none;" width="80%">obp hardware overview.</object> <br  />
  </p>
 <p>If there is no USB-DUX devide connected to the computer, the application will not start up. If the USBDUX-D device is used, a warning will be written into the programs log file, but the application will still run. The USBDUX-D device has only 12-bit instead of 24, like the SIGMA device, which is not enough for the blood pressure detection to work.</p>
 <h1><a class="anchor" id="autotoc_md1"></a>
@@ -97,6 +97,10 @@ Demonstration</h1>
 <p>A demonstration of the application can be found on YouTube.</p>
 <p><a href="https://youtu.be/3zEBVUrJrbY"><img src="https://img.youtube.com/vi/3zEBVUrJrbY/sddefault.jpg" alt="obp hardware overview." class="inline"/>  </a> </p>
 <h1><a class="anchor" id="autotoc_md2"></a>
+Documentation</h1>
+<p>The Doxygen documentation is available on GitHub pages: <a href="https://itsbelinda.github.io/obp/">https://itsbelinda.github.io/obp/</a></p>
+<p>Alternatively, it can be built from the configuration file in the <a href="https://github.com/itsBelinda/obp/tree/master/doc/doxygen">doxygen</a> folder.</p>
+<h1><a class="anchor" id="autotoc_md3"></a>
 Installation (C++)</h1>
 <p>The following instructions concern the code located in the <a href="https://github.com/itsBelinda/obp/tree/master/c%2B%2B">C++ folder</a>.</p>
 <p>The following libraries are required to compile and run the program:</p><ul>
@@ -104,35 +108,35 @@ Installation (C++)</h1>
 <li><a href="https://qwt.sourceforge.io/">Qt5 and Qwt</a></li>
 <li><a href="https://github.com/berndporr/iir1">iir1</a></li>
 </ul>
-<h2><a class="anchor" id="autotoc_md3"></a>
+<h2><a class="anchor" id="autotoc_md4"></a>
 Cloning the Repository</h2>
 <p><b>IMPORTANT:</b> This repository contains a submodule, the software will not build, if the submodule is not cloned. To clone both this repository and the submodule run the following commands: </p><pre class="fragment">git clone https://github.com/itsBelinda/obp.git
 git submodule init
 git submodule update
-</pre><h2><a class="anchor" id="autotoc_md4"></a>
+</pre><h2><a class="anchor" id="autotoc_md5"></a>
 Installing dependencies (for Ubuntu)</h2>
 <p>This quick guide assumes g++ and cmake are installed with a g++ verstion that supports C++20.</p>
-<h3><a class="anchor" id="autotoc_md5"></a>
+<h3><a class="anchor" id="autotoc_md6"></a>
 Install Comedi Development Librairy</h3>
 <pre class="fragment">sudo apt-get install libcomedi-dev
-</pre> <h3><a class="anchor" id="autotoc_md6"></a>
+</pre> <h3><a class="anchor" id="autotoc_md7"></a>
 Install Qt and Qwt Development Librairy</h3>
 <pre class="fragment">sudo apt-get install qt-default
 sudo apt-get install libqwt-qt5-dev
-</pre> <h3><a class="anchor" id="autotoc_md7"></a>
+</pre> <h3><a class="anchor" id="autotoc_md8"></a>
 Install the IIR Filter Librairy (iir1) by Bernd Porr</h3>
 <p>Link the repository to the package manager: </p><pre class="fragment">sudo add-apt-repository ppa:berndporr/dsp
 </pre><p> Then install as usual: </p><pre class="fragment">sudo apt-get install iir1-dev
-</pre><h2><a class="anchor" id="autotoc_md8"></a>
+</pre><h2><a class="anchor" id="autotoc_md9"></a>
 Building the Projcet</h2>
-<p>The project is set-up as a cmake project (details are defined in <a href="https://github.com/itsBelinda/obp/tree/master/c%2B%2B/CMakeLists.txt">CMakeList.txt</a>). Run <code>cmake .</code> from the console in the source foler (<a href="https://github.com/itsBelinda/obp/tree/master/c%2B%2B">c++</a> to generate the Makefile and <code>make</code> to compile. Run <code>ctest</code> to run the test.</p>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<p>The project is set-up as a cmake project (details are defined in <a href="https://github.com/itsBelinda/obp/tree/master/c%2B%2B/CMakeLists.txt">CMakeList.txt</a>). Run <code>cmake .</code> from the console in the source foler (<a href="https://github.com/itsBelinda/obp/tree/master/c%2B%2B">c++</a>) to generate the Makefile and <code>make</code> to compile. Run <code>ctest</code> to run the test.</p>
+<h2><a class="anchor" id="autotoc_md10"></a>
 Running the Application</h2>
 <p>Finally, run the application form the source folder with <code>./obp</code>.</p>
-<h1><a class="anchor" id="autotoc_md10"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 License</h1>
 <p>This piece of software is released under the GNU General Public License. <a href="http://www.gnu.org/licenses/licenses.html#GPL">http://www.gnu.org/licenses/licenses.html#GPL</a> So please go ahead and modify/extend it.</p>
-<h1><a class="anchor" id="autotoc_md11"></a>
+<h1><a class="anchor" id="autotoc_md12"></a>
 Credits</h1>
 <p>The first C++ setup of this project is based on a data aquisiton project by Bernd Porr, which can be found <a href="https://github.com/berndporr/psth-vep">here</a>. This was initially developed by Tobi Delbrücks (<a href="http://">http://</a><a href="http://www.ini.uzh.ch/~tobi/friend/">http://www.ini.uzh.ch/~tobi/friend/</a>). </p>
 </div></div><!-- PageDoc -->

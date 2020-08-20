@@ -24,18 +24,19 @@ var NAVTREE =
 [
   [ "Oscillometric Blood Pressure Measurement", "index.html", [
     [ "Demonstration", "index.html#autotoc_md1", null ],
-    [ "Installation (C++)", "index.html#autotoc_md2", [
-      [ "Cloning the Repository", "index.html#autotoc_md3", null ],
-      [ "Installing dependencies (for Ubuntu)", "index.html#autotoc_md4", [
-        [ "Install Comedi Development Librairy", "index.html#autotoc_md5", null ],
-        [ "Install Qt and Qwt Development Librairy", "index.html#autotoc_md6", null ],
-        [ "Install the IIR Filter Librairy (iir1) by Bernd Porr", "index.html#autotoc_md7", null ]
+    [ "Documentation", "index.html#autotoc_md2", null ],
+    [ "Installation (C++)", "index.html#autotoc_md3", [
+      [ "Cloning the Repository", "index.html#autotoc_md4", null ],
+      [ "Installing dependencies (for Ubuntu)", "index.html#autotoc_md5", [
+        [ "Install Comedi Development Librairy", "index.html#autotoc_md6", null ],
+        [ "Install Qt and Qwt Development Librairy", "index.html#autotoc_md7", null ],
+        [ "Install the IIR Filter Librairy (iir1) by Bernd Porr", "index.html#autotoc_md8", null ]
       ] ],
-      [ "Building the Projcet", "index.html#autotoc_md8", null ],
-      [ "Running the Application", "index.html#autotoc_md9", null ]
+      [ "Building the Projcet", "index.html#autotoc_md9", null ],
+      [ "Running the Application", "index.html#autotoc_md10", null ]
     ] ],
-    [ "License", "index.html#autotoc_md10", null ],
-    [ "Credits", "index.html#autotoc_md11", null ],
+    [ "License", "index.html#autotoc_md11", null ],
+    [ "Credits", "index.html#autotoc_md12", null ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
