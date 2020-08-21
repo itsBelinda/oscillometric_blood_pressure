@@ -21,7 +21,7 @@
 
 int main(int argc, char **argv) {
 
-    plog::init(plog::verbose, "obp_log.csv", 1000000, 5);
+    plog::init(plog::warning, "obp_log.csv", 1000000, 5);
 
     PLOG_VERBOSE << "Application started.";
     QApplication app(argc, argv);

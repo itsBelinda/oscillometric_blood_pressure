@@ -14,7 +14,7 @@
 #define OBP_COMMON_H
 
 // will produce
-//#define NDEBUG 1 //TODO: uncomment to remove asserts
+#define NDEBUG 1 //TODO: uncomment to remove asserts
 #include <plog/Log.h>
 #include <cassert>
 
